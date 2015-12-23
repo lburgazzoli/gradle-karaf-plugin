@@ -1,0 +1,1 @@
+# gradle-karaf-plugin
