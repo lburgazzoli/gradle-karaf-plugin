@@ -20,3 +20,8 @@ plugins {
     id 'maven'
     id 'com.github.lburgazzoli.karaf'
 }
+
+karaf {
+    features {
+    }
+}
