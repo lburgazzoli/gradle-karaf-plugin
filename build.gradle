@@ -1,0 +1,155 @@
+// *****************************************************************************
+// 
+// *****************************************************************************
+
+buildscript {
+    repositories {
+        mavenCentral()
+        mavenLocal()
+        jcenter()
+    }
+
+    dependencies {
+        classpath 'io.codearte.gradle.nexus:gradle-nexus-staging-plugin:0.5.3'
+    }
+}
+
+// *****************************************************************************
+//
+// *****************************************************************************
+
+plugins {
+    id 'java'
+    id 'groovy'
+    id 'maven'
+    id 'com.gradle.plugin-publish' version '0.9.1'
+    id 'com.bmuschko.nexus' version '2.3.1'
+    id 'net.researchgate.release' version '2.3.4'
+}
+
+apply plugin: 'io.codearte.nexus-staging'
+
+group               = 'com.github.lburgazzoli'
+description         = 'A gradle plugin fot Karaf'
+sourceCompatibility = JavaVersion.VERSION_1_7
+targetCompatibility = JavaVersion.VERSION_1_7
+
+ext {
+    gradleVersion    = '2.10'
+    gradleScriptDir  = "${rootProject.projectDir}/gradle"
+    gradlePluginId   = "com.github.lburgazzoli.karaf"
+    gradlePluginTags = [ 'karaf' ]
+    isReleaseVersion = !version.endsWith("SNAPSHOT")
+    gitRoot          = "https://github.com/lburgazzoli"
+    gitProject       = "https://github.com/lburgazzoli/gradle-karaf-plugin"
+
+    if(!project.hasProperty('nexusUsername') && !project.hasProperty('nexusPassword')) {
+        nexusUsername = "$System.env.CI_DEPLOY_USERNAME"
+        nexusPassword = "$System.env.CI_DEPLOY_PASSWORD"
+    }
+
+    versions = [
+        slf4j : '1.7.13',
+        spock : '1.0-groovy-2.4'
+    ]
+}
+
+repositories {
+    mavenCentral()    
+    mavenLocal()
+    jcenter()
+}
+
+dependencies {
+
+    compile gradleApi()
+    compile localGroovy()
+
+    testCompile("org.spockframework:spock-core:$versions.spock") {
+        exclude(module: 'groovy-all')
+    }
+}
+
+jar {
+    baseName = "${project.name}"
+
+    manifest {
+        attributes['Implementation-Title'   ] = "${group}.${project.name}-${project.version}"
+        attributes['Implementation-Version' ] = project.version
+        attributes['Implementation-Vendor'  ] = 'Luca Burgazzoli'
+    }
+}
+
+// *****************************************************************************
+// PUBLISHING
+// *****************************************************************************
+
+nexus {
+    sign = project.isReleaseVersion
+}
+
+extraArchive {
+    javadoc = true
+    sources = true
+    tests   = false
+}
+
+modifyPom {
+    project {
+        name          = project.name
+        description   = project.name
+        url           = project.gitProject
+        packaging     = 'jar'
+
+        licenses {
+            license {
+                name         = "The Apache Software License, Version 2.0"
+                url          = "http://www.apache.org/licenses/LICENSE-2.0.txt"
+                distribution = "repo"
+            }
+        }
+
+        scm {
+            url                 = project.ext.gitProject
+            connection          = "scm:git:${project.gitProject}.git"
+            developerConnection = "scm:git:${project.gitProject}.git"
+        }
+        
+        developers {
+            developer {
+                id 'lburgazzoli'
+                name 'Luca Burgazzoli'
+                url gitRoot
+            }
+        }
+    }
+}
+
+pluginBundle {
+    website     = project.gitProject
+    vcsUrl      = project.gitProject
+    description = project.name
+    tags        = gradlePluginTags
+
+    plugins {
+        karafFeaturesPlugin {
+            id          = gradlePluginId
+            displayName = project.description
+        }
+    }
+}
+
+// *****************************************************************************
+//
+// *****************************************************************************
+
+afterReleaseBuild.dependsOn uploadArchives, publishPlugins
+//closeAndPromoteRepository.dependsOn uploadArchives
+
+task promote(dependsOn: closeAndPromoteRepository) {
+    println "Release"
+}
+
+task wrapper(type: Wrapper) {
+    gradleVersion = project.gradleVersion
+}
