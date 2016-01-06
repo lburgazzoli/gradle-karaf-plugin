@@ -13,27 +13,18 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.github.lburgazzoli.gradle.plugin.karaf.task
+package com.github.lburgazzoli.gradle.plugin.karaf.features
 
-import com.github.lburgazzoli.gradle.plugin.karaf.KarafPluginExtension
-import org.gradle.api.DefaultTask
+import com.github.lburgazzoli.gradle.plugin.karaf.AbstractKarafTask
+import org.gradle.api.tasks.TaskAction
 
 /**
  * @author lburgazzoli
  */
-class ExtensionAwareTask extends DefaultTask{
+class KarafFeaturesTask extends AbstractKarafTask {
+    public static final String NAME = "generateFeatures"
 
-    private KarafPluginExtension pluginExtension;
-
-    protected ExtensionAwareTask() {
-    }
-
-    KarafPluginExtension getExtension() {
-        // Don't keep looking it up...
-        if (this.pluginExtension == null) {
-            this.pluginExtension = KarafPluginExtension.lookup(project)
-        }
-
-        return this.pluginExtension;
+    @TaskAction
+    def run() {
     }
 }

@@ -1,5 +1,5 @@
 /**
- * Copyright 2015, Luca Burgazzoli and contributors as indicated by the @author tags
+ * Copyright 2016, Luca Burgazzoli and contributors as indicated by the @author tags
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
