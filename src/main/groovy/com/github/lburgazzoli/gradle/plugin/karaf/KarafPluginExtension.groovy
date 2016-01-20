@@ -15,13 +15,29 @@
  */
 package com.github.lburgazzoli.gradle.plugin.karaf
 
+import com.github.lburgazzoli.gradle.plugin.karaf.features.model.FeaturesDescriptor
 import org.gradle.api.Project
-
+import org.gradle.util.ConfigureUtil
 /**
  * @author lburgazzoli
  */
 class KarafPluginExtension {
     public static final String NAME = 'karaf'
+
+    private final Project project
+    private FeaturesDescriptor features
+
+    public KarafPluginExtension(Project project) {
+        this.project = project
+    }
+
+    def features(Closure closure) {
+        features = ConfigureUtil.configure(closure, new FeaturesDescriptor(this.project))
+    }
+
+    def FeaturesDescriptor getFeatures() {
+        return features
+    }
 
     // *************************************************************************
     // Helpers

@@ -1,5 +1,5 @@
-/*
- * Copyright 2015, Luca Burgazzoli and contributors as indicated by the @author tags
+/**
+ * Copyright 2016, Luca Burgazzoli and contributors as indicated by the @author tags
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,17 +14,14 @@
  * limitations under the License.
  */
 
-plugins {
-    id 'java'
-    id 'groovy'
-    id 'maven'
-    id 'com.github.lburgazzoli.karaf'
-}
+package com.github.lburgazzoli.gradle.plugin.karaf.features.model
 
-karaf {
-    features {
-        feature {
-            name = 'main'
-        }
+/**
+ * @author lburgazzoli
+ */
+class DependencyResolverMvn implements DependencyResolver {
+    @Override
+    List<DependencyDescriptor> resolve(FeatureDescriptor featureDescriptor) {
+        return null
     }
 }
