@@ -42,6 +42,9 @@ class DependencyDescriptor {
     String type
     File file
     Kind kind
+    String url
+
+    final Map<String, String> attributes
 
     DependencyDescriptor() {
         this.group = null
@@ -50,6 +53,8 @@ class DependencyDescriptor {
         this.type = null
         this.file = null
         this.kind = Kind.UNKNOWN
+        this.url = null
+        this.attributes = [:]
     }
 
     DependencyDescriptor(ResolvedComponentResult component, ResolvedArtifact artifact) {
@@ -89,6 +94,10 @@ class DependencyDescriptor {
     }
 
     boolean isResolved() {
-        return file != null;
+        return this.url != null;
+    }
+
+    void attribute(String key, String value) {
+        this.attributes[ key ] = value
     }
 }

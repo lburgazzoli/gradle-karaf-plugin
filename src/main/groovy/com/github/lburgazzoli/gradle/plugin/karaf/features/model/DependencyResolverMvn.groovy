@@ -16,12 +16,43 @@
 
 package com.github.lburgazzoli.gradle.plugin.karaf.features.model
 
+
 /**
  * @author lburgazzoli
  */
-class DependencyResolverMvn implements DependencyResolver {
+class DependencyResolverMvn extends DependencyResolver {
     @Override
-    List<DependencyDescriptor> resolve(FeatureDescriptor featureDescriptor) {
-        return null
+    protected void renderUrl(
+        DependencyDescriptor dependencyDescriptor,
+        BundleInstructionDescriptor bundleInstructionDescriptor) {
+
+        dependencyDescriptor.url = baseMvnUrl( dependencyDescriptor )
+
+        if (bundleInstructionDescriptor) {
+            if(bundleInstructionDescriptor.hasWrapInstructions() ) {
+                dependencyDescriptor.url = "wrap:${dependencyDescriptor.url}"
+
+                def sep = '?'
+                bundleInstructionDescriptor.wrapInstructions?.instructions.each { key , val ->
+                    // do these need to be encoded?
+                    dependencyDescriptor.url = "${dependencyDescriptor.url}${sep}${key}=${val}"
+                    sep = '&'
+                }
+            }
+        } else if (!dependencyDescriptor.isOSGi() ) {
+            // if the resolved file does not have "proper" OSGi headers we
+            // implicitly do the wrap as a courtesy...
+            dependencyDescriptor.url = "wrap:${dependencyDescriptor.url}"
+        }
+    }
+
+    /**
+     *
+     * @param bundleCoordinates
+     * @return
+     */
+    public static String baseMvnUrl(DependencyDescriptor dependencyDescriptor) {
+        def gnv = "${dependencyDescriptor.group}/${dependencyDescriptor.name}/${dependencyDescriptor.version}";
+        return dependencyDescriptor.isWar() ? "mvn:${gnv}/war" : "mvn:${gnv}"
     }
 }

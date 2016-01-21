@@ -15,11 +15,13 @@
  */
 package com.github.lburgazzoli.gradle.plugin.karaf.features
 
-import com.github.lburgazzoli.gradle.plugin.karaf.AbstractKarafTask
-import com.github.lburgazzoli.gradle.plugin.karaf.features.model.FeaturesDescriptor
 import groovy.xml.MarkupBuilder
 import org.gradle.api.tasks.TaskAction
 import org.gradle.util.VersionNumber
+
+import com.github.lburgazzoli.gradle.plugin.karaf.AbstractKarafTask
+import com.github.lburgazzoli.gradle.plugin.karaf.features.model.FeaturesDescriptor
+
 /**
  * @author lburgazzoli
  */
@@ -30,7 +32,7 @@ class KarafFeaturesTask extends AbstractKarafTask {
 
     @TaskAction
     def run() {
-        generateFeatures(extension.features)
+        println generateFeatures(extension.features)
     }
 
     protected String generateFeatures(FeaturesDescriptor featuresDescriptor) {
@@ -50,8 +52,7 @@ class KarafFeaturesTask extends AbstractKarafTask {
             }
             featuresDescriptor.features.each { feature ->
                 builder.feature(name: feature.name, version: feature.version, description: feature.description) {
-                    /*
-                    feature.dependencyFeatures.each {
+                    feature.features.each {
                         builder.feature(
                             [
                                 version:  it.version,
@@ -60,20 +61,10 @@ class KarafFeaturesTask extends AbstractKarafTask {
                             it.name
                         )
                     }
-                    */
 
-                    /*
-                    // Render bundle dependencies
-                    bundleDefinitionCalculator.calculate(feature, extension, extraBundles).each {
-                        builder.bundle(
-                            [
-                                'dependency' : it.dependency,
-                                'start-level': it.startLevel
-                            ],
-                            it.url
-                        )
+                    resolver.resolve(feature).each {
+                        builder.bundle(it.attributes, it.url)
                     }
-                    */
                 }
             }
         }

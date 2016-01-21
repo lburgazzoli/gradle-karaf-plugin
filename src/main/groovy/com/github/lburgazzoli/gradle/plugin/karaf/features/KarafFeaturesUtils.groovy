@@ -30,17 +30,14 @@ import java.util.jar.Manifest
  */
 class KarafFeaturesUtils {
 
-    static List<DependencyDescriptor> collectDependencies(List<Configuration> configurations, Set<DependencyDescriptor> container) {
+    static void collectDependencies(List<Configuration> configurations, Set<DependencyDescriptor> container) {
         configurations.each {
             collectDependencies(it, container)
         }
-
-        return container
     }
 
-    static List<DependencyDescriptor> collectDependencies(Configuration configuration, Set<DependencyDescriptor> container) {
+    static void collectDependencies(Configuration configuration, Set<DependencyDescriptor> container) {
         collectDependencies(container, configuration.incoming.resolutionResult.root)
-        return container;
     }
 
     static void collectDependencies(Configuration configuration, ResolvedComponentResult root, Set<DependencyDescriptor> container) {

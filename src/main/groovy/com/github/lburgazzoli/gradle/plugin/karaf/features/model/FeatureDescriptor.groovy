@@ -32,6 +32,7 @@ class FeatureDescriptor {
 
     private List<Configuration> configurations
     private List<BundleInstructionDescriptor> bundles
+    private List<FeatureDependencyDescriptor> features
 
     public FeatureDescriptor(Project project, String name) {
         this.project = project
@@ -39,6 +40,7 @@ class FeatureDescriptor {
         this.version = project.version
         this.configurations = []
         this.bundles = []
+        this.features = []
     }
 
     // *************************************************************************
@@ -62,7 +64,6 @@ class FeatureDescriptor {
     // Bundles
     // *************************************************************************
 
-
     def bundle(String pattern, Closure closure) {
         def descriptor = new BundleInstructionDescriptor(DependencyMatcher.from(pattern))
         if(closure) {
@@ -81,5 +82,40 @@ class FeatureDescriptor {
 
     public List<BundleInstructionDescriptor> getBundles() {
         return this.bundles
+    }
+
+    // *************************************************************************
+    // Features
+    // *************************************************************************
+
+    def features(Collection<String> featureNames) {
+        featureNames.each {
+            this.feature(it, null)
+        }
+    }
+
+    def feature(FeatureDescriptor feature) {
+        this.feature(feature.name, null)
+    }
+
+    def feature(FeatureDescriptor feature, Closure closure) {
+        this.feature(feature.name, closure)
+    }
+
+    def feature(String featureName) {
+        this.feature(featureName, null)
+    }
+
+    def feature(String featureName, Closure closure) {
+        def featureDependencyDescriptor = new FeatureDependencyDescriptor(featureName)
+        if ( closure ) {
+            ConfigureUtil.configure( closure, featureDependencyDescriptor )
+        }
+
+        this.features << featureDependencyDescriptor
+    }
+
+    public List<FeatureDependencyDescriptor> getFeatures() {
+        return this.features
     }
 }

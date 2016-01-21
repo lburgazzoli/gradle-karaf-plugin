@@ -47,7 +47,7 @@ class BundleInstructionDescriptor {
 	}
 
     boolean matches(DependencyDescriptor dependency) {
-        return matcher ? matcher.matches(dependency) : false
+        return matcher.matches(dependency)
     }
 
 
