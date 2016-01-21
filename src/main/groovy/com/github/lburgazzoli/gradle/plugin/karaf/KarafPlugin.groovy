@@ -18,12 +18,18 @@ package com.github.lburgazzoli.gradle.plugin.karaf
 import org.gradle.api.Plugin
 import org.gradle.api.Project
 
+import com.github.lburgazzoli.gradle.plugin.karaf.features.KarafFeaturesTask
+
 /**
  * @author lburgazzoli
  */
 class KarafPlugin implements Plugin<Project> {
     @Override
     void apply(Project project) {
-        def extension = KarafPluginExtension.create(project)
+        KarafPluginExtension.create(project)
+
+        project.task( KarafFeaturesTask.TASK_NAME, type: KarafFeaturesTask ) {
+            group = 'karaf'
+        }
     }
 }

@@ -32,7 +32,10 @@ class KarafPluginExtension {
     }
 
     def features(Closure closure) {
-        features = ConfigureUtil.configure(closure, new FeaturesDescriptor(this.project))
+        features = ConfigureUtil.configure(
+            closure,
+            new FeaturesDescriptor(this.project)
+        )
     }
 
     def FeaturesDescriptor getFeatures() {

@@ -52,7 +52,7 @@ class FeaturesDescriptor {
         )
     }
 
-    def features(Closure closure) {
+    def feature(Closure closure) {
         features.configure( closure )
     }
 
