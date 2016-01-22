@@ -13,7 +13,6 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 plugins {
     id 'java'
     id 'groovy'
@@ -21,10 +20,60 @@ plugins {
     id 'com.github.lburgazzoli.karaf'
 }
 
+group = 'com.lburgazzoli.github'
+version = '1.2.3'
+
+repositories {
+    mavenLocal()
+    mavenCentral()
+}
+
+dependencies {
+    compile "com.google.guava:guava:19.0"
+    compile "com.squareup.retrofit:retrofit:1.9.0"
+    compile 'com.fasterxml.jackson.core:jackson-core:2.7.0'
+    compile 'com.fasterxml.jackson.core:jackson-databind:2.7.0'
+    compile 'com.fasterxml.jackson.core:jackson-annotations:2.7.0'
+}
+
 karaf {
     features {
+        xsdVersion = "1.3.0"
+
         feature {
-            name = 'main'
+            name = "karaf-features-example"
+            description = "feature-description"
+            details = "my detailed description"
+            includeProject = false
+
+            conditional {
+                condition = 'json-p'
+
+                feature 'myfeature-1'
+                feature 'myfeature-2'
+
+                bundle 'com.fasterxml.jackson.core'
+            }
         }
     }
 }
+
+/*
+    <?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+    <features xmlns="http://karaf.apache.org/xmlns/features/v1.3.0" name="example">
+      <feature name="karaf-features-example" version="1.2.3" description="feature-description">
+        <details>my detailed description</details>
+        <bundle>mvn:com.google.guava/guava/19.0</bundle>
+        <bundle>mvn:com.google.code.gson/gson/2.3.1</bundle>
+        <bundle>wrap:mvn:com.squareup.retrofit/retrofit/1.9.0</bundle>
+        <conditional>
+          <condition>json-p</condition>
+          <feature>myfeature-1</feature>
+          <feature>myfeature-2</feature>
+          <bundle>mvn:com.fasterxml.jackson.core/jackson-core/2.7.0</bundle>
+          <bundle>mvn:com.fasterxml.jackson.core/jackson-annotations/2.7.0</bundle>
+          <bundle>mvn:com.fasterxml.jackson.core/jackson-databind/2.7.0</bundle>
+        </conditional>
+      </feature>
+    </features>
+ */

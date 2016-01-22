@@ -227,7 +227,6 @@ class KarafPluginTest extends Specification {
     def setupProject(Project project) {
         project.apply plugin: 'java'
         project.apply plugin: 'maven'
-        project.apply plugin: 'osgi'
 
         project.repositories {
             mavenLocal()
