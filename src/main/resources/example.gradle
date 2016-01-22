@@ -17,7 +17,7 @@ plugins {
     id 'java'
     id 'groovy'
     id 'maven'
-    id 'com.github.lburgazzoli.karaf'
+    id "com.github.lburgazzoli.karaf" version "0.0.9"
 }
 
 group = 'com.lburgazzoli.github'
