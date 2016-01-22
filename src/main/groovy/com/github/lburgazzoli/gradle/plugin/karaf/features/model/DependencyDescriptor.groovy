@@ -43,6 +43,7 @@ class DependencyDescriptor {
     File file
     Kind kind
     String url
+    BundleInstructionDescriptor instructions
 
     final Map<String, String> attributes
 
@@ -54,15 +55,18 @@ class DependencyDescriptor {
         this.file = null
         this.kind = Kind.UNKNOWN
         this.url = null
-        this.attributes = [:]
+        this.attributes = new HashMap<>()
+        this.instructions = null
     }
 
-    DependencyDescriptor(ResolvedComponentResult component, ResolvedArtifact artifact) {
+    DependencyDescriptor(ResolvedComponentResult component, ResolvedArtifact artifact, BundleInstructionDescriptor instructions) {
         this.group = component.moduleVersion.group
         this.name = component.moduleVersion.name
         this.version = component.moduleVersion.version
-        this.type = artifact.type;
-        this.file = artifact.file
+        this.type = artifact ? artifact.type : null
+        this.file = artifact ? artifact.file : null
+        this.attributes = new HashMap<>()
+        this.instructions = instructions
 
         if(component.id instanceof ProjectComponentIdentifier) {
             this.kind = Kind.PROJECT
@@ -82,11 +86,11 @@ class DependencyDescriptor {
     }
 
     boolean isJar() {
-        return this.type.equals('jar')
+        return this.type && this.type.equals('jar')
     }
 
     boolean isWar() {
-        return this.type.equals('war')
+        return this.type && this.type.equals('war')
     }
 
     boolean isOSGi() {

@@ -21,29 +21,31 @@ package com.github.lburgazzoli.gradle.plugin.karaf.features.model
  * @author lburgazzoli
  */
 class DependencyResolverMvn extends DependencyResolver {
+
     @Override
-    protected void renderUrl(
-        DependencyDescriptor dependencyDescriptor,
-        BundleInstructionDescriptor bundleInstructionDescriptor) {
+    protected String renderUrl(DependencyDescriptor dependency) {
 
-        dependencyDescriptor.url = baseMvnUrl( dependencyDescriptor )
+        String url = baseMvnUrl( dependency )
 
-        if (bundleInstructionDescriptor) {
-            if(bundleInstructionDescriptor.hasWrapInstructions() ) {
-                dependencyDescriptor.url = "wrap:${dependencyDescriptor.url}"
+        if (dependency.instructions) {
+            if(dependency.instructions.wrap() ) {
+                url = "wrap:${url}"
 
-                def sep = '?'
-                bundleInstructionDescriptor.wrapInstructions?.instructions.each { key , val ->
-                    // do these need to be encoded?
-                    dependencyDescriptor.url = "${dependencyDescriptor.url}${sep}${key}=${val}"
-                    sep = '&'
+                if (dependency.instructions.wrap) {
+                    def res = dependency.instructions.wrap.inject([]) {
+                        result, entry -> result << "${entry.key}=${entry.value}"
+                    }.join('&')
+
+                    url = "wrap:${url}?${res}"
                 }
             }
-        } else if (!dependencyDescriptor.isOSGi() ) {
+        } else if (!dependency.isOSGi() ) {
             // if the resolved file does not have "proper" OSGi headers we
             // implicitly do the wrap as a courtesy...
-            dependencyDescriptor.url = "wrap:${dependencyDescriptor.url}"
+            url = "wrap:${url}"
         }
+
+        return url
     }
 
     /**

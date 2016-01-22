@@ -14,22 +14,26 @@
  * limitations under the License.
  */
 
-package com.github.lburgazzoli.gradle.plugin.karaf.features.model
+package com.github.lburgazzoli.gradle.plugin.karaf.features
 
-import org.gradle.api.NamedDomainObjectContainer
 import org.gradle.api.Project
 import org.gradle.api.tasks.OutputFile
+import org.gradle.util.ConfigureUtil
+
+import com.github.lburgazzoli.gradle.plugin.karaf.features.model.DependencyResolver
+import com.github.lburgazzoli.gradle.plugin.karaf.features.model.DependencyResolverMvn
+import com.github.lburgazzoli.gradle.plugin.karaf.features.model.FeatureDescriptor
 
 /**
  * @author lburgazzoli
  */
-class FeaturesDescriptor {
+class KarafFeaturesExtension {
     public static final String DEFAULT_XSD_VERSION = "1.2.0"
 
     private final Project project
     private final DependencyResolver resolver
     private final def Set<String> repositories
-    private final NamedDomainObjectContainer<FeatureDescriptor> features;
+    private final List<FeatureDescriptor> featureDescriptors;
 
     String name
     String xsdVersion
@@ -37,27 +41,25 @@ class FeaturesDescriptor {
     @OutputFile
     private File outputFile
 
-    FeaturesDescriptor(Project project) {
+    KarafFeaturesExtension(Project project) {
         this.project = project
         this.name = project.name
         this.resolver = new DependencyResolverMvn()
         this.xsdVersion = DEFAULT_XSD_VERSION
         this.repositories = []
         this.outputFile = null
-
-        // Create a dynamic container for FeatureDescriptor definitions by the user
-        this.features = project.container(
-            FeatureDescriptor,
-            new FeatureDescriptorFactory( project )
-        )
+        this.featureDescriptors = []
     }
 
     def feature(Closure closure) {
-        features.configure( closure )
+        featureDescriptors << ConfigureUtil.configure(
+            closure,
+            new FeatureDescriptor(project)
+        )
     }
 
-    def getFeatures() {
-        return features
+    def getFeatureDescriptors() {
+        return this.featureDescriptors
     }
 
     def DependencyResolver getResolver() {

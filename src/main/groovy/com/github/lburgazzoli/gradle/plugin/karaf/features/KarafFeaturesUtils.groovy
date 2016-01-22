@@ -25,34 +25,40 @@ import org.gradle.api.artifacts.result.ResolvedDependencyResult
 import java.util.jar.JarFile
 import java.util.jar.Manifest
 
+import com.github.lburgazzoli.gradle.plugin.karaf.features.model.FeatureDescriptor
+
 /**
  * @author lburgazzoli
  */
 class KarafFeaturesUtils {
 
-    static void collectDependencies(List<Configuration> configurations, Set<DependencyDescriptor> container) {
-        configurations.each {
-            collectDependencies(it, container)
+    static void collectDependencies(FeatureDescriptor featureDescriptor, Set<DependencyDescriptor> container) {
+        featureDescriptor.configurations.each {
+            collectDependencies(featureDescriptor, it, container)
         }
     }
 
-    static void collectDependencies(Configuration configuration, Set<DependencyDescriptor> container) {
-        collectDependencies(container, configuration.incoming.resolutionResult.root)
+    static void collectDependencies(FeatureDescriptor featureDescriptor, Configuration configuration, Set<DependencyDescriptor> container) {
+        collectDependencies(featureDescriptor, configuration, configuration.incoming.resolutionResult.root, container)
     }
 
-    static void collectDependencies(Configuration configuration, ResolvedComponentResult root, Set<DependencyDescriptor> container) {
-        root.dependencies.findAll {
-            it instanceof ResolvedDependencyResult
-        }.collect {
-            (ResolvedDependencyResult) it
-        }.each {
-            collectDependencies(configuration, it.selected, container)
-        }
+    static void collectDependencies(FeatureDescriptor featureDescriptor, Configuration configuration, ResolvedComponentResult root, Set<DependencyDescriptor> container) {
+        def instruction = featureDescriptor.findBundleInstructions(root.moduleVersion)
+        if(!instruction || (instruction && instruction.include)) {
+            root.dependencies.findAll {
+                it instanceof ResolvedDependencyResult
+            }.collect {
+                (ResolvedDependencyResult) it
+            }.each {
+                collectDependencies(featureDescriptor, configuration, it.selected, container)
+            }
 
-        container << new DependencyDescriptor(
-            root,
-            findArtifact(configuration, root.moduleVersion)
-        )
+            container << new DependencyDescriptor(
+                root,
+                findArtifact(configuration, root.moduleVersion),
+                instruction
+            )
+        }
     }
 
     static boolean hasOsgiManifestHeaders(File file) {
@@ -72,7 +78,7 @@ class KarafFeaturesUtils {
         return value != null && !value.trim().isEmpty()
     }
 
-    static boolean hasOneOfTheAttributes(Manifest manifest, String[] attributeNames) {
+    static boolean hasOneOfTheAttributes(Manifest manifest, Collection<String> attributeNames) {
         return attributeNames.find { hasAttribute(manifest, it) } != null
     }
 
@@ -82,7 +88,7 @@ class KarafFeaturesUtils {
 
     static ResolvedArtifact findArtifact(Configuration configuration, ModuleVersionIdentifier versionIdentifier) {
         return configuration.resolvedConfiguration.resolvedArtifacts.find {
-            matches(versionIdentifier, it.moduleVersion)
+            matches(versionIdentifier, it.moduleVersion.id)
         }
     }
 

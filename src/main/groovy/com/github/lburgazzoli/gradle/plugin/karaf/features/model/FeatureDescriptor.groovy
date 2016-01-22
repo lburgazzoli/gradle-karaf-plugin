@@ -16,13 +16,16 @@
 
 package com.github.lburgazzoli.gradle.plugin.karaf.features.model
 
+import groovy.transform.ToString
 import org.gradle.api.Project
 import org.gradle.api.artifacts.Configuration
+import org.gradle.api.artifacts.ModuleVersionIdentifier
 import org.gradle.util.ConfigureUtil
 
 /**
  * @author lburgazzoli
  */
+@ToString(includeNames = true)
 class FeatureDescriptor {
     private final Project project
 
@@ -30,17 +33,18 @@ class FeatureDescriptor {
     String version
     String description
 
-    private List<Configuration> configurations
-    private List<BundleInstructionDescriptor> bundles
-    private List<FeatureDependencyDescriptor> features
+    final List<Configuration> configurations
+    final List<BundleInstructionDescriptor> bundleInstructions
+    final List<FeatureDependencyDescriptor> featureDependencies
 
-    public FeatureDescriptor(Project project, String name) {
+    public FeatureDescriptor(Project project) {
         this.project = project
-        this.name = name
+        this.name = null
         this.version = project.version
-        this.configurations = []
-        this.bundles = []
-        this.features = []
+        this.description = null
+        this.configurations = [ project.configurations.runtime ]
+        this.bundleInstructions = []
+        this.featureDependencies = []
     }
 
     // *************************************************************************
@@ -70,18 +74,26 @@ class FeatureDescriptor {
             ConfigureUtil.configure(closure, descriptor)
         }
 
-        bundles << descriptor
+        bundleInstructions << descriptor
     }
 
     def bundle(Closure closure) {
-        bundles << ConfigureUtil.configure(
+        bundleInstructions << ConfigureUtil.configure(
             closure,
             new BundleExtendedInstructionDescriptor()
         )
     }
 
-    public List<BundleInstructionDescriptor> getBundles() {
-        return this.bundles
+    List<BundleInstructionDescriptor> getBundleInstructions() {
+        return this.bundleInstructions
+    }
+
+    BundleInstructionDescriptor findBundleInstructions(DependencyDescriptor dependency) {
+        return this.bundleInstructions.find { it.matches( dependency ) }
+    }
+
+    BundleInstructionDescriptor findBundleInstructions(ModuleVersionIdentifier identifier) {
+        return this.bundleInstructions.find { it.matches( identifier ) }
     }
 
     // *************************************************************************
@@ -89,6 +101,8 @@ class FeatureDescriptor {
     // *************************************************************************
 
     def features(Collection<String> featureNames) {
+        this.featureDependencies.clear()
+
         featureNames.each {
             this.feature(it, null)
         }
@@ -112,10 +126,10 @@ class FeatureDescriptor {
             ConfigureUtil.configure( closure, featureDependencyDescriptor )
         }
 
-        this.features << featureDependencyDescriptor
+        this.featureDependencies << featureDependencyDescriptor
     }
 
-    public List<FeatureDependencyDescriptor> getFeatures() {
-        return this.features
+    List<FeatureDependencyDescriptor> getFeatureDependencies() {
+        return this.featureDependencies
     }
 }

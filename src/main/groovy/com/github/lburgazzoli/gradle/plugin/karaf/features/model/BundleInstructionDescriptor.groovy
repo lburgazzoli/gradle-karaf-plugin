@@ -15,6 +15,7 @@
  */
 package com.github.lburgazzoli.gradle.plugin.karaf.features.model
 
+import org.gradle.api.artifacts.ModuleVersionIdentifier
 import org.gradle.util.ConfigureUtil
 
 /**
@@ -27,19 +28,20 @@ import org.gradle.util.ConfigureUtil
 class BundleInstructionDescriptor {
 	private DependencyMatcher matcher
     private DependencyDescriptor remap
-    private WrapInstructions wrapInstructions;
 
 	boolean include;
 	String startLevel;
 	boolean dependency
 
+    final Map<String, String> wrap
+
     protected BundleInstructionDescriptor(DependencyMatcher matcher) {
         this.matcher = matcher
         this.remap = null
-        this.wrapInstructions = null
         this.include = true
         this.startLevel = null
         this.dependency = false
+        this.wrap = new HashMap<>()
     }
 
 	DependencyMatcher getMatcher() {
@@ -48,6 +50,10 @@ class BundleInstructionDescriptor {
 
     boolean matches(DependencyDescriptor dependency) {
         return matcher.matches(dependency)
+    }
+
+    boolean matches(ModuleVersionIdentifier identifier) {
+        return matcher.matches(identifier)
     }
 
 
@@ -79,40 +85,19 @@ class BundleInstructionDescriptor {
 	def wrap(Closure closure) {
 		ConfigureUtil.configure(
             closure,
-            wrapInstructions = new WrapInstructions()
+            new WrapInstructionsHelper()
         )
 	}
 
-    def wrap(Map<String, String> properties) {
-        wrapInstructions = new WrapInstructions()
-        wrapInstructions.instructions(properties)
-    }
-
-	def boolean hasWrapInstructions() {
-		return wrapInstructions != null;
-	}
-
-    WrapInstructions getWrapInstructions() {
-		return wrapInstructions
-	}
-
-    public static class WrapInstructions {
-        def Map<String, String> instructions
+    private class WrapInstructionsHelper {
 
         public void instruction(String key, String value) {
-            if ( instructions == null ) {
-                instructions = new HashMap<String,String>()
-            }
-
-            instructions.put( key, value )
+            wrap.put( key, value )
         }
 
         public void instructions(Map<String,String> instructions) {
-            if ( instructions == null ) {
-                instructions = new HashMap<String,String>()
-            }
-
-            instructions.putAll(instructions)
+            wrap.clear()
+            wrap.putAll(instructions)
         }
     }
 }

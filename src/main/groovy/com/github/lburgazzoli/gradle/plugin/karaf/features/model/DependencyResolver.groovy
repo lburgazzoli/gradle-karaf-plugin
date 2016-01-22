@@ -24,21 +24,16 @@ abstract class DependencyResolver {
 
     Collection<DependencyDescriptor> resolve(FeatureDescriptor featureDescriptor) {
         Set<DependencyDescriptor> dependencies = new LinkedHashSet<>()
-        collectDependencies(featureDescriptor.configurations, dependencies)
+        collectDependencies(featureDescriptor, dependencies)
+
         dependencies.each {
-            dependency ->
-                renderUrl(
-                    dependency,
-                    featureDescriptor.bundles.find {
-                        instruction -> instruction.matches( dependency )
-                    }
-                )
+            it.url = renderUrl(it)
         }
 
-        return dependencies
+        return dependencies.findAll {
+            it.isResolved()
+        }
     }
 
-    protected abstract void renderUrl(
-        DependencyDescriptor dependencyDescriptor,
-        BundleInstructionDescriptor bundleInstructionDescriptor)
+    protected abstract String renderUrl(DependencyDescriptor dependency)
 }

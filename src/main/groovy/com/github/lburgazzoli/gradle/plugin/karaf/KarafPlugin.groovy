@@ -28,8 +28,10 @@ class KarafPlugin implements Plugin<Project> {
     void apply(Project project) {
         KarafPluginExtension.create(project)
 
-        project.task( KarafFeaturesTask.TASK_NAME, type: KarafFeaturesTask ) {
-            group = 'karaf'
+        // Karaf Features
+        project.task( KarafFeaturesTask.NAME , type: KarafFeaturesTask) {
+            group       = KarafFeaturesTask.GROUP
+            description = KarafFeaturesTask.DESCRIPTION
         }
     }
 }

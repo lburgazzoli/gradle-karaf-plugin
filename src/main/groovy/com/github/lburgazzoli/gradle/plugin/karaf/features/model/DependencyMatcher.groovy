@@ -47,8 +47,11 @@ public class DependencyMatcher {
         )
 	}
 
-	public boolean matches(DependencyDescriptor dependencyDescriptor) {
-		return matches(dependencyDescriptor.version)
+	public boolean matches(DependencyDescriptor check) {
+		return ( check.group.equals( group )
+			&& ( name == null || check.name.equals( name ) )
+			&& ( version == null || check.version.equals( version ) )
+		)
 	}
 
 	public static DependencyMatcher from(String notation) {
@@ -58,10 +61,9 @@ public class DependencyMatcher {
                 "Supplied String module notation '${notation}' is invalid.");
 		}
 
-        return [
-            group   : notationParts.length >= 1 ? notationParts[0] :  null,
-            name    : notationParts.length >= 2 ? notationParts[1] :  null,
-            version : notationParts.length == 3 ? notationParts[2] :  null,
-        ] as DependencyMatcher
+        return new DependencyMatcher(
+            notationParts.length >= 1 ? notationParts[0] : null,
+            notationParts.length >= 2 ? notationParts[1] : null,
+            notationParts.length == 3 ? notationParts[2] : null)
 	}
 }

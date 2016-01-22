@@ -15,9 +15,10 @@
  */
 package com.github.lburgazzoli.gradle.plugin.karaf
 
-import com.github.lburgazzoli.gradle.plugin.karaf.features.model.FeaturesDescriptor
+import com.github.lburgazzoli.gradle.plugin.karaf.features.KarafFeaturesExtension
 import org.gradle.api.Project
 import org.gradle.util.ConfigureUtil
+
 /**
  * @author lburgazzoli
  */
@@ -25,21 +26,23 @@ class KarafPluginExtension {
     public static final String NAME = 'karaf'
 
     private final Project project
-    private FeaturesDescriptor features
+    private KarafFeaturesExtension features
 
     public KarafPluginExtension(Project project) {
         this.project = project
+        this.features = new KarafFeaturesExtension(project)
     }
 
     def features(Closure closure) {
-        features = ConfigureUtil.configure(
-            closure,
-            new FeaturesDescriptor(this.project)
-        )
+        ConfigureUtil.configure(closure, features)
     }
 
-    def FeaturesDescriptor getFeatures() {
-        return features
+    KarafFeaturesExtension getFeatures() {
+        return this.features
+    }
+
+    boolean hasFeatures() {
+        return !this.features.featureDescriptors.empty
     }
 
     // *************************************************************************
