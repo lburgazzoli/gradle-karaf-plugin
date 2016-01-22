@@ -142,9 +142,9 @@ pluginBundle {
 //
 // *****************************************************************************
 
-//afterReleaseBuild.dependsOn uploadArchives, publishPlugins
+afterReleaseBuild.dependsOn uploadArchives, publishPlugins
 //closeAndPromoteRepository.dependsOn uploadArchives
-afterReleaseBuild.dependsOn publishPlugins
+//afterReleaseBuild.dependsOn publishPlugins
 
 /*
 task promote(dependsOn: closeAndPromoteRepository) {
