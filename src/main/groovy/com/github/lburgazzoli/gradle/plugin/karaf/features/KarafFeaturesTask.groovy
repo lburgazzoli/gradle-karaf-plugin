@@ -57,6 +57,7 @@ class KarafFeaturesTask extends AbstractKarafTask {
         builder.setDoubleQuotes(true)
 
         def xsdVer13 = VersionNumber.parse(featuresExtension.xsdVersion).compareTo(XMLNS_V13) >= 0
+        def resolver = featuresExtension.resolver
 
         builder.mkp.xmlDeclaration(version: "1.0", encoding: "UTF-8", standalone: "yes")
         builder.features(xmlns:FEATURES_XMLNS_PREFIX + featuresExtension.xsdVersion, name: featuresExtension.name) {
@@ -65,6 +66,17 @@ class KarafFeaturesTask extends AbstractKarafTask {
             }
             featuresExtension.featureDescriptors.each { feature ->
                 builder.feature(name: feature.name, version: feature.version, description: feature.description) {
+                    if(feature.details) {
+                        builder.details(feature.details)
+                    }
+
+                    feature.configs.each {
+                        builder.config(
+                            [ name: it.name ],
+                            it.content
+                        )
+                    }
+
                     feature.featureDependencies.each {
                         builder.feature(
                             [
@@ -75,8 +87,45 @@ class KarafFeaturesTask extends AbstractKarafTask {
                         )
                     }
 
-                    featuresExtension.resolver.resolve(feature).each {
-                        builder.bundle(it.attributes, it.url)
+                    def dependencies = resolver.resolve(feature)
+
+                    dependencies.each {
+                        if(!feature.isConditional(it)) {
+                            builder.bundle(it.attributes, it.url)
+                        }
+                    }
+
+                    feature.conditions.each { condition ->
+                        builder.conditional {
+                            if(condition.condition) {
+                                builder.condition(condition.condition)
+                            }
+
+                            condition.configs.each {
+                                builder.config(
+                                    [ name: it.name ],
+                                    it.content
+                                )
+                            }
+
+                            condition.featureDependencies.each {
+                                builder.feature(
+                                    [
+                                        version:  it.version,
+                                        dependency: (it.dependency && xsdVer13) ? true : null
+                                    ],
+                                    it.name
+                                )
+                            }
+
+                            dependencies.each { dependency ->
+                                condition.bundleInstructions.each {
+                                    if(it.matches(dependency)) {
+                                        builder.bundle(dependency.attributes, dependency.url)
+                                    }
+                                }
+                            }
+                        }
                     }
                 }
             }

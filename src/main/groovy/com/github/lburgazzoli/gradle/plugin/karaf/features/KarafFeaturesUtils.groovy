@@ -48,6 +48,7 @@ class KarafFeaturesUtils {
 
     static void collectDependencies(
         FeatureDescriptor featureDescriptor, Configuration configuration, ResolvedComponentResult root, Set<DependencyDescriptor> container) {
+
         def instruction = featureDescriptor.findBundleInstructions(root.moduleVersion)
         if(instruction && !instruction.include) {
             return
@@ -70,9 +71,12 @@ class KarafFeaturesUtils {
             }
         }
 
-        container << new DependencyDescriptor(
-            root,
-            findArtifact(configuration, root.moduleVersion),
+        container << applyRemap(
+            new DependencyDescriptor(
+                root,
+                findArtifact(configuration, root.moduleVersion),
+                instruction
+            ),
             instruction
         )
     }
@@ -127,18 +131,16 @@ class KarafFeaturesUtils {
         return false
     }
 
-    static DependencyDescriptor applyRemap(DependencyDescriptor remap, DependencyDescriptor descriptor) {
-        def newDescriptor = descriptor
-        if(remap) {
-            newDescriptor = new DependencyDescriptor()
-            newDescriptor.group = remap.group ?: descriptor.group
-            newDescriptor.name = remap.name ?: descriptor.name
-            newDescriptor.version = remap.version ?: descriptor.version
-            newDescriptor.type = remap.type ?: descriptor.type
-            newDescriptor.file = remap.file ?: descriptor.file
-            newDescriptor.kind = remap.file ?: descriptor.kind
+    static DependencyDescriptor applyRemap(DependencyDescriptor dependency, BundleInstructionDescriptor descriptor) {
+        if(descriptor && descriptor.remap) {
+            dependency.group   = descriptor.remap.group ?: dependency.group
+            dependency.name    = descriptor.remap.name ?: dependency.name
+            dependency.version = descriptor.remap.version ?: dependency.version
+            dependency.type    = descriptor.remap.type ?: dependency.type
+            dependency.file    = descriptor.remap.file ?: dependency.file
+            dependency.kind    = descriptor.remap.file ?: dependency.kind
         }
 
-        return newDescriptor
+        return dependency
     }
 }
