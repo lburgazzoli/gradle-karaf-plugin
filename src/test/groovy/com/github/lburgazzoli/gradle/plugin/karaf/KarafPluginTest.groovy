@@ -92,6 +92,7 @@ class KarafPluginTest extends Specification {
                 feature {
                     name = "karaf-features-simple-project"
                     description = "feature-description"
+                    includeProject = true
 
                     feature 'dependencyFeatureName1'
                     feature('dependencyFeatureName2') {
@@ -111,7 +112,7 @@ class KarafPluginTest extends Specification {
             featuresStr != null
             featuresXml != null
 
-            println("${featuresStr}")
+            log.info(featuresStr)
 
             featuresXml.feature.@name == 'karaf-features-simple-project'
             featuresXml.feature.@description == 'feature-description'
@@ -122,6 +123,19 @@ class KarafPluginTest extends Specification {
             featuresXml.feature.feature[1].@dependency == 'true'
 
             featuresStr.contains("xmlns=\"http://karaf.apache.org/xmlns/features/v1.3.0\"") == true
+
+            featuresXml.feature.bundle.'**'.findAll {
+                    it.text().contains('mvn:com.google.guava/guava/19.0')
+                }.size() == 1
+            featuresXml.feature.bundle.'**'.findAll {
+                    it.text().contains('mvn:com.google.code.gson/gson/2.3.1')
+                }.size() == 1
+            featuresXml.feature.bundle.'**'.findAll {
+                    it.text().contains('mvn:com.squareup.retrofit/retrofit/1.9.0')
+                }.size() == 1
+            featuresXml.feature.bundle.'**'.findAll {
+                    it.text().contains('mvn:com.squareup.retrofit/converter-jackson/1.9.0')
+                }.size() == 0
     }
 
     // *************************************************************************

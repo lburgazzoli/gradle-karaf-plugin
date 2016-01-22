@@ -42,6 +42,7 @@ class KarafFeaturesTask extends AbstractKarafTask {
                 outputFile.parentFile.mkdirs()
             }
 
+            println "$outputFile"
             def out = new BufferedWriter(new FileWriter(outputFile))
             out.write(generateFeatures(extension.features))
             out.close()

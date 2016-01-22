@@ -27,7 +27,7 @@ import org.gradle.util.ConfigureUtil
  */
 @ToString(includeNames = true)
 class FeatureDescriptor {
-    private final Project project
+    final Project project
 
     String name
     String version
@@ -37,14 +37,23 @@ class FeatureDescriptor {
     final List<BundleInstructionDescriptor> bundleInstructions
     final List<FeatureDependencyDescriptor> featureDependencies
 
+    boolean includeProject
+
     public FeatureDescriptor(Project project) {
         this.project = project
         this.name = null
         this.version = project.version
         this.description = null
-        this.configurations = [ project.configurations.runtime ]
+        this.configurations = []
         this.bundleInstructions = []
         this.featureDependencies = []
+        this.includeProject = false
+
+        // If \"runtime\" configuration exists add it as default
+        Configuration runtime = project.configurations.findByName("runtime")
+        if(runtime) {
+            this.configurations << runtime
+        }
     }
 
     // *************************************************************************

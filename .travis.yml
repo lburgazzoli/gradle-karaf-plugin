@@ -8,10 +8,10 @@ script: "
   if [ ${TRAVIS_PULL_REQUEST} = 'false' ];
   then
     echo \"== MAIN build ==\";
-    ./gradlew test uploadArchives;
+    ./gradlew clean test uploadArchives;
   else
     echo \"== PULL build ==\";
-    ./gradlew test;
+    ./gradlew clean test;
   fi
 "
 jdk:

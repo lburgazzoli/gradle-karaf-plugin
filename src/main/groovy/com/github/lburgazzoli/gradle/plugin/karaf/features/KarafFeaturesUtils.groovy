@@ -15,54 +15,70 @@
  */
 package com.github.lburgazzoli.gradle.plugin.karaf.features
 
-import com.github.lburgazzoli.gradle.plugin.karaf.features.model.DependencyDescriptor
+import java.util.jar.JarFile
+import java.util.jar.Manifest
 import org.gradle.api.artifacts.Configuration
 import org.gradle.api.artifacts.ModuleVersionIdentifier
 import org.gradle.api.artifacts.ResolvedArtifact
+import org.gradle.api.artifacts.component.ProjectComponentIdentifier
 import org.gradle.api.artifacts.result.ResolvedComponentResult
 import org.gradle.api.artifacts.result.ResolvedDependencyResult
 
-import java.util.jar.JarFile
-import java.util.jar.Manifest
-
+import com.github.lburgazzoli.gradle.plugin.karaf.features.model.BundleInstructionDescriptor
+import com.github.lburgazzoli.gradle.plugin.karaf.features.model.DependencyDescriptor
 import com.github.lburgazzoli.gradle.plugin.karaf.features.model.FeatureDescriptor
-
 /**
  * @author lburgazzoli
  */
 class KarafFeaturesUtils {
 
-    static void collectDependencies(FeatureDescriptor featureDescriptor, Set<DependencyDescriptor> container) {
+    static void collectDependencies(
+        FeatureDescriptor featureDescriptor, Set<DependencyDescriptor> container) {
+
         featureDescriptor.configurations.each {
             collectDependencies(featureDescriptor, it, container)
         }
     }
 
-    static void collectDependencies(FeatureDescriptor featureDescriptor, Configuration configuration, Set<DependencyDescriptor> container) {
+    static void collectDependencies(
+        FeatureDescriptor featureDescriptor, Configuration configuration, Set<DependencyDescriptor> container) {
+
         collectDependencies(featureDescriptor, configuration, configuration.incoming.resolutionResult.root, container)
     }
 
-    static void collectDependencies(FeatureDescriptor featureDescriptor, Configuration configuration, ResolvedComponentResult root, Set<DependencyDescriptor> container) {
+    static void collectDependencies(
+        FeatureDescriptor featureDescriptor, Configuration configuration, ResolvedComponentResult root, Set<DependencyDescriptor> container) {
         def instruction = featureDescriptor.findBundleInstructions(root.moduleVersion)
-        if(!instruction || (instruction && instruction.include)) {
-            root.dependencies.findAll {
-                it instanceof ResolvedDependencyResult
-            }.collect {
-                (ResolvedDependencyResult) it
-            }.each {
-                collectDependencies(featureDescriptor, configuration, it.selected, container)
-            }
-
-            container << new DependencyDescriptor(
-                root,
-                findArtifact(configuration, root.moduleVersion),
-                instruction
-            )
+        if(instruction && !instruction.include) {
+            return
         }
+
+        root.dependencies.findAll {
+            it instanceof ResolvedDependencyResult
+        }.collect {
+            (ResolvedDependencyResult) it
+        }.each {
+            collectDependencies(featureDescriptor, configuration, it.selected, container)
+        }
+
+        if(root.id instanceof ProjectComponentIdentifier) {
+            String p1 = ((ProjectComponentIdentifier)root.id).getProjectPath()
+            String p2 = featureDescriptor.project.getPath()
+
+            if(p1.equals(p2) && !featureDescriptor.includeProject) {
+                return
+            }
+        }
+
+        container << new DependencyDescriptor(
+            root,
+            findArtifact(configuration, root.moduleVersion),
+            instruction
+        )
     }
 
     static boolean hasOsgiManifestHeaders(File file) {
-        if(file) {
+        if(file != null && file.exists()) {
             JarFile jarFile = new JarFile(file)
             Manifest manifest = jarFile.getManifest()
             if (manifest != null) {
@@ -90,6 +106,25 @@ class KarafFeaturesUtils {
         return configuration.resolvedConfiguration.resolvedArtifacts.find {
             matches(versionIdentifier, it.moduleVersion.id)
         }
+    }
+
+    static boolean isFiltered(
+        FeatureDescriptor featureDescriptor, BundleInstructionDescriptor instruction, ResolvedComponentResult root) {
+
+        if(instruction && !instruction.include) {
+            return true
+        }
+
+        if(root.id instanceof ProjectComponentIdentifier) {
+            String p1 = ((ProjectComponentIdentifier)root.id).getProjectPath()
+            String p2 = featureDescriptor.project.getPath()
+
+            if(p1.equals(p2) && !featureDescriptor.includeProject) {
+                return true
+            }
+        }
+
+        return false
     }
 
     static DependencyDescriptor applyRemap(DependencyDescriptor remap, DependencyDescriptor descriptor) {
