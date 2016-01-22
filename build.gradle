@@ -131,7 +131,7 @@ pluginBundle {
     tags        = gradlePluginTags
 
     plugins {
-        karafFeaturesPlugin {
+        karafPlugin {
             id          = gradlePluginId
             displayName = project.description
         }
@@ -142,12 +142,15 @@ pluginBundle {
 //
 // *****************************************************************************
 
-afterReleaseBuild.dependsOn uploadArchives, publishPlugins
+//afterReleaseBuild.dependsOn uploadArchives, publishPlugins
 //closeAndPromoteRepository.dependsOn uploadArchives
+afterReleaseBuild.dependsOn publishPlugins
 
+/*
 task promote(dependsOn: closeAndPromoteRepository) {
     println "Release"
 }
+*/
 
 task wrapper(type: Wrapper) {
     gradleVersion = project.gradleVersion

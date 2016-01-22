@@ -25,6 +25,7 @@ release.properties
 .gradle
 bin/
 tmp/
+build/
 *.tmp
 *.bak
 *.swp
