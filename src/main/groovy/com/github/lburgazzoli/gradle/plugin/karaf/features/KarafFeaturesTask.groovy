@@ -15,12 +15,10 @@
  */
 package com.github.lburgazzoli.gradle.plugin.karaf.features
 
-import groovy.xml.MarkupBuilder
 import org.gradle.api.tasks.TaskAction
 import org.gradle.util.VersionNumber
 
 import com.github.lburgazzoli.gradle.plugin.karaf.AbstractKarafTask
-
 /**
  * @author lburgazzoli
  */
@@ -42,7 +40,6 @@ class KarafFeaturesTask extends AbstractKarafTask {
                 outputFile.parentFile.mkdirs()
             }
 
-            println "$outputFile"
             def out = new BufferedWriter(new FileWriter(outputFile))
             out.write(generateFeatures(extension.features))
             out.close()
@@ -50,12 +47,8 @@ class KarafFeaturesTask extends AbstractKarafTask {
     }
 
     String generateFeatures(KarafFeaturesExtension featuresExtension) {
-        def writer = new StringWriter()
 
-        def builder = new MarkupBuilder(writer)
-        builder.setOmitNullAttributes(true)
-        builder.setDoubleQuotes(true)
-
+        def builder = new KarafFeaturesBuilder()
         def xsdVer13 = VersionNumber.parse(featuresExtension.xsdVersion).compareTo(XMLNS_V13) >= 0
         def resolver = featuresExtension.resolver
 
@@ -131,6 +124,6 @@ class KarafFeaturesTask extends AbstractKarafTask {
             }
         }
 
-        return writer.toString()
+        return builder.toString()
     }
 }

@@ -29,11 +29,12 @@ class BundleInstructionDescriptor {
 	private DependencyMatcher matcher
     private DependencyDescriptor remap
 
-	boolean include;
-	String startLevel;
+	boolean include
+	String startLevel
 	boolean dependency
+    boolean wrap
 
-    final Map<String, String> wrap
+    final Map<String, String> wrapAttributes
 
     protected BundleInstructionDescriptor(DependencyMatcher matcher) {
         this.matcher = matcher
@@ -41,7 +42,8 @@ class BundleInstructionDescriptor {
         this.include = true
         this.startLevel = null
         this.dependency = false
-        this.wrap = new HashMap<>()
+        this.wrap = false
+        this.wrapAttributes = new HashMap<>()
     }
 
 	DependencyMatcher getMatcher() {
@@ -55,7 +57,6 @@ class BundleInstructionDescriptor {
     boolean matches(ModuleVersionIdentifier identifier) {
         return matcher.matches(identifier)
     }
-
 
     // *************************************************************************
     // Remap
@@ -77,27 +78,38 @@ class BundleInstructionDescriptor {
 		return remap
 	}
 
-
     // *************************************************************************
     // Wrap
     // *************************************************************************
 
 	def wrap(Closure closure) {
+        this.wrap = true
 		ConfigureUtil.configure(
             closure,
             new WrapInstructionsHelper()
         )
 	}
 
-    private class WrapInstructionsHelper {
+    boolean hasWrapAttributes() {
+        return !wrapAttributes.isEmpty()
+    }
 
+    private class WrapInstructionsHelper {
         public void instruction(String key, String value) {
-            wrap.put( key, value )
+            wrapAttributes.put( key, value )
         }
 
         public void instructions(Map<String,String> instructions) {
-            wrap.clear()
-            wrap.putAll(instructions)
+            wrapAttributes.clear()
+            wrapAttributes.putAll(instructions)
         }
+    }
+
+    // *************************************************************************
+    // Helpers
+    // *************************************************************************
+
+    static  BundleInstructionDescriptor fromPattern(String pattern) {
+        return new BundleInstructionDescriptor(DependencyMatcher.from(pattern))
     }
 }

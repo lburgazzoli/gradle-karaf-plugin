@@ -16,6 +16,7 @@
 package com.github.lburgazzoli.gradle.plugin.karaf
 
 import org.gradle.api.DefaultTask
+import org.gradle.util.ConfigureUtil
 
 /**
  * @author lburgazzoli
@@ -23,6 +24,17 @@ import org.gradle.api.DefaultTask
 abstract class AbstractKarafTask extends DefaultTask {
 
     private KarafPluginExtension pluginExtension;
+
+    void setExtension(Closure closure) {
+        this.pluginExtension = ConfigureUtil.configure(
+            closure,
+            new KarafPluginExtension()
+        )
+    }
+
+    void setExtension(KarafPluginExtension pluginExtension) {
+        this.pluginExtension = pluginExtension
+    }
 
     KarafPluginExtension getExtension() {
         // Don't keep looking it up...

@@ -42,11 +42,11 @@ abstract class FeatureDefinition {
     // *************************************************************************
 
     def bundle(String pattern) {
-        bundleInstructions << new BundleInstructionDescriptor(DependencyMatcher.from(pattern))
+        bundleInstructions << BundleInstructionDescriptor.fromPattern(pattern)
     }
 
     def bundle(String pattern, Closure closure) {
-        def descriptor = new BundleInstructionDescriptor(DependencyMatcher.from(pattern))
+        def descriptor = BundleInstructionDescriptor.fromPattern(pattern)
         if(closure) {
             ConfigureUtil.configure(closure, descriptor)
         }

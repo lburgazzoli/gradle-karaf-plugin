@@ -58,6 +58,14 @@ class KarafFeaturesExtension {
         )
     }
 
+    def repository(String repository) {
+        repositories << repository
+    }
+
+    def getRepositories() {
+        return this.repositories
+    }
+
     def getFeatureDescriptors() {
         return this.featureDescriptors
     }

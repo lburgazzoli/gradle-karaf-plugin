@@ -13,7 +13,6 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 package com.github.lburgazzoli.gradle.plugin.karaf.features.model
 
 
@@ -28,11 +27,11 @@ class DependencyResolverMvn extends DependencyResolver {
         String url = baseMvnUrl( dependency )
 
         if (dependency.instructions) {
-            if(dependency.instructions.wrap() ) {
+            if(dependency.instructions.wrap) {
                 url = "wrap:${url}"
 
-                if (dependency.instructions.wrap) {
-                    def res = dependency.instructions.wrap.inject([]) {
+                if (dependency.instructions.hasWrapAttributes()) {
+                    def res = dependency.instructions.wrapAttributes.inject([]) {
                         result, entry -> result << "${entry.key}=${entry.value}"
                     }.join('&')
 

@@ -13,7 +13,6 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 package com.github.lburgazzoli.gradle.plugin.karaf.features.model
 
 import groovy.transform.ToString
@@ -48,7 +47,7 @@ class FeatureDescriptor extends FeatureDefinition {
         this.conditions = []
         this.includeProject = false
 
-        // If \"runtime\" configuration exists add it as default
+        // If "runtime" configuration exists add it as default
         Configuration runtime = project.configurations.findByName("runtime")
         if(runtime) {
             this.configurations << runtime

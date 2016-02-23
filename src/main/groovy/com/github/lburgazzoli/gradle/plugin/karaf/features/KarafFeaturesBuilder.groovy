@@ -13,15 +13,35 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.github.lburgazzoli.gradle.plugin.karaf.features.model
+package com.github.lburgazzoli.gradle.plugin.karaf.features
+
+import groovy.xml.MarkupBuilder
 
 /**
  * @author lburgazzoli
  */
-class FeatureCondition extends FeatureDefinition {
-    String condition
+class KarafFeaturesBuilder extends MarkupBuilder {
+    private final Writer writer;
 
-    public FeatureCondition() {
-        this.condition = null
+    public KarafFeaturesBuilder() {
+        this(new StringWriter())
+    }
+
+    public KarafFeaturesBuilder(Writer writer) {
+        super(writer)
+
+        this.writer = writer
+
+        super.setOmitNullAttributes(true)
+        super.setDoubleQuotes(true)
+    }
+
+    public getWriter() {
+        return this.writer;
+    }
+
+    @Override
+    public String toString() {
+        return writer.toString();
     }
 }

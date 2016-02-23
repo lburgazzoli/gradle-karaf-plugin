@@ -88,6 +88,8 @@ class KarafPluginTest extends Specification {
             def extension = getKarafExtension(project)
             extension.features {
                 xsdVersion = "1.3.0"
+                repository "mvn:org.apache.karaf.cellar/apache-karaf-cellar/4.0.0/xml/features"
+                repository "mvn:org.apache.karaf.features/standard/4.0.0/xml/features"
 
                 feature {
                     name = "karaf-features-simple-project"
