@@ -84,7 +84,7 @@ class KarafFeaturesExtension {
 
     File getOutputFile() {
         if(outputFile == null) {
-            def path = "${project.buildDir}/karaf-feautures"
+            def path = "${project.buildDir}/karaf/feautures"
             def name = "${name}-${project.version}.xml"
 
             outputFile = new File(path, name)

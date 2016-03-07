@@ -15,9 +15,11 @@
  */
 package com.github.lburgazzoli.gradle.plugin.karaf
 
-import com.github.lburgazzoli.gradle.plugin.karaf.features.KarafFeaturesExtension
 import org.gradle.api.Project
 import org.gradle.util.ConfigureUtil
+
+import com.github.lburgazzoli.gradle.plugin.karaf.features.KarafFeaturesExtension
+import com.github.lburgazzoli.gradle.plugin.karaf.kar.KarafKarExtension
 
 /**
  * @author lburgazzoli
@@ -27,22 +29,52 @@ class KarafPluginExtension {
 
     private final Project project
     private KarafFeaturesExtension features
+    private KarafKarExtension kar
 
     public KarafPluginExtension(Project project) {
         this.project = project
-        this.features = new KarafFeaturesExtension(project)
+        this.features = null
+        this.kar = null
     }
 
+    // *************************************************************************
+    // Features
+    // *************************************************************************
+
     def features(Closure closure) {
-        ConfigureUtil.configure(closure, features)
+        ConfigureUtil.configure(closure, getFeatures())
     }
 
     KarafFeaturesExtension getFeatures() {
+        if (!this.features) {
+            this.features = new KarafFeaturesExtension(project)
+        }
+
         return this.features
     }
 
     boolean hasFeatures() {
-        return !this.features.featureDescriptors.empty
+        return !getFeatures().featureDescriptors.empty
+    }
+
+    // *************************************************************************
+    // Kar
+    // *************************************************************************
+
+    def kar(Closure closure) {
+        ConfigureUtil.configure(closure, getFeatures())
+    }
+
+    KarafKarExtension getKar() {
+        if (!this.kar) {
+            this.kar = new KarafKarExtension(project)
+        }
+
+        return this.kar
+    }
+
+    boolean hasKar() {
+        return true
     }
 
     // *************************************************************************

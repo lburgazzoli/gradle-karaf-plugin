@@ -19,6 +19,7 @@ import org.gradle.api.Plugin
 import org.gradle.api.Project
 
 import com.github.lburgazzoli.gradle.plugin.karaf.features.KarafFeaturesTask
+import com.github.lburgazzoli.gradle.plugin.karaf.kar.KarafKarTask
 
 /**
  * @author lburgazzoli
@@ -29,9 +30,17 @@ class KarafPlugin implements Plugin<Project> {
         KarafPluginExtension.create(project)
 
         // Karaf Features
-        project.task( KarafFeaturesTask.NAME , type: KarafFeaturesTask) {
+        def ext = project.task( KarafFeaturesTask.NAME , type: KarafFeaturesTask) {
             group       = KarafFeaturesTask.GROUP
             description = KarafFeaturesTask.DESCRIPTION
         }
+
+        // Karaf KAR
+        def kar = project.task( KarafKarTask.NAME , type: KarafKarTask) {
+            group       = KarafKarTask.GROUP
+            description = KarafKarTask.DESCRIPTION
+        }
+
+        kar.dependsOn ext
     }
 }

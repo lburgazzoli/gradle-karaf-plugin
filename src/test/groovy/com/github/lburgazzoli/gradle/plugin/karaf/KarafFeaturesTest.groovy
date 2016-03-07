@@ -13,7 +13,6 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 package com.github.lburgazzoli.gradle.plugin.karaf
 
 import groovy.util.logging.Slf4j
@@ -23,11 +22,12 @@ import org.gradle.util.ConfigureUtil
 
 import com.github.lburgazzoli.gradle.plugin.karaf.features.KarafFeaturesTask
 import spock.lang.Specification
+
 /**
  * @author lburgazzoli
  */
 @Slf4j
-class KarafPluginTest extends Specification {
+class KarafFeaturesTest extends Specification {
 
     // *************************************************************************
     //
