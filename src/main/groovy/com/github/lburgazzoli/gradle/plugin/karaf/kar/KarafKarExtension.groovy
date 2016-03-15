@@ -16,6 +16,7 @@
 
 package com.github.lburgazzoli.gradle.plugin.karaf.kar
 
+import java.nio.file.Path
 import org.gradle.api.Project
 import org.gradle.api.tasks.OutputDirectory
 
@@ -43,7 +44,15 @@ class KarafKarExtension {
         return repositoryDir
     }
 
+    Path getRepositoryPath() {
+        return repositoryDir.toPath()
+    }
+
     File getOutputDir() {
         return outputDir
+    }
+
+    Path getOutputPath() {
+        return outputDir.toPath()
     }
 }

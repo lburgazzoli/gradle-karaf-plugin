@@ -15,6 +15,9 @@
  */
 package com.github.lburgazzoli.gradle.plugin.karaf.kar
 
+import java.nio.file.Files
+import java.nio.file.Path
+import java.nio.file.Paths
 import org.gradle.jvm.tasks.Jar
 
 import com.github.lburgazzoli.gradle.plugin.karaf.KarafPluginExtension
@@ -37,9 +40,10 @@ class KarafKarTask extends Jar {
             return;
         }
 
-        File root = kar.repositoryDir
-        if(!root.exists()) {
-            root.mkdirs()
+        Path root = kar.repositoryPath
+        String rootPath = root.toAbsolutePath().toString();
+        if(!Files.exists(root)) {
+            Files.createDirectories(root)
         }
 
         features.featureDescriptors.each { feature ->
@@ -47,14 +51,14 @@ class KarafKarTask extends Jar {
                 def path = "${it.group}/${it.name}/${it.version}"
                 def name = "${it.name}-${it.version}.${it.type}"
 
-                copy(it.file, new File(root, "${path}/${name}"))
+                copy(it.file.toPath(), Paths.get(rootPath, "${path}/${name}"))
             }
         }
 
         def path = "${features.project.group}/${features.name}/${features.project.version}"
         def name = "${features.name}-${features.project.version}.xml"
 
-        copy(features.getOutputFile(), new File(root, "${path}/${name}"))
+        copy(features.outputPath, Paths.get(rootPath, "${path}/${name}"))
 
         baseName = features.name
         version = features.project.version
@@ -66,13 +70,13 @@ class KarafKarTask extends Jar {
         super.copy()
     }
 
-    def copy(File source, File destination) {
+    def copy(Path source, Path destination) {
         if(source) {
-            if (!destination.parentFile.exists()) {
-                destination.parentFile.mkdirs()
+            if (!Files.exists(destination.parent)) {
+                Files.createDirectories(destination.parent)
             }
 
-            destination << source
+            Files.copy(source, destination)
         }
     }
 }

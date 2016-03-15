@@ -16,6 +16,7 @@
 
 package com.github.lburgazzoli.gradle.plugin.karaf.features
 
+import java.nio.file.Path
 import org.gradle.api.Project
 import org.gradle.api.tasks.OutputFile
 import org.gradle.util.ConfigureUtil
@@ -88,5 +89,9 @@ class KarafFeaturesExtension {
 
     File getOutputFile() {
         return outputFile
+    }
+
+    Path getOutputPath() {
+        return outputFile.toPath()
     }
 }
