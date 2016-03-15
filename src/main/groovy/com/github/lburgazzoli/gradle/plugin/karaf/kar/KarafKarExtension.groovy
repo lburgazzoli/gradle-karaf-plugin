@@ -35,23 +35,15 @@ class KarafKarExtension {
     KarafKarExtension(Project project) {
         this.project = project
         this.enabled = true
-        this.outputDir = null
-        this.repositoryDir = null
+        this.outputDir = new File("${project.buildDir}/libs")
+        this.repositoryDir = new File("${project.buildDir}/karaf/kar/repository")
     }
 
     File getRepositoryDir() {
-        if(repositoryDir == null) {
-            repositoryDir = new File("${project.buildDir}/karaf/kar/repository")
-        }
-
         return repositoryDir
     }
 
     File getOutputDir() {
-        if(outputDir == null) {
-            outputDir = new File("${project.buildDir}/libs")
-        }
-
         return outputDir
     }
 }

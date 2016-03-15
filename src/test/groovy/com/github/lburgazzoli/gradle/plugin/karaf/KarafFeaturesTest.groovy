@@ -77,9 +77,9 @@ class KarafFeaturesTest extends Specification {
         given:
             def project = setupProject('com.lburgazzoli.github', 'gradle-karaf', '1.2.3') {
                 dependencies {
-                    compile "com.google.guava:guava:19.0"
-                    compile "com.squareup.retrofit:retrofit:1.9.0"
-                    compile "com.squareup.retrofit:converter-jackson:1.9.0"
+                    runtime "com.google.guava:guava:19.0"
+                    runtime "com.squareup.retrofit:retrofit:1.9.0"
+                    runtime "com.squareup.retrofit:converter-jackson:1.9.0"
                 }
             }
 

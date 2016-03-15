@@ -32,8 +32,8 @@ class FeatureDescriptor extends FeatureDefinition {
     String description
     String details
 
-    final List<Configuration> configurations
-    final List<FeatureCondition> conditions
+    List<Configuration> configurations
+    List<FeatureCondition> conditions
 
     boolean includeProject
 
@@ -58,13 +58,14 @@ class FeatureDescriptor extends FeatureDefinition {
     // Configurations
     // *************************************************************************
 
-    void configurations(Collection<Configuration> configurations) {
-        this.configurations.clear();
-        this.configurations.addAll(configurations)
+    void configuration(Configuration configuration) {
+        if (configuration) {
+            this.configurations << configuration
+        }
     }
 
-    void configuration(Configuration configuration) {
-        this.configurations << configuration
+    void configuration(String configurationName) {
+        configuration(this.project.configurations.getByName(configurationName))
     }
 
     // *************************************************************************

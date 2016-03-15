@@ -47,8 +47,12 @@ class KarafFeaturesExtension {
         this.resolver = new DependencyResolverMvn()
         this.xsdVersion = DEFAULT_XSD_VERSION
         this.repositories = []
-        this.outputFile = null
         this.featureDescriptors = []
+
+        this.outputFile = new File(
+            "${project.buildDir}/karaf/features",
+            "${name}-${project.version}.xml"
+        )
     }
 
     def feature(Closure closure) {
@@ -83,13 +87,6 @@ class KarafFeaturesExtension {
     }
 
     File getOutputFile() {
-        if(outputFile == null) {
-            def path = "${project.buildDir}/karaf/feautures"
-            def name = "${name}-${project.version}.xml"
-
-            outputFile = new File(path, name)
-        }
-
         return outputFile
     }
 }
