@@ -22,26 +22,28 @@ plugins {
     id 'java'
     id 'groovy'
     id 'maven'
-    id 'com.gradle.plugin-publish' version '0.9.1'
+    id 'com.gradle.plugin-publish' version '0.9.4'
     id 'com.bmuschko.nexus' version '2.3.1'
-    id 'net.researchgate.release' version '2.3.4'
+    id 'net.researchgate.release' version '2.3.5'
 }
 
 apply plugin: 'io.codearte.nexus-staging'
 
 group               = 'com.github.lburgazzoli'
-description         = 'A gradle plugin fot Karaf'
+description         = 'A gradle plugin for Karaf'
 sourceCompatibility = JavaVersion.VERSION_1_7
 targetCompatibility = JavaVersion.VERSION_1_7
 
 ext {
-    gradleVersion    = '2.10'
-    gradleScriptDir  = "${rootProject.projectDir}/gradle"
-    gradlePluginId   = "com.github.lburgazzoli.karaf"
-    gradlePluginTags = [ 'karaf' ]
-    isReleaseVersion = !version.endsWith("SNAPSHOT")
-    gitRoot          = "https://github.com/lburgazzoli"
-    gitProject       = "https://github.com/lburgazzoli/gradle-karaf-plugin"
+    gradleVersion     = '2.12'
+    gradleScriptDir   = "${rootProject.projectDir}/gradle"
+    gradlePluginId    = "com.github.lburgazzoli.karaf"
+    gradlePluginTags  = [ 'karaf' ]
+    isReleaseVersion  = !version.endsWith("SNAPSHOT")
+    isSnapshotVersion = version.endsWith("SNAPSHOT")
+    isCI              = Boolean.valueOf("$System.env.CI")
+    gitRoot           = "https://github.com/lburgazzoli"
+    gitProject        = "https://github.com/lburgazzoli/gradle-karaf-plugin"
 
     if(!project.hasProperty('nexusUsername') && !project.hasProperty('nexusPassword')) {
         nexusUsername = "$System.env.CI_DEPLOY_USERNAME"
@@ -138,6 +140,12 @@ pluginBundle {
     }
 }
 
+uploadArchives {
+    onlyIf {
+        (isCI && isSnapshotVersion) || !isCI
+    }
+}
+
 // *****************************************************************************
 //
 // *****************************************************************************
@@ -145,12 +153,6 @@ pluginBundle {
 afterReleaseBuild.dependsOn uploadArchives, publishPlugins
 //closeAndPromoteRepository.dependsOn uploadArchives
 //afterReleaseBuild.dependsOn publishPlugins
-
-/*
-task promote(dependsOn: closeAndPromoteRepository) {
-    println "Release"
-}
-*/
 
 task wrapper(type: Wrapper) {
     gradleVersion = project.gradleVersion
