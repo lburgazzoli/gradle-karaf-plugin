@@ -85,7 +85,9 @@ class KarafKarTask extends Jar {
                 Files.createDirectories(destination.parent)
             }
 
-            Files.copy(source, destination)
+            if (!Files.exists(destination)) {
+                Files.copy(source, destination)
+            }
         }
     }
 }
