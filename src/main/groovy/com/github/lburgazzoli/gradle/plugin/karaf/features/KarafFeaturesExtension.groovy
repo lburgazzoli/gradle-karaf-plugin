@@ -24,7 +24,6 @@ import org.gradle.util.ConfigureUtil
 import com.github.lburgazzoli.gradle.plugin.karaf.features.model.DependencyResolver
 import com.github.lburgazzoli.gradle.plugin.karaf.features.model.DependencyResolverMvn
 import com.github.lburgazzoli.gradle.plugin.karaf.features.model.FeatureDescriptor
-
 /**
  * @author lburgazzoli
  */
@@ -39,7 +38,6 @@ class KarafFeaturesExtension {
     String name
     String xsdVersion
 
-    @OutputFile
     private File outputFile
 
     KarafFeaturesExtension(Project project) {
@@ -87,6 +85,7 @@ class KarafFeaturesExtension {
         this.outputFile = file
     }
 
+    @OutputFile
     File getOutputFile() {
         return outputFile
     }

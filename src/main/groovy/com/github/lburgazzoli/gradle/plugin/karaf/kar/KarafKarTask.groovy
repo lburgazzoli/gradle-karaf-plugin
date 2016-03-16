@@ -21,6 +21,7 @@ import java.nio.file.Paths
 import org.gradle.jvm.tasks.Jar
 
 import com.github.lburgazzoli.gradle.plugin.karaf.KarafPluginExtension
+
 /**
  * @author lburgazzoli
  */
@@ -30,15 +31,23 @@ class KarafKarTask extends Jar {
     public static final String DESCRIPTION = 'Generates Karaf KAR Archive'
     public static final String EXTENSION = 'kar'
 
+    public KarafKarTask() {
+        // TODO: to be improved
+        outputs.upToDateWhen {
+            false
+        }
+    }
+
     @Override
     protected void copy() {
-        def features = KarafPluginExtension.lookup(project).features
-        def kar = KarafPluginExtension.lookup(project).kar
-        def resolver = features.resolver
-
-        if (!kar.enabled) {
+        def ext = KarafPluginExtension.lookup(project)
+        if (!ext.hasKar()) {
             return;
         }
+
+        def features = ext.features
+        def kar = ext.kar
+        def resolver = features.resolver
 
         Path root = kar.repositoryPath
         String rootPath = root.toAbsolutePath().toString();

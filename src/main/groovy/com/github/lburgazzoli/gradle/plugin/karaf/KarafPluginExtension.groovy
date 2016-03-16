@@ -62,7 +62,10 @@ class KarafPluginExtension {
     // *************************************************************************
 
     def kar(Closure closure) {
-        ConfigureUtil.configure(closure, getFeatures())
+        getKar()
+
+        kar.enabled = true
+        kar = ConfigureUtil.configure(closure, kar)
     }
 
     KarafKarExtension getKar() {
@@ -74,7 +77,7 @@ class KarafPluginExtension {
     }
 
     boolean hasKar() {
-        return true
+        return getKar().enabled
     }
 
     // *************************************************************************

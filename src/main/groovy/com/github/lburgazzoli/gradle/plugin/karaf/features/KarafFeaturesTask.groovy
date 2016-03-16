@@ -30,9 +30,16 @@ class KarafFeaturesTask extends AbstractKarafTask {
     public static final String FEATURES_XMLNS_PREFIX = 'http://karaf.apache.org/xmlns/features/v'
     public static final VersionNumber XMLNS_V13 = new  VersionNumber(1, 3, 0, null)
 
+    public KarafFeaturesTask() {
+        // TODO: to be improved
+        outputs.upToDateWhen {
+            false
+        }
+    }
+
     @TaskAction
     def run() {
-        if(extension.features.featureDescriptors) {
+        if(extension.hasFeatures()) {
             File outputFile = extension.features.getOutputFile()
 
             // write out a features repository xml.

@@ -17,6 +17,7 @@ package com.github.lburgazzoli.gradle.plugin.karaf
 
 import org.gradle.api.Plugin
 import org.gradle.api.Project
+import org.gradle.api.plugins.BasePlugin
 
 import com.github.lburgazzoli.gradle.plugin.karaf.features.KarafFeaturesTask
 import com.github.lburgazzoli.gradle.plugin.karaf.kar.KarafKarTask
@@ -34,7 +35,7 @@ class KarafPlugin implements Plugin<Project> {
         project.configurations.create(CONFIGURATION_NAME)
 
         // Karaf Features
-        def ext = project.task( KarafFeaturesTask.NAME , type: KarafFeaturesTask) {
+        def feat = project.task( KarafFeaturesTask.NAME , type: KarafFeaturesTask) {
             group       = KarafFeaturesTask.GROUP
             description = KarafFeaturesTask.DESCRIPTION
         }
@@ -45,7 +46,10 @@ class KarafPlugin implements Plugin<Project> {
             description = KarafKarTask.DESCRIPTION
         }
 
-        kar.dependsOn ext
+        def assemble = project.tasks.findByName(BasePlugin.ASSEMBLE_TASK_NAME)
+
+        kar.dependsOn feat
+        assemble?.dependsOn kar
 
         //PublishArtifact karArtifact = project.artifacts.add(CONFIGURATION_NAME, kar)
         //project.components.add(new KarJavaLibrary(karArtifact, project.configurations.karaf.allDependencies))

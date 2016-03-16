@@ -26,20 +26,17 @@ import org.gradle.api.tasks.OutputDirectory
 class KarafKarExtension {
     private final Project project
     boolean enabled;
-
-    @OutputDirectory
     private File outputDir
-
-    @OutputDirectory
     private File repositoryDir
 
     KarafKarExtension(Project project) {
         this.project = project
-        this.enabled = true
-        this.outputDir = new File("${project.buildDir}/libs")
+        this.enabled = false
+        this.outputDir = new File("${project.buildDir}/karaf/kar")
         this.repositoryDir = new File("${project.buildDir}/karaf/kar/repository")
     }
 
+    @OutputDirectory
     File getRepositoryDir() {
         return repositoryDir
     }
@@ -48,6 +45,7 @@ class KarafKarExtension {
         return repositoryDir.toPath()
     }
 
+    @OutputDirectory
     File getOutputDir() {
         return outputDir
     }
