@@ -19,7 +19,6 @@ import groovy.transform.ToString
 import org.gradle.api.Project
 import org.gradle.api.artifacts.Configuration
 import org.gradle.util.ConfigureUtil
-
 /**
  * @author lburgazzoli
  */
@@ -58,6 +57,15 @@ class FeatureDescriptor extends FeatureDefinition {
     // Configurations
     // *************************************************************************
 
+    void configurations(Closure closure) {
+        this.configurations.clear()
+
+        ConfigureUtil.configure(
+            closure,
+            new ConfigurationsHelper()
+        );
+    }
+
     void configuration(Configuration configuration) {
         if (configuration) {
             this.configurations << configuration
@@ -85,5 +93,20 @@ class FeatureDescriptor extends FeatureDefinition {
                 instruction -> instruction.matches(dependency)
             }
         } != null
+    }
+
+    // *************************************************************************
+    //
+    // *************************************************************************
+
+    class ConfigurationsHelper {
+
+        public add(String configurationName) {
+            configuration(project.configurations.getByName(configurationName))
+        }
+
+        public add(Configuration configuration) {
+            configuration(configuration)
+        }
     }
 }
