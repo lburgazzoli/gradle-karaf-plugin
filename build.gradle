@@ -86,7 +86,7 @@ jar {
 // *****************************************************************************
 
 nexus {
-    sign = project.isReleaseVersion
+    sign = project.isReleaseVersion && !isCI
 }
 
 extraArchive {
