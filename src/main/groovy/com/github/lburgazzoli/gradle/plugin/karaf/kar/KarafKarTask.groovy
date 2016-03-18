@@ -49,7 +49,7 @@ class KarafKarTask extends Jar {
         def kar = ext.kar
         def resolver = features.resolver
 
-        Path root = kar.repositoryPath
+        Path root = kar.explodedPath
         String rootPath = root.toAbsolutePath().toString();
         if(!Files.exists(root)) {
             Files.createDirectories(root)
@@ -57,24 +57,32 @@ class KarafKarTask extends Jar {
 
         features.featureDescriptors.each { feature ->
             resolver.resolve(feature).each {
-                def path = "${it.group}/${it.name}/${it.version}"
-                def name = "${it.name}-${it.version}.${it.type}"
-
-                copy(it.file.toPath(), Paths.get(rootPath, "${path}/${name}"))
+                copy(
+                    it.file.toPath(),
+                    asKarPath(
+                        rootPath,
+                        "${it.group}/${it.name}/${it.version}",
+                        "${it.name}-${it.version}.${it.type}"
+                    )
+                )
             }
         }
 
-        def path = "${features.project.group}/${features.name}/${features.project.version}"
-        def name = "${features.name}-${features.project.version}.xml"
-
-        copy(features.outputPath, Paths.get(rootPath, "${path}/${name}"))
+        copy(
+            features.outputPath,
+            asKarPath(
+                rootPath,
+                "${features.project.group}/${features.name}/${features.project.version}",
+                "${features.name}-${features.project.version}.xml"
+            )
+        )
 
         baseName = features.name
         version = features.project.version
         extension = EXTENSION
         destinationDir = kar.outputDir
 
-        from(kar.repositoryDir)
+        from(kar.explodedDir)
 
         super.copy()
     }
@@ -89,5 +97,9 @@ class KarafKarTask extends Jar {
                 Files.copy(source, destination)
             }
         }
+    }
+
+    def asKarPath(String root, String path, String name) {
+        return Paths.get(root, "repository/${path}/${name}")
     }
 }

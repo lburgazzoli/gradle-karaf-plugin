@@ -27,22 +27,22 @@ class KarafKarExtension {
     private final Project project
     boolean enabled;
     private File outputDir
-    private File repositoryDir
+    private File explodedDir
 
     KarafKarExtension(Project project) {
         this.project = project
         this.enabled = false
         this.outputDir = new File("${project.buildDir}/karaf/kar")
-        this.repositoryDir = new File("${project.buildDir}/karaf/kar/repository")
+        this.explodedDir = new File("${project.buildDir}/karaf/kar/exploded")
     }
 
     @OutputDirectory
-    File getRepositoryDir() {
-        return repositoryDir
+    File getExplodedDir() {
+        return explodedDir
     }
 
-    Path getRepositoryPath() {
-        return repositoryDir.toPath()
+    Path getExplodedPath() {
+        return explodedDir.toPath()
     }
 
     @OutputDirectory
