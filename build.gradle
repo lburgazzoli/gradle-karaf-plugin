@@ -1,18 +1,3 @@
-// *****************************************************************************
-// 
-// *****************************************************************************
-
-buildscript {
-    repositories {
-        mavenCentral()
-        mavenLocal()
-        jcenter()
-    }
-
-    dependencies {
-        classpath 'io.codearte.gradle.nexus:gradle-nexus-staging-plugin:0.5.3'
-    }
-}
 
 // *****************************************************************************
 //
@@ -23,11 +8,8 @@ plugins {
     id 'groovy'
     id 'maven'
     id 'com.gradle.plugin-publish' version '0.9.4'
-    id 'com.bmuschko.nexus' version '2.3.1'
     id 'net.researchgate.release' version '2.3.5'
 }
-
-apply plugin: 'io.codearte.nexus-staging'
 
 group               = 'com.github.lburgazzoli'
 description         = 'A gradle plugin for Karaf'
@@ -44,11 +26,6 @@ ext {
     isCI              = Boolean.valueOf("$System.env.CI")
     gitRoot           = "https://github.com/lburgazzoli"
     gitProject        = "https://github.com/lburgazzoli/gradle-karaf-plugin"
-
-    if(!project.hasProperty('nexusUsername') && !project.hasProperty('nexusPassword')) {
-        nexusUsername = "$System.env.CI_DEPLOY_USERNAME"
-        nexusPassword = "$System.env.CI_DEPLOY_PASSWORD"
-    }
 
     versions = [
         slf4j : '1.7.13',
@@ -85,47 +62,6 @@ jar {
 // PUBLISHING
 // *****************************************************************************
 
-nexus {
-    sign = project.isReleaseVersion && !isCI
-}
-
-extraArchive {
-    javadoc = true
-    sources = true
-    tests   = false
-}
-
-modifyPom {
-    project {
-        name          = project.name
-        description   = project.name
-        url           = project.gitProject
-        packaging     = 'jar'
-
-        licenses {
-            license {
-                name         = "The Apache Software License, Version 2.0"
-                url          = "http://www.apache.org/licenses/LICENSE-2.0.txt"
-                distribution = "repo"
-            }
-        }
-
-        scm {
-            url                 = project.ext.gitProject
-            connection          = "scm:git:${project.gitProject}.git"
-            developerConnection = "scm:git:${project.gitProject}.git"
-        }
-        
-        developers {
-            developer {
-                id 'lburgazzoli'
-                name 'Luca Burgazzoli'
-                url gitRoot
-            }
-        }
-    }
-}
-
 pluginBundle {
     website     = project.gitProject
     vcsUrl      = project.gitProject
@@ -140,19 +76,11 @@ pluginBundle {
     }
 }
 
-uploadArchives {
-    onlyIf {
-        (isCI && isSnapshotVersion) || !isCI
-    }
-}
-
 // *****************************************************************************
 //
 // *****************************************************************************
 
-afterReleaseBuild.dependsOn uploadArchives, publishPlugins
-//closeAndPromoteRepository.dependsOn uploadArchives
-//afterReleaseBuild.dependsOn publishPlugins
+afterReleaseBuild.dependsOn publishPlugins
 
 task wrapper(type: Wrapper) {
     gradleVersion = project.gradleVersion

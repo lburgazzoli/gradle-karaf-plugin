@@ -5,14 +5,7 @@ addons:
     packages:
     - oracle-java8-installer
 script: "
-  if [ ${TRAVIS_PULL_REQUEST} = 'false' ];
-  then
-    echo \"== MAIN build ==\";
-    ./gradlew clean test uploadArchives;
-  else
-    echo \"== PULL build ==\";
-    ./gradlew clean test;
-  fi
+  ./gradlew clean test
 "
 jdk:
 - oraclejdk8
