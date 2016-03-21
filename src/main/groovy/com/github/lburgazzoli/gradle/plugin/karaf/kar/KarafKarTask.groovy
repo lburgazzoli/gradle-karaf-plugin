@@ -61,7 +61,7 @@ class KarafKarTask extends Jar {
                     it.file.toPath(),
                     asKarPath(
                         rootPath,
-                        "${it.group}/${it.name}/${it.version}",
+                        "${it.group.replaceAll("\\.", "/")}/${it.name}/${it.version}",
                         "${it.name}-${it.version}.${it.type}"
                     )
                 )
@@ -72,7 +72,7 @@ class KarafKarTask extends Jar {
             features.outputPath,
             asKarPath(
                 rootPath,
-                "${features.project.group}/${features.name}/${features.project.version}",
+                "${features.project.group.replaceAll("\\.", "/")}/${features.name}/${features.project.version}",
                 "${features.name}-${features.project.version}.xml"
             )
         )
