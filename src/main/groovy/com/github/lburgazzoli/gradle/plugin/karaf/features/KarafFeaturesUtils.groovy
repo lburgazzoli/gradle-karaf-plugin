@@ -32,12 +32,14 @@ import com.github.lburgazzoli.gradle.plugin.karaf.features.model.FeatureDescript
  */
 class KarafFeaturesUtils {
 
-    static void collectDependencies(
+    static Set<DependencyDescriptor> collectDependencies(
         FeatureDescriptor featureDescriptor, Set<DependencyDescriptor> container) {
 
         featureDescriptor.configurations.each {
             collectDependencies(featureDescriptor, it, container)
         }
+
+        return container;
     }
 
     static void collectDependencies(

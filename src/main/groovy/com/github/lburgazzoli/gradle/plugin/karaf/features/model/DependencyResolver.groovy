@@ -15,7 +15,7 @@
  */
 package com.github.lburgazzoli.gradle.plugin.karaf.features.model
 
-import static com.github.lburgazzoli.gradle.plugin.karaf.features.KarafFeaturesUtils.collectDependencies
+import com.github.lburgazzoli.gradle.plugin.karaf.features.KarafFeaturesUtils
 
 /**
  * @author lburgazzoli
@@ -23,14 +23,14 @@ import static com.github.lburgazzoli.gradle.plugin.karaf.features.KarafFeaturesU
 abstract class DependencyResolver {
 
     Collection<DependencyDescriptor> resolve(FeatureDescriptor featureDescriptor) {
-        Set<DependencyDescriptor> dependencies = new LinkedHashSet<>()
-        collectDependencies(featureDescriptor, dependencies)
+        def deps = KarafFeaturesUtils.collectDependencies(
+            featureDescriptor,
+            new LinkedHashSet<>()
+        )
 
-        dependencies.each {
+        return deps.each {
             it.url = renderUrl(it)
-        }
-
-        return dependencies.findAll {
+        }.findAll {
             it.isResolved()
         }
     }

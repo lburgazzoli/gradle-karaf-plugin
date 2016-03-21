@@ -17,6 +17,7 @@ package com.github.lburgazzoli.gradle.plugin.karaf
 
 import org.gradle.api.Plugin
 import org.gradle.api.Project
+import org.gradle.api.artifacts.Configuration
 import org.gradle.api.plugins.BasePlugin
 
 import com.github.lburgazzoli.gradle.plugin.karaf.features.KarafFeaturesTask
@@ -30,7 +31,7 @@ class KarafPlugin implements Plugin<Project> {
 
     @Override
     void apply(Project project) {
-        KarafPluginExtension.create(project)
+        def ext = KarafPluginExtension.create(project)
 
         project.configurations.create(CONFIGURATION_NAME)
 
@@ -50,6 +51,22 @@ class KarafPlugin implements Plugin<Project> {
 
         kar.dependsOn feat
         assemble?.dependsOn kar
+
+        project.afterEvaluate {
+            if (ext.hasFeatures()) {
+                ext.features.featureDescriptors.each {
+                    it.configurations.each { Configuration configuration ->
+                        feat.inputs.files(configuration)
+                        feat.dependsOn(configuration)
+                    }
+                }
+
+                // if there is an output file, add that as an output
+                if (ext.features.outputFile != null) {
+                    feat.outputs.file(ext.features.outputFile)
+                }
+            }
+        }
 
         //PublishArtifact karArtifact = project.artifacts.add(CONFIGURATION_NAME, kar)
         //project.components.add(new KarJavaLibrary(karArtifact, project.configurations.karaf.allDependencies))
