@@ -26,10 +26,11 @@ ext {
     isCI              = Boolean.valueOf("$System.env.CI")
     gitRoot           = "https://github.com/lburgazzoli"
     gitProject        = "https://github.com/lburgazzoli/gradle-karaf-plugin"
+    groovyVersion     = GroovySystem.version.replaceAll(/\.\d+$/,'')
 
     versions = [
         slf4j : '1.7.13',
-        spock : '1.0-groovy-2.4'
+        spock : "1.0-groovy-${groovyVersion}"
     ]
 }
 
@@ -46,6 +47,16 @@ dependencies {
     testCompile("org.spockframework:spock-core:$versions.spock") {
         exclude(module: 'groovy-all')
     }
+}
+
+project.tasks.withType(org.gradle.api.tasks.compile.JavaCompile) {
+    it.sourceCompatibility = project.sourceCompatibility
+    it.targetCompatibility = project.targetCompatibility
+}
+
+project.tasks.withType(org.gradle.api.tasks.compile.GroovyCompile) {
+    it.sourceCompatibility = project.sourceCompatibility
+    it.targetCompatibility = project.targetCompatibility
 }
 
 jar {
