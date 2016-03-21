@@ -13,21 +13,19 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.github.lburgazzoli.gradle.plugin.karaf
+package com.github.lburgazzoli.gradle.plugin.karaf.features
 
 import groovy.util.logging.Slf4j
-import org.gradle.api.Project
 import org.gradle.testfixtures.ProjectBuilder
-import org.gradle.util.ConfigureUtil
 
-import com.github.lburgazzoli.gradle.plugin.karaf.features.KarafFeaturesTask
-import spock.lang.Specification
+import com.github.lburgazzoli.gradle.plugin.karaf.KarafPluginExtension
+import com.github.lburgazzoli.gradle.plugin.karaf.KarafTestSupport
 
 /**
  * @author lburgazzoli
  */
 @Slf4j
-class KarafFeaturesTest extends Specification {
+class KarafFeaturesTest extends KarafTestSupport {
 
     // *************************************************************************
     //
@@ -80,6 +78,8 @@ class KarafFeaturesTest extends Specification {
                     runtime "com.google.guava:guava:19.0"
                     runtime "com.squareup.retrofit:retrofit:1.9.0"
                     runtime "com.squareup.retrofit:converter-jackson:1.9.0"
+                    compile "org.apache.activemq:activemq-web:5.13.2"
+                    compile "org.apache.activemq:activemq-web-console:5.13.2@war"
                 }
             }
 
@@ -182,79 +182,5 @@ class KarafFeaturesTest extends Specification {
             featuresXml != null
 
             println featuresStr
-    }
-
-    // *************************************************************************
-    //
-    // *************************************************************************
-
-    def setupProjectAndDependencies() {
-        def project = ProjectBuilder.builder().build()
-        setupProject(project)
-        setupProjectDependencies(project)
-
-        return project
-    }
-
-    def setupProject(String name) {
-        setupProject(ProjectBuilder.builder().withName(name).build())
-    }
-
-    def setupProject(String name, Closure closure) {
-        ConfigureUtil.configure(
-            closure,
-            setupProject(ProjectBuilder.builder().withName(name).build())
-        )
-    }
-
-    def setupProject(String group, String name, String version) {
-        Project project = ProjectBuilder.builder().withName(name).build()
-        project.group = group
-        project.version = version
-
-        setupProject(project)
-    }
-
-    def setupProject(String group, String name, String version, Closure closure) {
-        Project project = ProjectBuilder.builder().withName(name).build()
-        project.group = group
-        project.version = version
-
-        ConfigureUtil.configure(
-            closure,
-            setupProject(project)
-        )
-    }
-
-    def setupProject(Project project) {
-        project.apply plugin: 'java'
-        project.apply plugin: 'maven'
-
-        project.repositories {
-            mavenLocal()
-            mavenCentral()
-        }
-
-        new KarafPlugin().apply(project)
-
-        return project
-    }
-
-    def setupProjectDependencies(Project project) {
-        project.dependencies {
-            compile "com.google.guava:guava:19.0"
-            compile "com.squareup.retrofit:retrofit:1.9.0"
-            compile "com.squareup.retrofit:converter-jackson:1.9.0"
-            compile "org.apache.activemq:activemq-web:5.12.1"
-            compile "org.apache.activemq:activemq-web-console:5.12.1@war"
-        }
-    }
-
-    KarafPluginExtension getKarafExtension(Project project) {
-        KarafPluginExtension.lookup(project)
-    }
-
-    KarafFeaturesTask  getKarafFeaturesTasks(Project project) {
-        project.tasks.getByName(KarafFeaturesTask.NAME)
     }
 }

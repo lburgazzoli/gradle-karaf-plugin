@@ -104,4 +104,9 @@ class DependencyDescriptor {
     void attribute(String key, String value) {
         this.attributes[ key ] = value
     }
+
+    void attributes(Map<String, String> instructions) {
+        this.attributes.clear()
+        this.attributes.putAll(instructions)
+    }
 }

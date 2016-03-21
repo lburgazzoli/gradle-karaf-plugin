@@ -29,14 +29,14 @@ class DependencyResolverMvn extends DependencyResolver {
         if (dependency.instructions) {
             if(dependency.instructions.wrap) {
                 url = "wrap:${url}"
+            }
 
-                if (dependency.instructions.hasWrapAttributes()) {
-                    def res = dependency.instructions.wrapAttributes.inject([]) {
-                        result, entry -> result << "${entry.key}=${entry.value}"
-                    }.join('&')
+            if (dependency.instructions.hasRemap()) {
+                def res = dependency.instructions.remap.attributes.inject([]) {
+                    result, entry -> result << "${entry.key}=${entry.value}"
+                }.join('&')
 
-                    url = "wrap:${url}?${res}"
-                }
+                url = "${url}?${res}"
             }
         } else if (!dependency.isOSGi() ) {
             // if the resolved file does not have "proper" OSGi headers we
@@ -54,6 +54,6 @@ class DependencyResolverMvn extends DependencyResolver {
      */
     public static String baseMvnUrl(DependencyDescriptor dependencyDescriptor) {
         def gnv = "${dependencyDescriptor.group}/${dependencyDescriptor.name}/${dependencyDescriptor.version}";
-        return dependencyDescriptor.isWar() ? "mvn:${gnv}/war" : "mvn:${gnv}"
+        return dependencyDescriptor.isWar() ? "war:mvn:${gnv}/war" : "mvn:${gnv}"
     }
 }

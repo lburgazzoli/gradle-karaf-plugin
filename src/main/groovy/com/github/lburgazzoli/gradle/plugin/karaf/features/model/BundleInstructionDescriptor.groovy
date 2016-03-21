@@ -43,7 +43,6 @@ class BundleInstructionDescriptor {
         this.startLevel = null
         this.dependency = false
         this.wrap = false
-        this.wrapAttributes = new HashMap<>()
     }
 
 	DependencyMatcher getMatcher() {
@@ -59,15 +58,27 @@ class BundleInstructionDescriptor {
     }
 
     // *************************************************************************
+    // Shortcuts for attributes
+    // *************************************************************************
+
+    void attribute(String key, String value) {
+        getOrCreateRemap().attribute(key, value)
+    }
+
+    void attributes(Map<String, String> attributes) {
+        getOrCreateRemap().attributes(attributes)
+    }
+
+    // *************************************************************************
     // Remap
     // *************************************************************************
 
 	def remap(Closure closure) {
-		ConfigureUtil.configure( closure, remap = new DependencyDescriptor())
+		ConfigureUtil.configure(closure, getOrCreateRemap())
 	}
 
     def remap(Map properties) {
-		ConfigureUtil.configureByMap( properties, remap = new DependencyDescriptor())
+		ConfigureUtil.configureByMap(properties, getOrCreateRemap())
 	}
 
     boolean hasRemap() {
@@ -78,30 +89,36 @@ class BundleInstructionDescriptor {
 		return remap
 	}
 
+    DependencyDescriptor getOrCreateRemap() {
+        if (remap == null) {
+            remap = new DependencyDescriptor();
+        }
+
+        return remap;
+    }
+
     // *************************************************************************
     // Wrap
     // *************************************************************************
 
 	def wrap(Closure closure) {
         this.wrap = true
+
+        getOrCreateRemap();
+
 		ConfigureUtil.configure(
             closure,
             new WrapInstructionsHelper()
         )
 	}
 
-    boolean hasWrapAttributes() {
-        return !wrapAttributes.isEmpty()
-    }
-
     private class WrapInstructionsHelper {
-        public void instruction(String key, String value) {
-            wrapAttributes.put( key, value )
+        public void attribute(String key, String value) {
+            getOrCreateRemap().attribute(key, value);
         }
 
-        public void instructions(Map<String,String> instructions) {
-            wrapAttributes.clear()
-            wrapAttributes.putAll(instructions)
+        public void attribute(Map<String, String> instructions) {
+            getOrCreateRemap().attributes(instructions)
         }
     }
 
