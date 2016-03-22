@@ -24,7 +24,7 @@ import org.gradle.api.artifacts.component.ProjectComponentIdentifier
 import org.gradle.api.artifacts.result.ResolvedComponentResult
 import org.gradle.api.artifacts.result.ResolvedDependencyResult
 
-import com.github.lburgazzoli.gradle.plugin.karaf.features.model.BundleInstructionDescriptor
+import com.github.lburgazzoli.gradle.plugin.karaf.features.model.BundleDescriptor
 import com.github.lburgazzoli.gradle.plugin.karaf.features.model.DependencyDescriptor
 import com.github.lburgazzoli.gradle.plugin.karaf.features.model.FeatureDescriptor
 /**
@@ -115,7 +115,7 @@ class KarafFeaturesUtils {
     }
 
     static boolean isFiltered(
-        FeatureDescriptor featureDescriptor, BundleInstructionDescriptor instruction, ResolvedComponentResult root) {
+        FeatureDescriptor featureDescriptor, BundleDescriptor instruction, ResolvedComponentResult root) {
 
         if(instruction && !instruction.include) {
             return true
@@ -133,7 +133,7 @@ class KarafFeaturesUtils {
         return false
     }
 
-    static DependencyDescriptor applyRemap(DependencyDescriptor dependency, BundleInstructionDescriptor descriptor) {
+    static DependencyDescriptor applyRemap(DependencyDescriptor dependency, BundleDescriptor descriptor) {
         if(descriptor && descriptor.remap) {
             dependency.group   = descriptor.remap.group ?: dependency.group
             dependency.name    = descriptor.remap.name ?: dependency.name

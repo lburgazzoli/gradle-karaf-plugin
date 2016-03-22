@@ -26,13 +26,13 @@ class DependencyResolverMvn extends DependencyResolver {
 
         String url = baseMvnUrl( dependency )
 
-        if (dependency.instructions) {
-            if(dependency.instructions.wrap) {
+        if (dependency.bundle) {
+            if(dependency.bundle.wrap) {
                 url = "wrap:${url}"
             }
 
-            if (dependency.instructions.hasRemap()) {
-                def res = dependency.instructions.remap.attributes.inject([]) {
+            if (dependency.bundle.instructions) {
+                def res = dependency.bundle.instructions.inject([]) {
                     result, entry -> result << "${entry.key}=${entry.value}"
                 }.join('&')
 

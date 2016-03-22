@@ -15,98 +15,22 @@
  */
 package com.github.lburgazzoli.gradle.plugin.karaf.features.model
 
-import com.github.lburgazzoli.gradle.plugin.karaf.features.KarafFeaturesUtils
-import groovy.transform.EqualsAndHashCode
-import groovy.transform.ToString
 import org.gradle.api.artifacts.ResolvedArtifact
-import org.gradle.api.artifacts.component.ModuleComponentIdentifier
-import org.gradle.api.artifacts.component.ProjectComponentIdentifier
 import org.gradle.api.artifacts.result.ResolvedComponentResult
 
 /**
  * @author lburgazzoli
  */
-@ToString(includeNames = true)
-@EqualsAndHashCode(includes = [ "group", "name", "version" ])
-class DependencyDescriptor {
-    @ToString(includeNames = true)
-    public enum Kind {
-        UNKNOWN,
-        MODULE,
-        PROJECT
-    }
+class DependencyDescriptor extends Dependency {
 
-    String group
-    String name
-    String version
-    String type
-    File file
-    Kind kind
-    String url
-    BundleInstructionDescriptor instructions
-
-    final Map<String, String> attributes
+    BundleDescriptor bundle
 
     DependencyDescriptor() {
-        this.group = null
-        this.name = null
-        this.version = null
-        this.type = null
-        this.file = null
-        this.kind = Kind.UNKNOWN
-        this.url = null
-        this.attributes = new HashMap<>()
-        this.instructions = null
+        this.bundle = null;
     }
 
-    DependencyDescriptor(ResolvedComponentResult component, ResolvedArtifact artifact, BundleInstructionDescriptor instructions) {
-        this.group = component.moduleVersion.group
-        this.name = component.moduleVersion.name
-        this.version = component.moduleVersion.version
-        this.type = artifact ? artifact.type : null
-        this.file = artifact ? artifact.file : null
-        this.attributes = new HashMap<>()
-        this.instructions = instructions
-
-        if(component.id instanceof ProjectComponentIdentifier) {
-            this.kind = Kind.PROJECT
-        } else if(component.id instanceof ModuleComponentIdentifier) {
-            this.kind = Kind.MODULE
-        } else {
-            this.kind = Kind.UNKNOWN
-        }
-    }
-
-    boolean isProject() {
-        return this.kind == Kind.PROJECT
-    }
-
-    boolean isModule() {
-        return this.kind == Kind.MODULE
-    }
-
-    boolean isJar() {
-        return this.type && this.type.equals('jar')
-    }
-
-    boolean isWar() {
-        return this.type && this.type.equals('war')
-    }
-
-    boolean isOSGi() {
-        return KarafFeaturesUtils.hasOsgiManifestHeaders(file)
-    }
-
-    boolean isResolved() {
-        return this.url != null;
-    }
-
-    void attribute(String key, String value) {
-        this.attributes[ key ] = value
-    }
-
-    void attributes(Map<String, String> instructions) {
-        this.attributes.clear()
-        this.attributes.putAll(instructions)
+    DependencyDescriptor(ResolvedComponentResult component, ResolvedArtifact artifact, BundleDescriptor bundle) {
+        super(component, artifact)
+        this.bundle = bundle
     }
 }

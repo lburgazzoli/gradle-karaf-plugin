@@ -47,7 +47,8 @@ class KarafWarFeaturesTest extends KarafTestSupport {
                     details = "my detailed description"
 
                     bundle("org.apache.activemq:activemq-web-console:5.13.2") {
-                        attribute "Webapp-Context", "activemq-web-console"
+                        attribute "startLevel", "50"
+                        instruction "Webapp-Context", "activemq-web-console"
                     }
                 }
             }

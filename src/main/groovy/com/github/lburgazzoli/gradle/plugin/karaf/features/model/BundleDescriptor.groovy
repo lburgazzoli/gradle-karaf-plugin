@@ -25,31 +25,30 @@ import org.gradle.util.ConfigureUtil
  * @author Steve Ebersole
  * @author Luca Burgazzoli
  */
-class BundleInstructionDescriptor {
+class BundleDescriptor {
 	private DependencyMatcher matcher
-    private DependencyDescriptor remap
+    private Dependency remap
 
 	boolean include
-	String startLevel
-	boolean dependency
     boolean wrap
 
-    final Map<String, String> wrapAttributes
+    Map<String, String> attributes
+    Map<String, String> instructions
 
-    protected BundleInstructionDescriptor(DependencyMatcher matcher) {
+    protected BundleDescriptor(DependencyMatcher matcher) {
         this.matcher = matcher
         this.remap = null
         this.include = true
-        this.startLevel = null
-        this.dependency = false
         this.wrap = false
+        this.attributes = new HashMap<>()
+        this.instructions = new HashMap<>()
     }
 
 	DependencyMatcher getMatcher() {
 		return matcher
 	}
 
-    boolean matches(DependencyDescriptor dependency) {
+    boolean matches(Dependency dependency) {
         return matcher.matches(dependency)
     }
 
@@ -58,15 +57,25 @@ class BundleInstructionDescriptor {
     }
 
     // *************************************************************************
-    // Shortcuts for attributes
+    // Shortcuts for attributes/instructions
     // *************************************************************************
 
     void attribute(String key, String value) {
-        getOrCreateRemap().attribute(key, value)
+        this.attributes[ key ] = value
     }
 
-    void attributes(Map<String, String> attributes) {
-        getOrCreateRemap().attributes(attributes)
+    void attributes(Map<String, String> instructions) {
+        this.attributes.clear()
+        this.attributes.putAll(instructions)
+    }
+
+    void instruction(String key, String value) {
+        this.instructions[ key ] = value
+    }
+
+    void instructions(Map<String, String> instructions) {
+        this.instructions.clear()
+        this.instructions.putAll(instructions)
     }
 
     // *************************************************************************
@@ -74,11 +83,17 @@ class BundleInstructionDescriptor {
     // *************************************************************************
 
 	def remap(Closure closure) {
-		ConfigureUtil.configure(closure, getOrCreateRemap())
+		remap = ConfigureUtil.configure(
+            closure,
+            new Dependency()
+        )
 	}
 
     def remap(Map properties) {
-		ConfigureUtil.configureByMap(properties, getOrCreateRemap())
+		remap = ConfigureUtil.configureByMap(
+            properties,
+            new Dependency()
+        )
 	}
 
     boolean hasRemap() {
@@ -89,22 +104,12 @@ class BundleInstructionDescriptor {
 		return remap
 	}
 
-    DependencyDescriptor getOrCreateRemap() {
-        if (remap == null) {
-            remap = new DependencyDescriptor();
-        }
-
-        return remap;
-    }
-
     // *************************************************************************
     // Wrap
     // *************************************************************************
 
 	def wrap(Closure closure) {
         this.wrap = true
-
-        getOrCreateRemap();
 
 		ConfigureUtil.configure(
             closure,
@@ -114,11 +119,11 @@ class BundleInstructionDescriptor {
 
     private class WrapInstructionsHelper {
         public void attribute(String key, String value) {
-            getOrCreateRemap().attribute(key, value);
+            instruction(key, value);
         }
 
         public void attribute(Map<String, String> instructions) {
-            getOrCreateRemap().attributes(instructions)
+            instruction(instructions)
         }
     }
 
@@ -126,7 +131,7 @@ class BundleInstructionDescriptor {
     // Helpers
     // *************************************************************************
 
-    static  BundleInstructionDescriptor fromPattern(String pattern) {
-        return new BundleInstructionDescriptor(DependencyMatcher.from(pattern))
+    static BundleDescriptor fromPattern(String pattern) {
+        return new BundleDescriptor(DependencyMatcher.from(pattern))
     }
 }

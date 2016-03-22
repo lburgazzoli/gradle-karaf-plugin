@@ -25,7 +25,7 @@ import org.gradle.util.ConfigureUtil
  * @author lburgazzoli
  */
 abstract class FeatureDefinition {
-    final List<BundleInstructionDescriptor> bundleInstructions
+    final List<BundleDescriptor> bundleInstructions
     final List<FeatureDependencyDescriptor> featureDependencies
     final Set<Config> configs
     final Set<ConfigFile> configFiles
@@ -42,11 +42,11 @@ abstract class FeatureDefinition {
     // *************************************************************************
 
     def bundle(String pattern) {
-        bundleInstructions << BundleInstructionDescriptor.fromPattern(pattern)
+        bundleInstructions << BundleDescriptor.fromPattern(pattern)
     }
 
     def bundle(String pattern, Closure closure) {
-        def descriptor = BundleInstructionDescriptor.fromPattern(pattern)
+        def descriptor = BundleDescriptor.fromPattern(pattern)
         if(closure) {
             ConfigureUtil.configure(closure, descriptor)
         }
@@ -57,19 +57,19 @@ abstract class FeatureDefinition {
     def bundle(Closure closure) {
         bundleInstructions << ConfigureUtil.configure(
             closure,
-            new BundleExtendedInstructionDescriptor()
+            new BundleExtendedDescriptor()
         )
     }
 
-    List<BundleInstructionDescriptor> getBundleInstructions() {
+    List<BundleDescriptor> getBundleInstructions() {
         return this.bundleInstructions
     }
 
-    BundleInstructionDescriptor findBundleInstructions(DependencyDescriptor dependency) {
+    BundleDescriptor findBundleInstructions(DependencyDescriptor dependency) {
         return this.bundleInstructions.find { it.matches( dependency ) }
     }
 
-    BundleInstructionDescriptor findBundleInstructions(ModuleVersionIdentifier identifier) {
+    BundleDescriptor findBundleInstructions(ModuleVersionIdentifier identifier) {
         return this.bundleInstructions.find { it.matches( identifier ) }
     }
 
@@ -156,6 +156,20 @@ abstract class FeatureDefinition {
             this.uri = name
             this.filename = filename
             this.override = false
+        }
+    }
+
+    class BundleExtendedDescriptor extends BundleDescriptor {
+        protected BundleExtendedDescriptor() {
+            super(new DependencyMatcher())
+        }
+
+        def match(Closure closure) {
+            ConfigureUtil.configure( closure, matcher )
+        }
+
+        def match(Map properties) {
+            ConfigureUtil.configureByMap( properties, matcher )
         }
     }
 }

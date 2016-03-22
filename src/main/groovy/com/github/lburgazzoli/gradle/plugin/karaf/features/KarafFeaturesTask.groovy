@@ -91,7 +91,7 @@ class KarafFeaturesTask extends AbstractKarafTask {
 
                     dependencies.each {
                         if(!feature.isConditional(it)) {
-                            builder.bundle(it.attributes, it.url)
+                            builder.bundle(it.bundle.attributes, it.url)
                         }
                     }
 
@@ -121,7 +121,7 @@ class KarafFeaturesTask extends AbstractKarafTask {
                             dependencies.each { dependency ->
                                 condition.bundleInstructions.each {
                                     if(it.matches(dependency)) {
-                                        builder.bundle(dependency.attributes, dependency.url)
+                                        builder.bundle(dependency.bundle.attributes, dependency.url)
                                     }
                                 }
                             }

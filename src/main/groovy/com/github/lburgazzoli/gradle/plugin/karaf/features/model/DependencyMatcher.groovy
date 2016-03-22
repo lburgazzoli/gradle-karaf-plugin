@@ -47,7 +47,7 @@ public class DependencyMatcher {
         )
 	}
 
-	public boolean matches(DependencyDescriptor check) {
+	public boolean matches(Dependency check) {
 		return ( check.group.equals( group )
 			&& ( name == null || check.name.equals( name ) )
 			&& ( version == null || check.version.equals( version ) )
