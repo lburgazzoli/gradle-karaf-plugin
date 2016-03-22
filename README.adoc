@@ -3,3 +3,88 @@
 - [ ] Karaf features
 - [ ] Karaf KAR
 - [ ] Karaf custom distribution
+
+== Example
+
+[source,groovy]
+----
+plugins {
+    id 'maven'
+    id 'java'
+    id 'com.github.lburgazzoli.karaf' version '0.0.19'
+}
+
+repositories {
+    mavenCentral()
+}
+
+configurations {
+    commons
+    json
+    rest
+}
+
+dependencies {
+    runtime 'com.google.guava:guava:19.0'
+    commons 'commons-io:commons-io:2.4'
+    
+    json 'com.fasterxml.jackson.core:jackson-core:2.7.0'
+    json 'com.fasterxml.jackson.core:jackson-databind:2.7.0'
+    json 'com.fasterxml.jackson.core:jackson-annotations:2.7.0'
+    
+    square 'com.squareup.retrofit2:retrofit:2.0.0' 
+}
+
+karaf {
+    features {
+        xsdVersion  = '1.2.0'
+        version     = '4.0.0'
+        description = 'Karaf features'
+        
+        // Define a feature named 'common' with dependencies from runtime configuration (default)
+        // and commons
+        feature {
+            name        = 'common'
+            description = 'Common dependencies'
+            
+            // Include one or more additional configuration
+            configuration 'commons'
+        }
+        
+        // Define a feature named 'rest' with dependencies from json and square configurations
+        feature {
+            name        = 'rest'
+            description = 'REST dependencies'
+            
+            // Override configurations
+            configurations {
+                add 'json'
+                add 'square'
+            }
+        }
+    }
+}
+----
+
+
+[source,xml]
+----
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<features xmlns="http://karaf.apache.org/xmlns/features/v1.2.0" name="gp">
+  <feature name="common" version="4.0.0" description="Common dependencies">
+    <bundle>mvn:com.google.guava/guava/19.0</bundle>
+    <bundle>mvn:commons-io/commons-io/2.4</bundle>
+  </feature>
+  <feature name="rest" version="4.0.0" description="REST dependencies">
+    <bundle>mvn:com.fasterxml.jackson.core/jackson-core/2.7.0</bundle>
+    <bundle>mvn:com.fasterxml.jackson.core/jackson-annotations/2.7.0</bundle>
+    <bundle>mvn:com.fasterxml.jackson.core/jackson-databind/2.7.0</bundle>
+    <!-- 
+        as squareup's jars a re not OSGi ready, the plugin automatically adds wrap instruction 
+    -->
+    <bundle>wrap:mvn:com.squareup.okio/okio/1.6.0</bundle>
+    <bundle>wrap:mvn:com.squareup.okhttp3/okhttp/3.2.0</bundle>
+    <bundle>wrap:mvn:com.squareup.retrofit2/retrofit/2.0.0</bundle>
+  </feature>
+</features>
+----
