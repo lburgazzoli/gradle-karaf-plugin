@@ -17,11 +17,9 @@ package com.github.lburgazzoli.gradle.plugin.karaf.kar
 
 import java.nio.file.Files
 import java.nio.file.Path
-import java.nio.file.Paths
 import org.gradle.jvm.tasks.Jar
 
 import com.github.lburgazzoli.gradle.plugin.karaf.KarafPluginExtension
-
 /**
  * @author lburgazzoli
  */
@@ -48,19 +46,17 @@ class KarafKarTask extends Jar {
         def features = ext.features
         def kar = ext.kar
         def resolver = features.resolver
+        def root = kar.explodedPath
 
-        Path root = kar.explodedPath
-        String rootPath = root.toAbsolutePath().toString();
-        if(!Files.exists(root)) {
-            Files.createDirectories(root)
-        }
+        root.deleteDir()
+        Files.createDirectories(root)
 
         features.featureDescriptors.each { feature ->
             resolver.resolve(feature).each {
                 copy(
                     it.file.toPath(),
                     asKarPath(
-                        rootPath,
+                        root,
                         "${it.group.replaceAll("\\.", "/")}/${it.name}/${it.version}",
                         "${it.name}-${it.version}.${it.type}"
                     )
@@ -71,7 +67,7 @@ class KarafKarTask extends Jar {
         copy(
             features.outputPath,
             asKarPath(
-                rootPath,
+                root,
                 "${features.project.group.replaceAll("\\.", "/")}/${features.name}/${features.project.version}",
                 "${features.name}-${features.project.version}.xml"
             )
@@ -88,7 +84,7 @@ class KarafKarTask extends Jar {
     }
 
     def copy(Path source, Path destination) {
-        if(source) {
+        if (source) {
             if (!Files.exists(destination.parent)) {
                 Files.createDirectories(destination.parent)
             }
@@ -99,7 +95,8 @@ class KarafKarTask extends Jar {
         }
     }
 
-    def asKarPath(String root, String path, String name) {
-        return Paths.get(root, "repository/${path}/${name}")
+    def asKarPath(Path root, String path, String name) {
+        return root.resolve("repository").resolve(path).resolve(name)
+        //return Paths.get(root, "repository/${path}/${name}")
     }
 }
