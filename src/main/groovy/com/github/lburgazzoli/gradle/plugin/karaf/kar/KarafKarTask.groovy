@@ -17,6 +17,7 @@ package com.github.lburgazzoli.gradle.plugin.karaf.kar
 
 import java.nio.file.Files
 import java.nio.file.Path
+import java.nio.file.StandardCopyOption
 import org.gradle.jvm.tasks.Jar
 
 import com.github.lburgazzoli.gradle.plugin.karaf.KarafPluginExtension
@@ -68,7 +69,7 @@ class KarafKarTask extends Jar {
             features.outputPath,
             asKarPath(
                 root,
-                "${features.project.group.replaceAll("\\.", "/")}/${features.name}/${features.project.version}",
+                "${features.project.group.toString().replaceAll("\\.", "/")}/${features.name}/${features.project.version}",
                 "${features.name}-${features.project.version}.xml"
             )
         )
@@ -77,6 +78,10 @@ class KarafKarTask extends Jar {
         version = features.project.version
         extension = EXTENSION
         destinationDir = kar.outputDir
+
+        if (kar.archiveName) {
+            archiveName = "${kar.archiveName}.kar"
+        }
 
         from(kar.explodedDir)
 
@@ -89,14 +94,16 @@ class KarafKarTask extends Jar {
                 Files.createDirectories(destination.parent)
             }
 
-            if (!Files.exists(destination)) {
-                Files.copy(source, destination)
-            }
+            Files.copy(
+                source,
+                destination,
+                StandardCopyOption.REPLACE_EXISTING,
+                StandardCopyOption.COPY_ATTRIBUTES
+            )
         }
     }
 
     def asKarPath(Path root, String path, String name) {
         return root.resolve("repository").resolve(path).resolve(name)
-        //return Paths.get(root, "repository/${path}/${name}")
     }
 }
