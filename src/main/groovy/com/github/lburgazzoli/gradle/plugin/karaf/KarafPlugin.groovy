@@ -22,12 +22,13 @@ import org.gradle.api.plugins.BasePlugin
 
 import com.github.lburgazzoli.gradle.plugin.karaf.features.KarafFeaturesTask
 import com.github.lburgazzoli.gradle.plugin.karaf.kar.KarafKarTask
+
 /**
  * @author lburgazzoli
  */
 class KarafPlugin implements Plugin<Project> {
+    static final String ARTIFACTS_CONFIGURATION_NAME = 'archives'
     static final String CONFIGURATION_NAME = 'karaf'
-    static final String COMPONENT_NAME = 'karaf'
 
     @Override
     void apply(Project project) {
@@ -66,22 +67,9 @@ class KarafPlugin implements Plugin<Project> {
                     feat.outputs.file(ext.features.outputFile)
                 }
             }
-        }
 
-        //PublishArtifact karArtifact = project.artifacts.add(CONFIGURATION_NAME, kar)
-        //project.components.add(new KarJavaLibrary(karArtifact, project.configurations.karaf.allDependencies))
-    }
-
-    /*
-    class KarJavaLibrary extends JavaLibrary {
-        KarJavaLibrary(PublishArtifact jarArtifact, DependencySet runtimeDependencies) {
-            super(jarArtifact, runtimeDependencies)
-        }
-
-        @Override
-        String getName() {
-            return COMPONENT_NAME
+            project.artifacts.add(ARTIFACTS_CONFIGURATION_NAME, ext.features.outputFile)
+            project.artifacts.add(ARTIFACTS_CONFIGURATION_NAME, kar)
         }
     }
-    */
 }
