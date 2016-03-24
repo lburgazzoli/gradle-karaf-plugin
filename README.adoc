@@ -63,6 +63,17 @@ karaf {
             }
         }
     }
+
+    // Enable generation of Karaf Archive KAR based on features defined above.
+    // To generate kar either use generateKar, assemble or install
+    kar {
+        // Optionally set the kar name, default is:
+        //
+        //     ${features.name}-${features.version}.kar
+        //
+        // Extension is automatically set to .kar
+        archiveName = 'foo'
+    }
 }
 ----
 
