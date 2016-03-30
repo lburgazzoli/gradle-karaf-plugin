@@ -19,6 +19,7 @@ import groovy.transform.ToString
 import org.gradle.api.Project
 import org.gradle.api.artifacts.Configuration
 import org.gradle.util.ConfigureUtil
+
 /**
  * @author lburgazzoli
  */
@@ -34,8 +35,6 @@ class FeatureDescriptor extends FeatureDefinition {
     List<Configuration> configurations
     List<FeatureCondition> conditions
 
-    boolean includeProject
-
     public FeatureDescriptor(Project project) {
         this.project = project
         this.name = null
@@ -44,7 +43,6 @@ class FeatureDescriptor extends FeatureDefinition {
         this.details = null
         this.configurations = []
         this.conditions = []
-        this.includeProject = false
 
         // If "runtime" configuration exists add it as default
         Configuration runtime = project.configurations.findByName("runtime")

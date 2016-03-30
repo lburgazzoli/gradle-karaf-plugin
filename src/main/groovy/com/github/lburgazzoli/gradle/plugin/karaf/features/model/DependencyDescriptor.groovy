@@ -17,6 +17,7 @@ package com.github.lburgazzoli.gradle.plugin.karaf.features.model
 
 import org.gradle.api.artifacts.ResolvedArtifact
 import org.gradle.api.artifacts.result.ResolvedComponentResult
+import org.gradle.api.tasks.bundling.AbstractArchiveTask
 
 /**
  * @author lburgazzoli
@@ -33,4 +34,16 @@ class DependencyDescriptor extends Dependency {
         super(component, artifact)
         this.bundle = bundle
     }
+
+    DependencyDescriptor(ResolvedComponentResult component, String type, File file, BundleDescriptor bundle) {
+        super(component, type, file)
+        this.bundle = bundle
+    }
+
+    DependencyDescriptor(ResolvedComponentResult component, AbstractArchiveTask task, BundleDescriptor bundle) {
+        super(component, task.extension, task.archivePath)
+        this.bundle = bundle
+    }
+
+
 }

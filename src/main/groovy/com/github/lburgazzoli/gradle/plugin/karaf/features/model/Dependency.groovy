@@ -28,7 +28,7 @@ import com.github.lburgazzoli.gradle.plugin.karaf.features.KarafFeaturesUtils
  * @author lburgazzoli
  */
 @ToString(includeNames = true)
-@EqualsAndHashCode(includes = [ "group", "name", "version" ])
+@EqualsAndHashCode(includes = [ "group", "name", "version", "type"])
 class Dependency {
     @ToString(includeNames = true)
     public enum Kind {
@@ -56,11 +56,15 @@ class Dependency {
     }
 
     Dependency(ResolvedComponentResult component, ResolvedArtifact artifact) {
+        this(component, artifact?.type, artifact?.file)
+    }
+
+    Dependency(ResolvedComponentResult component, String type, File file) {
         this.group = component.moduleVersion.group
         this.name = component.moduleVersion.name
         this.version = component.moduleVersion.version
-        this.type = artifact ? artifact.type : null
-        this.file = artifact ? artifact.file : null
+        this.type = type
+        this.file = file
 
         if(component.id instanceof ProjectComponentIdentifier) {
             this.kind = Kind.PROJECT

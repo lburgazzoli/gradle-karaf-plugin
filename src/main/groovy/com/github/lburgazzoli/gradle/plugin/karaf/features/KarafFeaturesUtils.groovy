@@ -23,14 +23,18 @@ import org.gradle.api.artifacts.ResolvedArtifact
 import org.gradle.api.artifacts.component.ProjectComponentIdentifier
 import org.gradle.api.artifacts.result.ResolvedComponentResult
 import org.gradle.api.artifacts.result.ResolvedDependencyResult
+import org.gradle.api.tasks.bundling.AbstractArchiveTask
 
+import com.github.lburgazzoli.gradle.plugin.karaf.KarafPlugin
+import com.github.lburgazzoli.gradle.plugin.karaf.KarafPluginExtension
+import com.github.lburgazzoli.gradle.plugin.karaf.KarafUtils
 import com.github.lburgazzoli.gradle.plugin.karaf.features.model.BundleDescriptor
 import com.github.lburgazzoli.gradle.plugin.karaf.features.model.DependencyDescriptor
 import com.github.lburgazzoli.gradle.plugin.karaf.features.model.FeatureDescriptor
 /**
  * @author lburgazzoli
  */
-class KarafFeaturesUtils {
+class KarafFeaturesUtils extends KarafUtils {
 
     static Set<DependencyDescriptor> collectDependencies(
         FeatureDescriptor featureDescriptor, Set<DependencyDescriptor> container) {
@@ -51,6 +55,7 @@ class KarafFeaturesUtils {
     static void collectDependencies(
         FeatureDescriptor featureDescriptor, Configuration configuration, ResolvedComponentResult root, Set<DependencyDescriptor> container) {
 
+        def ext = KarafPluginExtension.lookup(featureDescriptor.project)
         def instruction = featureDescriptor.findBundleInstructions(root.moduleVersion)
         if(instruction && !instruction.include) {
             return
@@ -68,7 +73,17 @@ class KarafFeaturesUtils {
             String p1 = ((ProjectComponentIdentifier)root.id).getProjectPath()
             String p2 = featureDescriptor.project.getPath()
 
-            if(p1.equals(p2) && !featureDescriptor.includeProject) {
+            if(p1.equals(p2)) {
+                if (ext.features.includeProject) {
+                    KarafUtils.forEachTask(featureDescriptor.project, KarafPlugin.ARTIFACT_TASKS) {
+                        AbstractArchiveTask task ->
+                            container << applyRemap(
+                                new DependencyDescriptor(root, task, instruction),
+                                instruction
+                        )
+                    }
+                }
+
                 return
             }
         }
@@ -112,25 +127,6 @@ class KarafFeaturesUtils {
         return configuration.resolvedConfiguration.resolvedArtifacts.find {
             matches(versionIdentifier, it.moduleVersion.id)
         }
-    }
-
-    static boolean isFiltered(
-        FeatureDescriptor featureDescriptor, BundleDescriptor instruction, ResolvedComponentResult root) {
-
-        if(instruction && !instruction.include) {
-            return true
-        }
-
-        if(root.id instanceof ProjectComponentIdentifier) {
-            String p1 = ((ProjectComponentIdentifier)root.id).getProjectPath()
-            String p2 = featureDescriptor.project.getPath()
-
-            if(p1.equals(p2) && !featureDescriptor.includeProject) {
-                return true
-            }
-        }
-
-        return false
     }
 
     static DependencyDescriptor applyRemap(DependencyDescriptor dependency, BundleDescriptor descriptor) {

@@ -17,8 +17,11 @@ package com.github.lburgazzoli.gradle.plugin.karaf
 
 import org.gradle.api.Plugin
 import org.gradle.api.Project
+import org.gradle.api.Task
 import org.gradle.api.artifacts.Configuration
 import org.gradle.api.plugins.BasePlugin
+import org.gradle.api.plugins.JavaPlugin
+import org.gradle.api.plugins.WarPlugin
 
 import com.github.lburgazzoli.gradle.plugin.karaf.features.KarafFeaturesTask
 import com.github.lburgazzoli.gradle.plugin.karaf.kar.KarafKarTask
@@ -29,6 +32,8 @@ import com.github.lburgazzoli.gradle.plugin.karaf.kar.KarafKarTask
 class KarafPlugin implements Plugin<Project> {
     static final String ARTIFACTS_CONFIGURATION_NAME = 'archives'
     static final String CONFIGURATION_NAME = 'karaf'
+    static final List<String> ARTIFACT_TASKS = [JavaPlugin.JAR_TASK_NAME, WarPlugin.WAR_TASK_NAME ]
+    static final List<String> ARCHIVE_TASKS = [ BasePlugin.ASSEMBLE_TASK_NAME ]
 
     @Override
     void apply(Project project) {
@@ -48,10 +53,11 @@ class KarafPlugin implements Plugin<Project> {
             description = KarafKarTask.DESCRIPTION
         }
 
-        def assemble = project.tasks.findByName(BasePlugin.ASSEMBLE_TASK_NAME)
-
         kar.dependsOn feat
-        assemble?.dependsOn kar
+
+        KarafUtils.forEachTask(project, ARCHIVE_TASKS) {
+            Task task -> task.dependsOn kar
+        }
 
         project.afterEvaluate {
             if (ext.hasFeatures()) {
@@ -65,6 +71,10 @@ class KarafPlugin implements Plugin<Project> {
                 // if there is an output file, add that as an output
                 if (ext.features.outputFile != null) {
                     feat.outputs.file(ext.features.outputFile)
+                }
+
+                KarafUtils.forEachTask(project, ARTIFACT_TASKS) {
+                    Task task -> feat.dependsOn task
                 }
             }
 

@@ -40,6 +40,9 @@ karaf {
         xsdVersion  = '1.2.0'
         version     = '4.0.0'
         description = 'Karaf features'
+
+        // Include the current project, false by default
+        includeProject = false
         
         // Define a feature named 'common' with dependencies from runtime configuration (default)
         // and commons

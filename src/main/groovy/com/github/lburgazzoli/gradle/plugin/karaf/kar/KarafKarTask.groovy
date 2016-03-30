@@ -55,7 +55,7 @@ class KarafKarTask extends Jar {
         features.featureDescriptors.each { feature ->
             resolver.resolve(feature).each {
                 copy(
-                    it.file.toPath(),
+                    it.file,
                     asKarPath(
                         root,
                         "${it.group.replaceAll("\\.", "/")}/${it.name}/${it.version}",
@@ -69,13 +69,13 @@ class KarafKarTask extends Jar {
             features.outputPath,
             asKarPath(
                 root,
-                "${features.project.group.toString().replaceAll("\\.", "/")}/${features.name}/${features.project.version}",
-                "${features.name}-${features.project.version}.xml"
+                "${features.group.toString().replaceAll("\\.", "/")}/${features.name}/${features.version}",
+                "${features.name}-${features.version}.xml"
             )
         )
 
         baseName = features.name
-        version = features.project.version
+        version = features.version
         extension = EXTENSION
         destinationDir = kar.outputDir
 
@@ -86,6 +86,19 @@ class KarafKarTask extends Jar {
         from(kar.explodedDir)
 
         super.copy()
+    }
+
+
+    def copy(File source, Path destination) {
+        if (source && destination) {
+            copy(source.toPath(), destination)
+        }
+    }
+
+    def copy(File source, File destination) {
+        if (source && destination) {
+            copy(source.toPath(), destination.toPath())
+        }
     }
 
     def copy(Path source, Path destination) {

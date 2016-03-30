@@ -36,21 +36,27 @@ class KarafFeaturesExtension {
     private final List<FeatureDescriptor> featureDescriptors;
 
     String name
+    String group
+    String version
     String xsdVersion
+    boolean includeProject
 
     private File outputFile
 
     KarafFeaturesExtension(Project project) {
         this.project = project
         this.name = project.name
+        this.group = project.group
+        this.version = project.version
         this.resolver = new DependencyResolverMvn()
         this.xsdVersion = DEFAULT_XSD_VERSION
+        this.includeProject = false
         this.repositories = []
         this.featureDescriptors = []
 
         this.outputFile = new File(
             "${project.buildDir}/karaf/features",
-            "${name}-${project.version}.xml"
+            "${name}-${version}.xml"
         )
     }
 
