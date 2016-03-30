@@ -31,6 +31,7 @@ import com.github.lburgazzoli.gradle.plugin.karaf.KarafUtils
 import com.github.lburgazzoli.gradle.plugin.karaf.features.model.BundleDescriptor
 import com.github.lburgazzoli.gradle.plugin.karaf.features.model.DependencyDescriptor
 import com.github.lburgazzoli.gradle.plugin.karaf.features.model.FeatureDescriptor
+
 /**
  * @author lburgazzoli
  */
