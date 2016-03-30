@@ -38,7 +38,7 @@ class DependencyResolverMvn extends DependencyResolver {
 
                 url = "${url}?${res}"
             }
-        } else if (!dependency.isOSGi() ) {
+        } else if (!dependency.isOSGi() && !dependency.isWar()) {
             // if the resolved file does not have "proper" OSGi headers we
             // implicitly do the wrap as a courtesy...
             url = "wrap:${url}"

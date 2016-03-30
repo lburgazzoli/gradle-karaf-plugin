@@ -17,13 +17,11 @@ package com.github.lburgazzoli.gradle.plugin.karaf.features.model
 
 import groovy.transform.EqualsAndHashCode
 import groovy.transform.ToString
-import org.gradle.api.artifacts.ResolvedArtifact
 import org.gradle.api.artifacts.component.ModuleComponentIdentifier
 import org.gradle.api.artifacts.component.ProjectComponentIdentifier
 import org.gradle.api.artifacts.result.ResolvedComponentResult
 
 import com.github.lburgazzoli.gradle.plugin.karaf.features.KarafFeaturesUtils
-
 /**
  * @author lburgazzoli
  */
@@ -53,10 +51,6 @@ class Dependency {
         this.file = null
         this.kind = Kind.UNKNOWN
         this.url = null
-    }
-
-    Dependency(ResolvedComponentResult component, ResolvedArtifact artifact) {
-        this(component, artifact?.type, artifact?.file)
     }
 
     Dependency(ResolvedComponentResult component, String type, File file) {

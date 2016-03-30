@@ -26,24 +26,33 @@ class DependencyDescriptor extends Dependency {
 
     BundleDescriptor bundle
 
-    DependencyDescriptor() {
-        this.bundle = null;
-    }
-
-    DependencyDescriptor(ResolvedComponentResult component, ResolvedArtifact artifact, BundleDescriptor bundle) {
-        super(component, artifact)
-        this.bundle = bundle
-    }
-
     DependencyDescriptor(ResolvedComponentResult component, String type, File file, BundleDescriptor bundle) {
         super(component, type, file)
         this.bundle = bundle
+
+        if(bundle && bundle.remap) {
+            this.group   = bundle.remap.group ?: this.group
+            this.name    = bundle.remap.name ?: this.name
+            this.version = bundle.remap.version ?: this.version
+            this.type    = bundle.remap.type ?: this.type
+            this.file    = bundle.remap.file ?: this.file
+            this.kind    = bundle.remap.file ?: this.kind
+        }
     }
 
-    DependencyDescriptor(ResolvedComponentResult component, AbstractArchiveTask task, BundleDescriptor bundle) {
-        super(component, task.extension, task.archivePath)
-        this.bundle = bundle
+    // *************************************************************************
+    // Helpers
+    // *************************************************************************
+
+    public static DependencyDescriptor make(
+            ResolvedComponentResult componentResult, ResolvedArtifact artifact, BundleDescriptor descriptor) {
+
+        return new DependencyDescriptor(componentResult, artifact?.type, artifact?.file, descriptor)
     }
 
+    public static DependencyDescriptor make(
+        ResolvedComponentResult componentResult, AbstractArchiveTask task, BundleDescriptor descriptor) {
 
+        return new DependencyDescriptor(componentResult, task.extension, task.archivePath, descriptor)
+    }
 }

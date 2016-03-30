@@ -25,13 +25,13 @@ import org.gradle.util.ConfigureUtil
  * @author lburgazzoli
  */
 abstract class FeatureDefinition {
-    final List<BundleDescriptor> bundleInstructions
+    final List<BundleDescriptor> bundleDescriptors
     final List<FeatureDependencyDescriptor> featureDependencies
     final Set<Config> configs
     final Set<ConfigFile> configFiles
 
     protected FeatureDefinition() {
-        this.bundleInstructions = new LinkedList<>()
+        this.bundleDescriptors = new LinkedList<>()
         this.featureDependencies = new LinkedList<>()
         this.configs = new LinkedHashSet<>()
         this.configFiles = new LinkedHashSet<>()
@@ -42,7 +42,7 @@ abstract class FeatureDefinition {
     // *************************************************************************
 
     def bundle(String pattern) {
-        bundleInstructions << BundleDescriptor.fromPattern(pattern)
+        bundleDescriptors << BundleDescriptor.fromPattern(pattern)
     }
 
     def bundle(String pattern, Closure closure) {
@@ -51,26 +51,26 @@ abstract class FeatureDefinition {
             ConfigureUtil.configure(closure, descriptor)
         }
 
-        bundleInstructions << descriptor
+        bundleDescriptors << descriptor
     }
 
     def bundle(Closure closure) {
-        bundleInstructions << ConfigureUtil.configure(
+        bundleDescriptors << ConfigureUtil.configure(
             closure,
             new BundleExtendedDescriptor()
         )
     }
 
-    List<BundleDescriptor> getBundleInstructions() {
-        return this.bundleInstructions
+    List<BundleDescriptor> getBundleDescriptors() {
+        return this.bundleDescriptors
     }
 
-    BundleDescriptor findBundleInstructions(DependencyDescriptor dependency) {
-        return this.bundleInstructions.find { it.matches( dependency ) }
+    BundleDescriptor findBundleDescriptors(DependencyDescriptor dependency) {
+        return this.bundleDescriptors.find { it.matches( dependency ) }
     }
 
-    BundleDescriptor findBundleInstructions(ModuleVersionIdentifier identifier) {
-        return this.bundleInstructions.find { it.matches( identifier ) }
+    BundleDescriptor findBundleDescriptors(ModuleVersionIdentifier identifier) {
+        return this.bundleDescriptors.find { it.matches( identifier ) }
     }
 
     // *************************************************************************

@@ -87,7 +87,7 @@ class FeatureDescriptor extends FeatureDefinition {
 
     boolean isConditional(DependencyDescriptor dependency) {
         return this.conditions.find {
-            condition -> condition.bundleInstructions.find {
+            condition -> condition.bundleDescriptors.find {
                 instruction -> instruction.matches(dependency)
             }
         } != null

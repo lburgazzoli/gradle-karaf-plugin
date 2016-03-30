@@ -17,21 +17,19 @@ package com.github.lburgazzoli.gradle.plugin.karaf.features
 
 import java.util.jar.JarFile
 import java.util.jar.Manifest
+import org.gradle.api.Project
 import org.gradle.api.artifacts.Configuration
 import org.gradle.api.artifacts.ModuleVersionIdentifier
 import org.gradle.api.artifacts.ResolvedArtifact
 import org.gradle.api.artifacts.component.ProjectComponentIdentifier
 import org.gradle.api.artifacts.result.ResolvedComponentResult
-import org.gradle.api.artifacts.result.ResolvedDependencyResult
 import org.gradle.api.tasks.bundling.AbstractArchiveTask
 
 import com.github.lburgazzoli.gradle.plugin.karaf.KarafPlugin
 import com.github.lburgazzoli.gradle.plugin.karaf.KarafPluginExtension
 import com.github.lburgazzoli.gradle.plugin.karaf.KarafUtils
-import com.github.lburgazzoli.gradle.plugin.karaf.features.model.BundleDescriptor
 import com.github.lburgazzoli.gradle.plugin.karaf.features.model.DependencyDescriptor
 import com.github.lburgazzoli.gradle.plugin.karaf.features.model.FeatureDescriptor
-
 /**
  * @author lburgazzoli
  */
@@ -40,63 +38,42 @@ class KarafFeaturesUtils extends KarafUtils {
     static Set<DependencyDescriptor> collectDependencies(
         FeatureDescriptor featureDescriptor, Set<DependencyDescriptor> container) {
 
-        featureDescriptor.configurations.each {
-            collectDependencies(featureDescriptor, it, container)
+        KarafUtils.walkDeps(featureDescriptor.configurations) {
+            Configuration configuration, ResolvedComponentResult root ->
+                collectDependencies(featureDescriptor, configuration, root, container)
         }
 
         return container;
     }
 
     static void collectDependencies(
-        FeatureDescriptor featureDescriptor, Configuration configuration, Set<DependencyDescriptor> container) {
-
-        collectDependencies(featureDescriptor, configuration, configuration.incoming.resolutionResult.root, container)
-    }
-
-    static void collectDependencies(
-        FeatureDescriptor featureDescriptor, Configuration configuration, ResolvedComponentResult root, Set<DependencyDescriptor> container) {
+            FeatureDescriptor featureDescriptor, Configuration configuration, ResolvedComponentResult root,  Set<DependencyDescriptor> container) {
 
         def ext = KarafPluginExtension.lookup(featureDescriptor.project)
-        def instruction = featureDescriptor.findBundleInstructions(root.moduleVersion)
+        def instruction = featureDescriptor.findBundleDescriptors(root.moduleVersion)
         if(instruction && !instruction.include) {
             return
         }
 
-        root.dependencies.findAll {
-            it instanceof ResolvedDependencyResult
-        }.collect {
-            (ResolvedDependencyResult) it
-        }.each {
-            collectDependencies(featureDescriptor, configuration, it.selected, container)
-        }
-
         if(root.id instanceof ProjectComponentIdentifier) {
-            String p1 = ((ProjectComponentIdentifier)root.id).getProjectPath()
-            String p2 = featureDescriptor.project.getPath()
+            ProjectComponentIdentifier pci = root.id as ProjectComponentIdentifier
+            Project prj = featureDescriptor.project.findProject(pci.getProjectPath())
 
-            if(p1.equals(p2)) {
-                if (ext.features.includeProject) {
-                    KarafUtils.forEachTask(featureDescriptor.project, KarafPlugin.ARTIFACT_TASKS) {
-                        AbstractArchiveTask task ->
-                            container << applyRemap(
-                                new DependencyDescriptor(root, task, instruction),
-                                instruction
-                        )
-                    }
-                }
-
+            if(prj.equals(featureDescriptor.project) && !ext.features.includeProject) {
                 return
             }
-        }
 
-        container << applyRemap(
-            new DependencyDescriptor(
+            KarafUtils.forEachTask(prj, KarafPlugin.ARTIFACT_TASKS) {
+                AbstractArchiveTask task ->
+                    container << DependencyDescriptor.make(root, task, instruction)
+            }
+        } else {
+            container << DependencyDescriptor.make(
                 root,
                 findArtifact(configuration, root.moduleVersion),
                 instruction
-            ),
-            instruction
-        )
+            )
+        }
     }
 
     static boolean hasOsgiManifestHeaders(File file) {
@@ -128,18 +105,5 @@ class KarafFeaturesUtils extends KarafUtils {
         return configuration.resolvedConfiguration.resolvedArtifacts.find {
             matches(versionIdentifier, it.moduleVersion.id)
         }
-    }
-
-    static DependencyDescriptor applyRemap(DependencyDescriptor dependency, BundleDescriptor descriptor) {
-        if(descriptor && descriptor.remap) {
-            dependency.group   = descriptor.remap.group ?: dependency.group
-            dependency.name    = descriptor.remap.name ?: dependency.name
-            dependency.version = descriptor.remap.version ?: dependency.version
-            dependency.type    = descriptor.remap.type ?: dependency.type
-            dependency.file    = descriptor.remap.file ?: dependency.file
-            dependency.kind    = descriptor.remap.file ?: dependency.kind
-        }
-
-        return dependency
     }
 }

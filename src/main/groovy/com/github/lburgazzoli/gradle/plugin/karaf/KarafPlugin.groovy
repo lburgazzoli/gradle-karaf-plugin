@@ -19,13 +19,14 @@ import org.gradle.api.Plugin
 import org.gradle.api.Project
 import org.gradle.api.Task
 import org.gradle.api.artifacts.Configuration
+import org.gradle.api.artifacts.component.ProjectComponentIdentifier
+import org.gradle.api.artifacts.result.ResolvedComponentResult
 import org.gradle.api.plugins.BasePlugin
 import org.gradle.api.plugins.JavaPlugin
 import org.gradle.api.plugins.WarPlugin
 
 import com.github.lburgazzoli.gradle.plugin.karaf.features.KarafFeaturesTask
 import com.github.lburgazzoli.gradle.plugin.karaf.kar.KarafKarTask
-
 /**
  * @author lburgazzoli
  */
@@ -66,15 +67,26 @@ class KarafPlugin implements Plugin<Project> {
                         feat.inputs.files(configuration)
                         feat.dependsOn(configuration)
                     }
+
+                    KarafUtils.walkDeps(it.configurations) {
+                            Configuration configuration, ResolvedComponentResult root ->
+
+                        if(root.id instanceof ProjectComponentIdentifier) {
+                            ProjectComponentIdentifier pci = root.id as ProjectComponentIdentifier
+                            Project prj = project.findProject(pci.getProjectPath())
+
+                            if(!prj.equals(project) || ext.features.includeProject) {
+                                KarafUtils.forEachTask(prj, KarafPlugin.ARTIFACT_TASKS) {
+                                    Task task -> feat.dependsOn task
+                                }
+                            }
+                        }
+                    }
                 }
 
                 // if there is an output file, add that as an output
                 if (ext.features.outputFile != null) {
                     feat.outputs.file(ext.features.outputFile)
-                }
-
-                KarafUtils.forEachTask(project, ARTIFACT_TASKS) {
-                    Task task -> feat.dependsOn task
                 }
             }
 

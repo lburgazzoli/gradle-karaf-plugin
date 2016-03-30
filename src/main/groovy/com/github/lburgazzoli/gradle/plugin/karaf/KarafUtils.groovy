@@ -16,17 +16,37 @@
 package com.github.lburgazzoli.gradle.plugin.karaf
 
 import org.gradle.api.Project
-
+import org.gradle.api.artifacts.Configuration
+import org.gradle.api.artifacts.result.ResolvedComponentResult
+import org.gradle.api.artifacts.result.ResolvedDependencyResult
 /**
  * @author lburgazzoli
  */
 class KarafUtils {
 
-    static forEachTask(Project project, List<String> tasks, Closure closure) {
+    static void forEachTask(Project project, List<String> tasks, Closure closure) {
         project.tasks.findAll {
             it.name in tasks
         }.each {
             closure(it)
         }
+    }
+
+    static void walkDeps(List<Configuration> configurations, Closure closure) {
+        configurations.each {
+            walkDeps(it, it.incoming.resolutionResult.root, closure)
+        }
+    }
+
+    static void walkDeps(Configuration configuration, ResolvedComponentResult root, Closure closure) {
+        root.dependencies.findAll {
+            it instanceof ResolvedDependencyResult
+        }.collect {
+            (ResolvedDependencyResult) it
+        }.each {
+            walkDeps(configuration, it.selected, closure)
+        }
+
+        closure(configuration, root)
     }
 }
