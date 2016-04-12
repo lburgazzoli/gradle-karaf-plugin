@@ -13,7 +13,6 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 package com.github.lburgazzoli.gradle.plugin.karaf.features.model
 
 import groovy.transform.EqualsAndHashCode
@@ -29,12 +28,14 @@ abstract class FeatureDefinition {
     final List<FeatureDependencyDescriptor> featureDependencies
     final Set<Config> configs
     final Set<ConfigFile> configFiles
+    final Set<Capability> capabilities
 
     protected FeatureDefinition() {
         this.bundleDescriptors = new LinkedList<>()
         this.featureDependencies = new LinkedList<>()
         this.configs = new LinkedHashSet<>()
         this.configFiles = new LinkedHashSet<>()
+        this.capabilities = new LinkedHashSet<>()
     }
 
     // *************************************************************************
@@ -128,6 +129,14 @@ abstract class FeatureDefinition {
     }
 
     // *************************************************************************
+    // Capabilities
+    // *************************************************************************
+
+    def capability(String ns, Closure closure) {
+        capabilities << ConfigureUtil.configure(closure, new Capability(ns))
+    }
+
+    // *************************************************************************
     //
     // *************************************************************************
 
@@ -156,6 +165,43 @@ abstract class FeatureDefinition {
             this.uri = name
             this.filename = filename
             this.override = false
+        }
+    }
+
+    @ToString(includeNames = true)
+    @EqualsAndHashCode(includes = [ "ns" ])
+    class Capability {
+
+        final String ns
+        String effective
+        String filter
+        String resolution
+        String extra
+
+        Capability(String ns) {
+            this.ns = ns
+            this.effective = "resolve"
+            this.filter = null
+            this.resolution = "mandatory";
+            this.extra = null
+        }
+
+        String format() {
+            StringBuilder text = new StringBuilder(ns)
+            if (filter) {
+                text.append(";filter:='").append(filter).append("'")
+            }
+            if (effective) {
+                text.append(";effective:='").append(effective).append("'")
+            }
+            if (resolution) {
+                text.append(";resolution:='").append(resolution).append("'")
+            }
+            if (extra) {
+                text.append(";").append(extra)
+            }
+
+            return text.toString();
         }
     }
 

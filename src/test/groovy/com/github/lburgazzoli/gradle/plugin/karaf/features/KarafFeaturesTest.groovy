@@ -183,4 +183,49 @@ class KarafFeaturesTest extends KarafTestSupport {
 
             println featuresStr
     }
+
+    def 'Simple Single Project With Capabilities'() {
+        given:
+            def project = setupProject('com.lburgazzoli.github', 'gradle-karaf', '1.2.3') {
+                dependencies {
+                    compile "com.google.guava:guava:19.0"
+                    compile "com.squareup.retrofit:retrofit:1.9.0"
+
+                    compile 'com.fasterxml.jackson.core:jackson-core:2.7.0'
+                    compile 'com.fasterxml.jackson.core:jackson-databind:2.7.0'
+                    compile 'com.fasterxml.jackson.core:jackson-annotations:2.7.0'
+                }
+            }
+
+            def task = getKarafFeaturesTasks(project)
+        when:
+            def extension = getKarafExtension(project)
+            extension.features {
+                xsdVersion = "1.3.0"
+
+                feature {
+                    name = "karaf-features-simple-project"
+                    description = "feature-description"
+                    details = "my detailed description"
+                    includeProject = false
+
+                    capability('osgi.extender') {
+                        effective = 'active'
+                        filter    = '(&(osgi.extender=osgi.enroute.configurer)${frange;1.2.3})'
+                    }
+                    capability('osgi.service') {
+                        effective = 'active'
+                        filter    = '(&(osgi.extender=osgi.enroute.configurer)${frange;1.2.3})'
+                    }
+                }
+            }
+
+            def featuresStr = task.generateFeatures(extension.features)
+            def featuresXml = new XmlSlurper().parseText(featuresStr)
+        then:
+            featuresStr != null
+            featuresXml != null
+
+            println featuresStr
+    }
 }

@@ -22,6 +22,7 @@ import org.gradle.api.artifacts.component.ProjectComponentIdentifier
 import org.gradle.api.artifacts.result.ResolvedComponentResult
 
 import com.github.lburgazzoli.gradle.plugin.karaf.features.KarafFeaturesUtils
+
 /**
  * @author lburgazzoli
  */
