@@ -11,7 +11,7 @@
 plugins {
     id 'maven'
     id 'java'
-    id 'com.github.lburgazzoli.karaf' version '0.0.19'
+    id 'com.github.lburgazzoli.karaf' version '0.0.24'
 }
 
 repositories {
@@ -52,6 +52,13 @@ karaf {
             
             // Include one or more additional configuration
             configuration 'commons'
+
+            conditional {
+                condition = 'json-p'
+                feature 'myfeature-1'
+                feature 'myfeature-2'
+                bundle 'com.fasterxml.jackson.core'
+            }
         }
         
         // Define a feature named 'rest' with dependencies from json and square configurations
@@ -63,6 +70,14 @@ karaf {
             configurations {
                 add 'json'
                 add 'square'
+            }
+
+            // Add capabilities
+            capability('osgi.extender') {
+                effective  = 'active'
+                filter     = '(&(osgi.extender=osgi.enroute.configurer)${frange;1.2.3})'
+                resolution = 'effective'
+                extra      = 'someExtraStuffs'
             }
         }
     }
@@ -88,6 +103,14 @@ karaf {
   <feature name="common" version="4.0.0" description="Common dependencies">
     <bundle>mvn:com.google.guava/guava/19.0</bundle>
     <bundle>mvn:commons-io/commons-io/2.4</bundle>
+    <conditional>
+      <condition>json-p</condition>
+      <feature>myfeature-1</feature>
+      <feature>myfeature-2</feature>
+      <bundle>mvn:com.fasterxml.jackson.core/jackson-core/2.7.0</bundle>
+      <bundle>mvn:com.fasterxml.jackson.core/jackson-annotations/2.7.0</bundle>
+      <bundle>mvn:com.fasterxml.jackson.core/jackson-databind/2.7.0</bundle>
+    </conditional>
   </feature>
   <feature name="rest" version="4.0.0" description="REST dependencies">
     <bundle>mvn:com.fasterxml.jackson.core/jackson-core/2.7.0</bundle>
@@ -99,6 +122,7 @@ karaf {
     <bundle>wrap:mvn:com.squareup.okio/okio/1.6.0</bundle>
     <bundle>wrap:mvn:com.squareup.okhttp3/okhttp/3.2.0</bundle>
     <bundle>wrap:mvn:com.squareup.retrofit2/retrofit/2.0.0</bundle>
+    <capability>osgi.extender;filter:='(&amp;(osgi.extender=osgi.enroute.configurer)${frange;1.2.3})';effective:='active';resolution:='effective';someExtraStuffs</capability>
   </feature>
 </features>
 ----

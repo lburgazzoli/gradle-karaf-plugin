@@ -212,6 +212,8 @@ class KarafFeaturesTest extends KarafTestSupport {
                     capability('osgi.extender') {
                         effective = 'active'
                         filter    = '(&(osgi.extender=osgi.enroute.configurer)${frange;1.2.3})'
+                        resolution = 'effective'
+                        extra      = 'someExtraStuffs'
                     }
                     capability('osgi.service') {
                         effective = 'active'
@@ -227,5 +229,12 @@ class KarafFeaturesTest extends KarafTestSupport {
             featuresXml != null
 
             println featuresStr
+
+            featuresXml.feature.capability.'**'.findAll {
+                    it.text().contains('osgi.extender;filter')
+                }.size() == 1
+            featuresXml.feature.capability.'**'.findAll {
+                    it.text().contains('osgi.service;filter')
+                }.size() == 1
     }
 }
