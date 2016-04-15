@@ -166,8 +166,7 @@ class KarafFeaturesTest extends KarafTestSupport {
                     details = "my detailed description"
                     includeProject = false
 
-                    conditional {
-                        condition = 'json-p'
+                    conditional('json-p') {
                         feature 'myfeature-1'
                         feature 'myfeature-2'
                         bundle 'com.fasterxml.jackson.core'

@@ -22,6 +22,10 @@ class FeatureCondition extends FeatureDefinition {
     String condition
 
     public FeatureCondition() {
-        this.condition = null
+        this(null)
+    }
+
+    public FeatureCondition(String condition) {
+        this.condition = condition
     }
 }

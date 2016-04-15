@@ -136,9 +136,11 @@ class KarafFeaturesTask extends AbstractKarafTask {
                         }
                     }
 
-                    feature.capabilities.each { capability ->
-                        builder.capability(capability.format())
-                    }
+                    builder.capability(
+                        feature.capabilities.collect {
+                            it.format()
+                        }.join(',')
+                    )
                 }
             }
         }

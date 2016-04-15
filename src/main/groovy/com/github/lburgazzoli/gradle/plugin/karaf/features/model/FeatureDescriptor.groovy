@@ -85,6 +85,13 @@ class FeatureDescriptor extends FeatureDefinition {
         )
     }
 
+    void conditional(String condition, Closure closure) {
+        this.conditions << ConfigureUtil.configure(
+            closure,
+            new FeatureCondition(condition)
+        )
+    }
+
     boolean isConditional(DependencyDescriptor dependency) {
         return this.conditions.find {
             condition -> condition.bundleDescriptors.find {
