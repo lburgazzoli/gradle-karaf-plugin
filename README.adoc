@@ -11,8 +11,11 @@
 plugins {
     id 'maven'
     id 'java'
-    id 'com.github.lburgazzoli.karaf' version '0.0.24'
+    id 'com.github.lburgazzoli.karaf' version '0.0.26'
 }
+
+group   = 'com.github.lburgazzoli'
+version = '0.0.1'
 
 repositories {
     mavenCentral()
@@ -43,41 +46,63 @@ karaf {
 
         // Include the current project, false by default
         includeProject = false
-        
-        // Define a feature named 'common' with dependencies from runtime configuration (default)
-        // and commons
+
+        // Define a feature named 'common' with dependencies from runtime
+        // configuration (default) and commons
         feature {
             name        = 'common'
             description = 'Common dependencies'
-            
+
             // Include one or more additional configuration
             configuration 'commons'
-
-            conditional {
-                condition = 'json-p'
-                feature 'myfeature-1'
-                feature 'myfeature-2'
-                bundle 'com.fasterxml.jackson.core'
-            }
         }
-        
-        // Define a feature named 'rest' with dependencies from json and square configurations
+
+        // Define a feature named 'rest' with dependencies from json and square
+        // configurations
         feature {
             name        = 'rest'
             description = 'REST dependencies'
-            
+
             // Override configurations
             configurations {
                 add 'json'
                 add 'square'
             }
+        }
 
-            // Add capabilities
+        feature {
+            name        = 'aries-blueprint'
+            description = 'Aries Blueprint'
+
+            // Override configurations
+            configurations {
+                add 'ariesBlueprint'
+            }
+
+            // Add feature dependency
+            feature 'aries-proxy'
+
+            // Customize artifacts with group 'org.apache.aries.blueprint'
+            bundle ('org.apache.aries.blueprint') {
+                attribute 'start-level', '20'
+            }
+
+            // Customize artifacts with group 'org.apache.karaf.bundle'
+            bundle ('org.apache.karaf.bundle') {
+                attribute 'start-level', '30'
+            }
+
+            conditional('bundle') {
+                bundle 'org.apache.karaf.bundle:org.apache.karaf.bundle.blueprintstate'
+            }
+
+            capability('osgi.service') {
+                effective = 'active'
+                extra     = 'objectClass=org.apache.aries.blueprint.services.ParserService'
+            }
+
             capability('osgi.extender') {
-                effective  = 'active'
-                filter     = '(&(osgi.extender=osgi.enroute.configurer)${frange;1.2.3})'
-                resolution = 'effective'
-                extra      = 'someExtraStuffs'
+                extra     = 'osgi.extender="osgi.blueprint";uses:="org.osgi.service.blueprint.container,org.osgi.service.blueprint.reflect";version:Version="1.0"'
             }
         }
     }
@@ -99,30 +124,35 @@ karaf {
 [source,xml]
 ----
 <?xml version="1.0" encoding="UTF-8" standalone="yes"?>
-<features xmlns="http://karaf.apache.org/xmlns/features/v1.2.0" name="gp">
-  <feature name="common" version="4.0.0" description="Common dependencies">
+<features xmlns="http://karaf.apache.org/xmlns/features/v1.2.0" name="gradle-karaf-features-plugin-examples">
+  <feature name="common" version="0.0.1" description="Common dependencies">
     <bundle>mvn:com.google.guava/guava/19.0</bundle>
     <bundle>mvn:commons-io/commons-io/2.4</bundle>
-    <conditional>
-      <condition>json-p</condition>
-      <feature>myfeature-1</feature>
-      <feature>myfeature-2</feature>
-      <bundle>mvn:com.fasterxml.jackson.core/jackson-core/2.7.0</bundle>
-      <bundle>mvn:com.fasterxml.jackson.core/jackson-annotations/2.7.0</bundle>
-      <bundle>mvn:com.fasterxml.jackson.core/jackson-databind/2.7.0</bundle>
-    </conditional>
+    <capability></capability>
   </feature>
-  <feature name="rest" version="4.0.0" description="REST dependencies">
+  <feature name="rest" version="0.0.1" description="REST dependencies">
     <bundle>mvn:com.fasterxml.jackson.core/jackson-core/2.7.0</bundle>
     <bundle>mvn:com.fasterxml.jackson.core/jackson-annotations/2.7.0</bundle>
     <bundle>mvn:com.fasterxml.jackson.core/jackson-databind/2.7.0</bundle>
-    <!-- 
-        as squareup's jars a re not OSGi ready, the plugin automatically adds wrap instruction 
+    <!--
+        as squareup's jars a re not OSGi ready, the plugin automatically adds wrap instruction
     -->
     <bundle>wrap:mvn:com.squareup.okio/okio/1.6.0</bundle>
     <bundle>wrap:mvn:com.squareup.okhttp3/okhttp/3.2.0</bundle>
     <bundle>wrap:mvn:com.squareup.retrofit2/retrofit/2.0.0</bundle>
-    <capability>osgi.extender;filter:='(&amp;(osgi.extender=osgi.enroute.configurer)${frange;1.2.3})';effective:='active';resolution:='effective';someExtraStuffs</capability>
+    <capability></capability>
+  </feature>
+  <feature name="aries-blueprint" version="0.0.1" description="Aries Blueprint">
+    <feature>aries-proxy</feature>
+    <bundle start-level="20">mvn:org.apache.aries.blueprint/org.apache.aries.blueprint.api/1.0.1</bundle>
+    <bundle start-level="20">mvn:org.apache.aries.blueprint/org.apache.aries.blueprint.cm/1.0.8</bundle>
+    <bundle start-level="20">mvn:org.apache.aries.blueprint/org.apache.aries.blueprint.core.compatibility/1.0.0</bundle>
+    <bundle start-level="20">mvn:org.apache.aries.blueprint/org.apache.aries.blueprint.core/1.6.0</bundle>
+    <conditional>
+      <condition>bundle</condition>
+      <bundle start-level="30">mvn:org.apache.karaf.bundle/org.apache.karaf.bundle.blueprintstate/4.0.4</bundle>
+    </conditional>
+    <capability>osgi.service;effective:='active';resolution:='mandatory';objectClass=org.apache.aries.blueprint.services.ParserService,osgi.extender;effective:='resolve';resolution:='mandatory';osgi.extender="osgi.blueprint";uses:="org.osgi.service.blueprint.container,org.osgi.service.blueprint.reflect";version:Version="1.0"</capability>
   </feature>
 </features>
 ----
