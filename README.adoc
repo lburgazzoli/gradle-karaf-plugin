@@ -14,28 +14,40 @@ plugins {
     id 'com.github.lburgazzoli.karaf' version '0.0.26'
 }
 
-group   = 'com.github.lburgazzoli'
-version = '0.0.1'
-
 repositories {
     mavenCentral()
 }
+
+group   = 'com.github.lburgazzoli'
+version = '0.0.1'
 
 configurations {
     commons
     json
     rest
+    square
+
+    // Avoid adding transitive dependencies
+    ariesBlueprint {
+        transitive = false
+    }
 }
 
 dependencies {
     runtime 'com.google.guava:guava:19.0'
     commons 'commons-io:commons-io:2.4'
-    
+
     json 'com.fasterxml.jackson.core:jackson-core:2.7.0'
     json 'com.fasterxml.jackson.core:jackson-databind:2.7.0'
     json 'com.fasterxml.jackson.core:jackson-annotations:2.7.0'
-    
-    square 'com.squareup.retrofit2:retrofit:2.0.0' 
+
+    square 'com.squareup.retrofit2:retrofit:2.0.0'
+
+    ariesBlueprint 'org.apache.aries.blueprint:org.apache.aries.blueprint.api:1.0.1'
+    ariesBlueprint 'org.apache.aries.blueprint:org.apache.aries.blueprint.cm:1.0.8'
+    ariesBlueprint 'org.apache.aries.blueprint:org.apache.aries.blueprint.core.compatibility:1.0.0'
+    ariesBlueprint 'org.apache.aries.blueprint:org.apache.aries.blueprint.core:1.6.0'
+    ariesBlueprint 'org.apache.karaf.bundle:org.apache.karaf.bundle.blueprintstate:4.0.4'
 }
 
 karaf {
