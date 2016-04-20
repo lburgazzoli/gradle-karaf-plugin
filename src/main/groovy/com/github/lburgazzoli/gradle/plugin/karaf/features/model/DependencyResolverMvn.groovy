@@ -36,7 +36,7 @@ class DependencyResolverMvn extends DependencyResolver {
                     result, entry -> result << "${entry.key}=${entry.value}"
                 }.join('&')
 
-                url = "${url}?${res}"
+                url = "${url}\$${res}"
             }
         } else if (!dependency.isOSGi() && !dependency.isWar()) {
             // if the resolved file does not have "proper" OSGi headers we
