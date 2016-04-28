@@ -16,7 +16,7 @@
 package com.github.lburgazzoli.gradle.plugin.karaf.features.model
 
 /**
- *
+ * @author Luca Burgazzoli
  * @author Steve Ebersole
  * @author Sergey Nekhviadovich
  */
@@ -24,17 +24,24 @@ class FeatureDependencyDescriptor {
 	/**
 	 * Dependency feature name
 	 */
-	def String name
+	String name
 
 	/**
 	 * Dependency feature version, will be skipped if unset
 	 */
-	def String version
+	String version
 
 	/**
 	 * Dependency feature dependency flag. Available only for karaf 4+ and feature xsd version 1.3.0+
 	 */
-	def boolean dependency
+    Boolean dependency
+
+    /**
+     * Prerequisite feature is special kind of dependency. If you will add prerequisite
+     * attribute to dependant feature tag then it will force installation and also
+     * activation of bundles in dependant feature before installation of actual feature.
+     */
+    Boolean prerequisite;
 
 	FeatureDependencyDescriptor() {
 		this(null)
@@ -43,6 +50,7 @@ class FeatureDependencyDescriptor {
 	FeatureDependencyDescriptor(String name) {
 	    this.name = name
         this.version = null
-        this.dependency = false
+        this.dependency = null
+        this.prerequisite = null
 	}
 }

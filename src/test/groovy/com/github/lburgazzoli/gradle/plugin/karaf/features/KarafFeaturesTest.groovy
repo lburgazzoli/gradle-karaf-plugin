@@ -102,6 +102,9 @@ class KarafFeaturesTest extends KarafTestSupport {
                         version = "5.6.7"
                         dependency = true
                     }
+                    feature('dependencyFeatureName3') {
+                        prerequisite = true
+                    }
 
                     bundle('com.squareup.retrofit:converter-jackson') {
                         include = false

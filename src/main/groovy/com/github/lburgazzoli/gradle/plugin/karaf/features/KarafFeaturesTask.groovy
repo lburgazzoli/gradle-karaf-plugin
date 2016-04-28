@@ -81,7 +81,8 @@ class KarafFeaturesTask extends AbstractKarafTask {
                         builder.feature(
                             [
                                 version:  it.version,
-                                dependency: (it.dependency && xsdVer13) ? true : null
+                                dependency: (it.dependency && xsdVer13) ? true : null,
+                                prerequisite: it.prerequisite
                             ],
                             it.name
                         )
@@ -116,7 +117,8 @@ class KarafFeaturesTask extends AbstractKarafTask {
                                 builder.feature(
                                     [
                                         version:  it.version,
-                                        dependency: (it.dependency && xsdVer13) ? true : null
+                                        dependency: (it.dependency && xsdVer13) ? true : null,
+                                        prerequisite: it.prerequisite
                                     ],
                                     it.name
                                 )
