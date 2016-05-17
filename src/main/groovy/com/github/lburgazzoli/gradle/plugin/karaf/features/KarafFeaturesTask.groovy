@@ -77,6 +77,15 @@ class KarafFeaturesTask extends AbstractKarafTask {
                         )
                     }
 
+                    feature.configFiles.each {
+                        if (it.filename) {
+                            builder.configfile(
+                                [filename: it.filename],
+                                it.uri
+                            )
+                        }
+                    }
+
                     feature.featureDependencies.each {
                         builder.feature(
                             [
@@ -111,6 +120,15 @@ class KarafFeaturesTask extends AbstractKarafTask {
                                     [ name: it.name ],
                                     it.content
                                 )
+                            }
+
+                            feature.configFiles.each {
+                                if (it.filename) {
+                                    builder.configfile(
+                                        [filename: it.filename],
+                                        it.uri
+                                    )
+                                }
                             }
 
                             condition.featureDependencies.each {

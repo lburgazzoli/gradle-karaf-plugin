@@ -128,6 +128,15 @@ abstract class FeatureDefinition {
         configFiles << configFile
     }
 
+    def configFile(Closure closure) {
+        def configFile = new ConfigFile()
+        if(closure) {
+            ConfigureUtil.configure(closure, configFile)
+        }
+
+        configFiles << configFile
+    }
+
     // *************************************************************************
     // Capabilities
     // *************************************************************************
@@ -157,9 +166,13 @@ abstract class FeatureDefinition {
     @ToString(includeNames = true)
     @EqualsAndHashCode(includes = [ 'uri', 'filename' ])
     class ConfigFile {
-        final String uri
-        final String filename
+        String uri
+        String filename
         boolean override
+
+        public ConfigFile() {
+            this(null, null)
+        }
 
         public ConfigFile(String uri, String filename) {
             this.uri = name

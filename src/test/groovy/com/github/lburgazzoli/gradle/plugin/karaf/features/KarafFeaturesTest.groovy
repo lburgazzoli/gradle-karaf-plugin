@@ -97,6 +97,11 @@ class KarafFeaturesTest extends KarafTestSupport {
                     details = "my detailed description"
                     includeProject = true
 
+                    configFile {
+                        filename = "/etc/org.apache.karaf.cellar.groups.cfg"
+                        uri      = "mvn:org.apache.karaf.cellar/apache-karaf-cellar/${project.version}/cfg/groups"
+                    }
+
                     feature 'dependencyFeatureName1'
                     feature('dependencyFeatureName2') {
                         version = "5.6.7"
@@ -142,6 +147,50 @@ class KarafFeaturesTest extends KarafTestSupport {
             featuresXml.feature.bundle.'**'.findAll {
                     it.text().contains('mvn:com.squareup.retrofit/converter-jackson/1.9.0')
                 }.size() == 0
+    }
+
+
+
+    def 'Simple Single Project Wit ConfigFile'() {
+        given:
+        def project = setupProject('com.lburgazzoli.github', 'gradle-karaf', '1.2.3') {
+            configurations {
+                hazelcast
+            }
+            dependencies {
+                hazelcast 'org.apache.geronimo.specs:geronimo-jta_1.1_spec:1.1.1'
+                hazelcast 'com.eclipsesource.minimal-json:minimal-json:0.9.2'
+                hazelcast 'com.hazelcast:hazelcast-all:3.6.1'
+            }
+        }
+
+            def task = getKarafFeaturesTasks(project)
+        when:
+            def extension = getKarafExtension(project)
+            extension.features {
+                xsdVersion = "1.3.0"
+                feature {
+                    name        = 'hazelcast'
+                    description = 'In memory data grid'
+
+                    configurations {
+                        add 'hazelcast'
+                    }
+
+                    configFile {
+                        filename = "/etc/hazelcast.xml"
+                        uri      = "mvn:org.apache.karaf.cellar/apache-karaf-cellar/${project.version}/xml/hazelcast"
+                    }
+                }
+            }
+
+            def featuresStr = task.generateFeatures(extension.features)
+            def featuresXml = new XmlSlurper().parseText(featuresStr)
+        then:
+            featuresStr != null
+            featuresXml != null
+
+            println featuresStr
     }
 
     def 'Simple Single Project With Conditions'() {
