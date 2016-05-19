@@ -81,10 +81,7 @@ karaf {
             description = 'REST dependencies'
 
             // Override configurations
-            configurations {
-                add 'json'
-                add 'square'
-            }
+            configurations 'json', 'square'
         }
 
         feature {
@@ -92,9 +89,7 @@ karaf {
             description = 'Aries Blueprint'
 
             // Override configurations
-            configurations {
-                add 'ariesBlueprint'
-            }
+            configurations 'ariesBlueprint'
 
             // Add feature dependency
             feature 'aries-proxy'
@@ -128,9 +123,7 @@ karaf {
             name        = 'hazelcast'
             description = 'In memory data grid'
 
-            configurations {
-                add 'hazelcast'
-            }
+            configurations 'hazelcast'
 
             // Add configFile entry
             configFile {

@@ -32,8 +32,8 @@ class FeatureDescriptor extends FeatureDefinition {
     String description
     String details
 
-    List<Configuration> configurations
-    List<FeatureCondition> conditions
+    final List<Configuration> configurations
+    final List<FeatureCondition> conditions
 
     public FeatureDescriptor(Project project) {
         this.project = project
@@ -64,10 +64,25 @@ class FeatureDescriptor extends FeatureDefinition {
         );
     }
 
+    void configurations(String... configurationNames) {
+        configurations(configurationNames.collect {
+            this.project.configurations.getByName(it)
+        })
+    }
+
     void configuration(Configuration configuration) {
         if (configuration) {
             this.configurations << configuration
         }
+    }
+
+    void configurations(Configuration... configurations) {
+        this.configurations(configurations.collect())
+    }
+
+    void configurations(Collection<Configuration> configurations) {
+        this.configurations.clear()
+        this.configurations.addAll(configurations)
     }
 
     void configuration(String configurationName) {
@@ -107,11 +122,19 @@ class FeatureDescriptor extends FeatureDefinition {
     class ConfigurationsHelper {
 
         public add(String configurationName) {
-            configuration(project.configurations.getByName(configurationName))
+            add(project.configurations.getByName(configurationName))
         }
 
         public add(Configuration configuration) {
             configuration(configuration)
+        }
+
+        public del(String configurationName) {
+            del(project.configurations.getByName(configurationName))
+        }
+
+        public del(Configuration configuration) {
+            configurations.remove(configuration)
         }
     }
 }
