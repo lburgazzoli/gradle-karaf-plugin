@@ -13,13 +13,16 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.github.lburgazzoli.gradle.plugin.karaf.features.model
+package com.github.lburgazzoli.gradle.plugin.karaf.mvn
+
+import com.github.lburgazzoli.gradle.plugin.karaf.features.model.DependencyDescriptor
+import com.github.lburgazzoli.gradle.plugin.karaf.features.model.DependencyResolver
 
 
 /**
  * @author lburgazzoli
  */
-class DependencyResolverMvn extends DependencyResolver {
+class MvnDependencyResolver extends DependencyResolver {
 
     @Override
     protected String renderUrl(DependencyDescriptor dependency) {

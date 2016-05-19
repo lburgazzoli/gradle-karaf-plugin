@@ -168,15 +168,21 @@ abstract class FeatureDefinition {
     class ConfigFile {
         String uri
         String filename
+        File file
         boolean override
 
         public ConfigFile() {
-            this(null, null)
+            this(null, null, null)
         }
 
         public ConfigFile(String uri, String filename) {
+            this(uri, filename, null)
+        }
+
+        public ConfigFile(String uri, String filename, File file) {
             this.uri = name
             this.filename = filename
+            this.file = file;
             this.override = false
         }
     }

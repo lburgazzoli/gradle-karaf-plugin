@@ -22,12 +22,11 @@ import org.gradle.api.artifacts.component.ProjectComponentIdentifier
 import org.gradle.api.artifacts.result.ResolvedComponentResult
 
 import com.github.lburgazzoli.gradle.plugin.karaf.features.KarafFeaturesUtils
-
 /**
  * @author lburgazzoli
  */
 @ToString(includeNames = true)
-@EqualsAndHashCode(includes = [ "group", "name", "version", "type"])
+@EqualsAndHashCode(includes = [ "group", "name", "version", "type", "classifier"])
 class Dependency {
     @ToString(includeNames = true)
     public enum Kind {
@@ -40,6 +39,7 @@ class Dependency {
     String name
     String version
     String type
+    String classifier;
     File file
     Kind kind
     String url
@@ -49,6 +49,7 @@ class Dependency {
         this.name = null
         this.version = null
         this.type = null
+        this.classifier = null;
         this.file = null
         this.kind = Kind.UNKNOWN
         this.url = null
@@ -58,6 +59,7 @@ class Dependency {
         this.group = component.moduleVersion.group
         this.name = component.moduleVersion.name
         this.version = component.moduleVersion.version
+        this.classifier = null
         this.type = type
         this.file = file
 
@@ -91,6 +93,10 @@ class Dependency {
     }
 
     boolean isResolved() {
-        return this.url != null;
+        return this.url != null
+    }
+
+    boolean hasClassifier() {
+        return this.classifier != null
     }
 }

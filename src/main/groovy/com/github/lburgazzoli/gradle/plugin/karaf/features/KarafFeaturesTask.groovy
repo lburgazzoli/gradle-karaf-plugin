@@ -78,7 +78,7 @@ class KarafFeaturesTask extends AbstractKarafTask {
                     }
 
                     feature.configFiles.each {
-                        if (it.filename) {
+                        if (it.filename && it.uri) {
                             builder.configfile(
                                 [filename: it.filename],
                                 it.uri
@@ -123,7 +123,7 @@ class KarafFeaturesTask extends AbstractKarafTask {
                             }
 
                             feature.configFiles.each {
-                                if (it.filename) {
+                                if (it.filename && it.uri) {
                                     builder.configfile(
                                         [filename: it.filename],
                                         it.uri

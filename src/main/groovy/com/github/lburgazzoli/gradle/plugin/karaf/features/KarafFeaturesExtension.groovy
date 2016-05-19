@@ -22,7 +22,7 @@ import org.gradle.api.tasks.OutputFile
 import org.gradle.util.ConfigureUtil
 
 import com.github.lburgazzoli.gradle.plugin.karaf.features.model.DependencyResolver
-import com.github.lburgazzoli.gradle.plugin.karaf.features.model.DependencyResolverMvn
+import com.github.lburgazzoli.gradle.plugin.karaf.mvn.MvnDependencyResolver
 import com.github.lburgazzoli.gradle.plugin.karaf.features.model.FeatureDescriptor
 /**
  * @author lburgazzoli
@@ -48,7 +48,7 @@ class KarafFeaturesExtension {
         this.name = project.name
         this.group = project.group
         this.version = project.version
-        this.resolver = new DependencyResolverMvn()
+        this.resolver = new MvnDependencyResolver()
         this.xsdVersion = DEFAULT_XSD_VERSION
         this.includeProject = false
         this.repositories = []

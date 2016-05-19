@@ -21,6 +21,8 @@ import java.nio.file.StandardCopyOption
 import org.gradle.jvm.tasks.Jar
 
 import com.github.lburgazzoli.gradle.plugin.karaf.KarafPluginExtension
+import com.github.lburgazzoli.gradle.plugin.karaf.mvn.MvnProtocolParser
+
 /**
  * @author lburgazzoli
  */
@@ -63,13 +65,31 @@ class KarafKarTask extends Jar {
                     )
                 )
             }
+
+            feature.configFiles.each {
+                if (it.filename && it.uri && it.file) {
+                    def dep = MvnProtocolParser.parse(it.uri)
+                    if (dep) {
+                        copy(
+                            it.file,
+                            asKarPath(
+                                root,
+                                "${dep.group.replaceAll("\\.", "/")}/${dep.name}/${dep.version}",
+                                dep.hasClassifier()
+                                    ? "${dep.name}-${dep.version}-${dep.classifier}.${dep.type}"
+                                    : "${dep.name}-${dep.version}.${dep.type}"
+                            )
+                        )
+                    }
+                }
+            }
         }
 
         copy(
             features.outputPath,
             asKarPath(
                 root,
-                "${features.group.toString().replaceAll("\\.", "/")}/${features.name}/${features.version}",
+                "${features.group.replaceAll("\\.", "/")}/${features.name}/${features.version}",
                 "${features.name}-${features.version}.xml"
             )
         )

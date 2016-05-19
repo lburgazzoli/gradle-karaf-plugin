@@ -132,9 +132,17 @@ karaf {
                 add 'hazelcast'
             }
 
+            // Add configFile entry
             configFile {
                 filename = "/etc/hazelcast.xml"
                 uri      = "mvn:org.apache.karaf.cellar/apache-karaf-cellar/${project.version}/xml/hazelcast"
+            }
+
+            // Add configFile entry and copy a local file to the kar repository
+            configFile {
+                filename = "/etc/hazelcast-clustered.xml"
+                file     = file("etc/hazelcast-clustered-defaults.xml")
+                uri      = "mvn:org.apache.karaf.cellar/apache-karaf-cellar/${project.version}/xml/hazelcast-clustered"
             }
         }
     }
@@ -188,6 +196,7 @@ karaf {
   </feature>
   <feature name="hazelcast" version="1.2.3" description="In memory data grid">
     <configfile filename="/etc/hazelcast.xml">mvn:org.apache.karaf.cellar/apache-karaf-cellar/1.2.3/xml/hazelcast</configfile>
+    <configfile filename="/etc/hazelcast.xml">mvn:org.apache.karaf.cellar/apache-karaf-cellar/1.2.3/xml/hazelcast-clustered</configfile>
     <bundle>mvn:org.apache.geronimo.specs/geronimo-jta_1.1_spec/1.1.1</bundle>
     <bundle>mvn:com.eclipsesource.minimal-json/minimal-json/0.9.2</bundle>
     <bundle>mvn:com.hazelcast/hazelcast-all/3.6.1</bundle>
