@@ -126,7 +126,7 @@ class FeatureDescriptor extends FeatureDefinition {
         }
 
         public add(Configuration configuration) {
-            configuration(configuration)
+            FeatureDescriptor.this.configuration(configuration)
         }
 
         public del(String configurationName) {
