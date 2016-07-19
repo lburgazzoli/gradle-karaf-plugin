@@ -1,7 +1,7 @@
 = gradle-karaf-plugin
 
-- [ ] Karaf features
-- [ ] Karaf KAR
+- [x] Karaf features
+- [x] Karaf KAR
 - [ ] Karaf custom distribution
 
 == Example
