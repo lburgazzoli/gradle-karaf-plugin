@@ -34,17 +34,25 @@ class KarafUtils {
 
     static void walkDeps(List<Configuration> configurations, Closure closure) {
         configurations.each {
-            walkDeps(it, it.incoming.resolutionResult.root, closure)
+            Set<ResolvedDependencyResult> alreadyKnownDependencies = new HashSet<>();
+            walkDeps(it, it.incoming.resolutionResult.root, alreadyKnownDependencies, closure)
         }
     }
 
-    static void walkDeps(Configuration configuration, ResolvedComponentResult root, Closure closure) {
+    static void walkDeps(Configuration configuration,
+                         ResolvedComponentResult root,
+                         Set<ResolvedDependencyResult> alreadyKnownDependencies,
+                         Closure closure) {
         root.dependencies.findAll {
             it instanceof ResolvedDependencyResult
         }.collect {
             (ResolvedDependencyResult) it
         }.each {
-            walkDeps(configuration, it.selected, closure)
+            def result = (ResolvedDependencyResult) it
+            if (!alreadyKnownDependencies.contains(result)) {
+                alreadyKnownDependencies.add(result)
+                walkDeps(configuration, result.selected, alreadyKnownDependencies, closure)
+            }
         }
 
         closure(configuration, root)
