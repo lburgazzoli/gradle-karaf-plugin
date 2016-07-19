@@ -11,7 +11,7 @@
 plugins {
     id 'maven'
     id 'java'
-    id 'com.github.lburgazzoli.karaf' version '0.0.26'
+    id 'com.github.lburgazzoli.karaf' version '0.0.32'
 }
 
 repositories {
