@@ -71,6 +71,31 @@ class KarafFeaturesTest extends KarafTestSupport {
             feature.configurations[0] == project.configurations.runtime
     }
 
+    def 'Recursive Dependency'() {
+        given:
+            def project = setupProject('com.lburgazzoli.github', 'gradle-karaf', '1.2.3') {
+                dependencies {
+                    compile 'com.jcabi:jcabi-github:0.28'
+                }
+            }
+            def task = getKarafFeaturesTasks(project)
+        when:
+            def extension = getKarafExtension(project)
+            extension.features {
+                feature {
+                    name = "feature-1"
+                    description = "my feature n1"
+                }
+            }
+        then:
+            task.generateFeatures(extension.features)
+            extension != null
+            extension.features != null
+            extension.features.featureDescriptors != null
+            extension.features.featureDescriptors.empty == false
+            extension.features.featureDescriptors.size() == 1
+    }
+
     def 'Simple Single Project Dependencies'() {
         given:
             def project = setupProject('com.lburgazzoli.github', 'gradle-karaf', '1.2.3') {
