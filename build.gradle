@@ -24,6 +24,7 @@ plugins {
     id 'groovy'
     id 'maven'
     id 'maven-publish'
+    id 'signing'
     id 'com.gradle.plugin-publish' version '0.9.5'
     id 'net.researchgate.release' version '2.4.1'
 }
@@ -130,6 +131,14 @@ artifacts {
     archives sourcesJar
     archives groovydocJar
     archives javadocJar
+}
+
+signing {
+    required { 
+        isReleaseVersion  
+    }
+    
+    sign configurations.archives
 }
 
 // *****************************************************************************
