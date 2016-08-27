@@ -213,7 +213,8 @@ publishing {
 //
 // *****************************************************************************
 
-afterReleaseBuild.dependsOn publishPlugins, publish
+//afterReleaseBuild.dependsOn publishPlugins, publish
+afterReleaseBuild.dependsOn publishPlugins
 
 task wrapper(type: Wrapper) {
     gradleVersion = project.gradleVersion
