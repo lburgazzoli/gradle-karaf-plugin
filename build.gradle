@@ -23,13 +23,13 @@ plugins {
     id 'java'
     id 'groovy'
     id 'maven'
-    id 'maven-publish'
+    //id 'maven-publish'
     id 'signing'
     id 'com.gradle.plugin-publish' version '0.9.5'
     id 'net.researchgate.release' version '2.4.1'
 }
 
-apply plugin: 'io.codearte.nexus-staging'
+//apply plugin: 'io.codearte.nexus-staging'
 
 // *****************************************************************************
 //
@@ -135,9 +135,10 @@ artifacts {
 
 signing {
     required { 
-        isReleaseVersion  
+        //isReleaseVersion  
+        false
     }
-    
+
     sign configurations.archives
 }
 
@@ -160,7 +161,8 @@ pluginBundle {
     }
 }
 
-// Maven
+// Maven (dosabled as there is issues with signing)
+/* 
 publishing {
     repositories {
         maven {
@@ -205,6 +207,7 @@ publishing {
         }
     }
 }
+*/
 
 // *****************************************************************************
 //
