@@ -150,8 +150,8 @@ publishing {
 
                 def scm = root.appendNode('scm')
                 scm.appendNode('url', project.gitProject)
-                scm.appendNode('connection', 'scm': + project.gitProject)
-                scm.appendNode('developerConnection', , 'scm': + project.gitURL)
+                scm.appendNode('connection', "scm:${project.gitProject}")
+                scm.appendNode('developerConnection', , "scm:${project.gitURL}")
 
                 def license = root.appendNode('licenses').appendNode('license')
                 license.appendNode('name', 'The Apache Software License, Version 2.0')
