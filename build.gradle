@@ -3,13 +3,36 @@
 //
 // *****************************************************************************
 
+buildscript {
+    repositories {
+        mavenCentral()
+        mavenLocal()
+        jcenter()
+    }
+
+    dependencies {
+        classpath 'io.codearte.gradle.nexus:gradle-nexus-staging-plugin:0.5.3'
+    }
+}
+
+// *****************************************************************************
+//
+// *****************************************************************************
+
 plugins {
     id 'java'
     id 'groovy'
     id 'maven'
-    id 'com.gradle.plugin-publish' version '0.9.4'
-    id 'net.researchgate.release' version '2.3.5'
+    id 'maven-publish'
+    id 'com.gradle.plugin-publish' version '0.9.5'
+    id 'net.researchgate.release' version '2.4.1'
 }
+
+apply plugin: 'io.codearte.nexus-staging'
+
+// *****************************************************************************
+//
+// *****************************************************************************
 
 group               = 'com.github.lburgazzoli'
 description         = 'A gradle plugin for Karaf'
@@ -17,7 +40,7 @@ sourceCompatibility = JavaVersion.VERSION_1_7
 targetCompatibility = JavaVersion.VERSION_1_7
 
 ext {
-    gradleVersion     = '2.12'
+    gradleVersion     = '3.0'
     gradleScriptDir   = "${rootProject.projectDir}/gradle"
     gradlePluginId    = "com.github.lburgazzoli.karaf"
     gradlePluginTags  = [ 'karaf' ]
@@ -26,12 +49,27 @@ ext {
     isCI              = Boolean.valueOf("$System.env.CI")
     gitRoot           = "https://github.com/lburgazzoli"
     gitProject        = "https://github.com/lburgazzoli/gradle-karaf-plugin"
+    gitURL            = "git@github.com:lburgazzoli/gradle-karaf-plugin"
     groovyVersion     = GroovySystem.version.replaceAll(/\.\d+$/,'')
 
     versions = [
-        slf4j : '1.7.13',
+        slf4j : '1.7.21',
         spock : "1.0-groovy-${groovyVersion}"
     ]
+
+    if (isReleaseVersion) {
+        nexusUrl = 'https://oss.sonatype.org/service/local/staging/deploy/maven2/'
+    } else {
+        nexusUrl = 'https://oss.sonatype.org/content/repositories/snapshots/'
+    }
+
+    if (isCI && isReleaseVersion) {
+        nexusUsername = ""
+        nexusPassword = ""
+    } else if(!project.hasProperty('nexusUsername') && !project.hasProperty('nexusPassword')) {
+        nexusUsername = "$System.env.CI_DEPLOY_USERNAME"
+        nexusPassword = "$System.env.CI_DEPLOY_PASSWORD"
+    }
 }
 
 repositories {
@@ -83,6 +121,48 @@ pluginBundle {
         karafPlugin {
             id          = gradlePluginId
             displayName = project.description
+        }
+    }
+}
+
+publishing {
+    repositories {
+        maven {
+            credentials {
+                username project.nexusUsername
+                password project.nexusPassword
+            }
+
+            url project.nexusUrl
+        }
+    }
+
+    publications {
+        mavenJava(MavenPublication) {
+            from components.java
+
+            pom.withXml {
+                def root = asNode()
+                root.appendNode('name', project.name)
+                root.appendNode('description', project.name)
+                root.appendNode('url', project.gitProject)
+                root.appendNode('inceptionYear', '2014')
+
+                def scm = root.appendNode('scm')
+                scm.appendNode('url', project.gitProject)
+                scm.appendNode('connection', 'scm': + project.gitProject)
+                scm.appendNode('developerConnection', , 'scm': + project.gitURL)
+
+                def license = root.appendNode('licenses').appendNode('license')
+                license.appendNode('name', 'The Apache Software License, Version 2.0')
+                license.appendNode('url', 'http://www.apache.org/licenses/LICENSE-2.0.txt')
+                license.appendNode('distribution', 'repo')
+
+                def developers = root.appendNode('developers')
+                def bmuschko = developers.appendNode('developer')
+                bmuschko.appendNode('id', 'lburgazzoli')
+                bmuschko.appendNode('name', 'Luca Burgazzoli')
+            }
         }
     }
 }
