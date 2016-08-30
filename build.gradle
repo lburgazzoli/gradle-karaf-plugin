@@ -165,6 +165,10 @@ signing {
 uploadArchives {
     repositories {
         mavenDeployer {
+            repository(url: project.nexusUrl) {
+                authentication(userName: project.nexusUsername, password: project.nexusPassword)
+            }
+
             beforeDeployment { 
                 MavenDeployment deployment -> signing.signPom(deployment) 
             }
@@ -172,10 +176,6 @@ uploadArchives {
             pom.groupId = project.group
             pom.artifactId = project.name
             pom.version = project.version
-
-            repository(url: project.ext.nexusUrl) {
-                authentication(userName: project.nexusUsername, project.nexusPassword)
-            }
 
             pom.project {
                 name project.name
