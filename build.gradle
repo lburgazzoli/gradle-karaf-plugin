@@ -23,13 +23,12 @@ plugins {
     id 'java'
     id 'groovy'
     id 'maven'
-    //id 'maven-publish'
     id 'signing'
     id 'com.gradle.plugin-publish' version '0.9.5'
     id 'net.researchgate.release' version '2.4.1'
 }
 
-//apply plugin: 'io.codearte.nexus-staging'
+apply plugin: 'io.codearte.nexus-staging'
 
 // *****************************************************************************
 //
@@ -133,20 +132,10 @@ artifacts {
     archives javadocJar
 }
 
-signing {
-    required { 
-        //isReleaseVersion  
-        false
-    }
-
-    sign configurations.archives
-}
-
 // *****************************************************************************
-// PUBLISHING
+// Publish to gradle Plugins
 // *****************************************************************************
 
-// Gradle Plugin
 pluginBundle {
     website     = project.gitProject
     vcsUrl      = project.gitProject
@@ -161,61 +150,65 @@ pluginBundle {
     }
 }
 
-// Maven (dosabled as there is issues with signing)
-/* 
-publishing {
-    repositories {
-        maven {
-            credentials {
-                username project.nexusUsername
-                password project.nexusPassword
-            }
+// *****************************************************************************
+// Publish to Sonatype OSS
+// *****************************************************************************
 
-            url project.nexusUrl
-        }
+signing {
+    required { 
+        isReleaseVersion
     }
 
-    publications {
-        mavenJava(MavenPublication) {
-            from components.java
-            artifact sourcesJar
-            artifact groovydocJar
-            artifact javadocJar
+    sign configurations.archives
+}
 
-            pom.withXml {
-                def root = asNode()
-                root.appendNode('name', project.name)
-                root.appendNode('description', project.name)
-                root.appendNode('url', project.gitProject)
-                root.appendNode('inceptionYear', '2014')
+uploadArchives {
+    repositories {
+        mavenDeployer {
+            beforeDeployment { 
+                MavenDeployment deployment -> signing.signPom(deployment) 
+            }
 
-                def scm = root.appendNode('scm')
-                scm.appendNode('url', project.gitProject)
-                scm.appendNode('connection', "scm:${project.gitProject}")
-                scm.appendNode('developerConnection', , "scm:${project.gitURL}")
+            pom.groupId = project.group
+            pom.artifactId = project.name
+            pom.version = project.version
 
-                def license = root.appendNode('licenses').appendNode('license')
-                license.appendNode('name', 'The Apache Software License, Version 2.0')
-                license.appendNode('url', 'http://www.apache.org/licenses/LICENSE-2.0.txt')
-                license.appendNode('distribution', 'repo')
+            repository(url: project.ext.nexusUrl) {
+                authentication(userName: project.nexusUsername, project.nexusPassword)
+            }
 
-                def developers = root.appendNode('developers')
-                def bmuschko = developers.appendNode('developer')
-                bmuschko.appendNode('id', 'lburgazzoli')
-                bmuschko.appendNode('name', 'Luca Burgazzoli')
+            pom.project {
+                name project.name
+                description project.name
+                url project.gitProject
+
+                scm {
+                    url project.gitProject
+                    connection "scm:${project.gitProject}"
+                    developerConnection "scm:${project.gitURL}"
+                }
+
+                licenses {
+                    license {
+                        name 'The Apache Software License, Version 2.0'
+                        url 'http://www.apache.org/licenses/LICENSE-2.0.txt'
+                        distribution 'repo'
+                    }
+                }
+
+                developers {
+                    developer {
+                        id 'lburgazzoli'
+                        name 'Luca Burgazzoli'
+                    }
+                }
             }
         }
     }
 }
-*/
 
 // *****************************************************************************
 //
 // *****************************************************************************
 
-//afterReleaseBuild.dependsOn publishPlugins, publish
-afterReleaseBuild.dependsOn publishPlugins
-
-task wrapper(type: Wrapper) {
-    gradleVersion = project.gradleVersion
-}
+afterReleaseBuild.dependsOn publishPlugins, uploadArchives
