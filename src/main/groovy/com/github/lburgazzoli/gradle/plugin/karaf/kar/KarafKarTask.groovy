@@ -21,12 +21,13 @@ import java.nio.file.StandardCopyOption
 import org.gradle.jvm.tasks.Jar
 
 import com.github.lburgazzoli.gradle.plugin.karaf.KarafPluginExtension
+import com.github.lburgazzoli.gradle.plugin.karaf.KarafTaskTrait
 import com.github.lburgazzoli.gradle.plugin.karaf.mvn.MvnProtocolParser
 
 /**
  * @author lburgazzoli
  */
-class KarafKarTask extends Jar {
+class KarafKarTask extends Jar implements KarafTaskTrait  {
     public static final String GROUP = 'karaf'
     public static final String NAME = 'generateKar'
     public static final String DESCRIPTION = 'Generates Karaf KAR Archive'
@@ -41,13 +42,13 @@ class KarafKarTask extends Jar {
 
     @Override
     protected void copy() {
-        def ext = KarafPluginExtension.lookup(project)
-        if (!ext.hasKar()) {
+        def karaf = getKaraf()
+        if (!karaf.hasKar()) {
             return;
         }
 
-        def features = ext.features
-        def kar = ext.kar
+        def features = karaf.features
+        def kar = karaf.kar
         def resolver = features.resolver
         def root = kar.explodedPath
 

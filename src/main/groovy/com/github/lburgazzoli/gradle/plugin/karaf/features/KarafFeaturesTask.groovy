@@ -15,14 +15,16 @@
  */
 package com.github.lburgazzoli.gradle.plugin.karaf.features
 
+import org.gradle.api.DefaultTask
 import org.gradle.api.tasks.TaskAction
 import org.gradle.util.VersionNumber
 
-import com.github.lburgazzoli.gradle.plugin.karaf.AbstractKarafTask
+import com.github.lburgazzoli.gradle.plugin.karaf.KarafTaskTrait
+
 /**
  * @author lburgazzoli
  */
-class KarafFeaturesTask extends AbstractKarafTask {
+class KarafFeaturesTask extends DefaultTask implements KarafTaskTrait  {
     public static final String GROUP = "karaf"
     public static final String NAME = "generateFeatures"
     public static final String DESCRIPTION = "Generates Karaf features file"
@@ -39,8 +41,8 @@ class KarafFeaturesTask extends AbstractKarafTask {
 
     @TaskAction
     def run() {
-        if(extension.hasFeatures()) {
-            File outputFile = extension.features.getOutputFile()
+        if(karaf.hasFeatures()) {
+            File outputFile = karaf.features.getOutputFile()
 
             // write out a features repository xml.
             if(!outputFile.parentFile.exists()) {
@@ -48,23 +50,23 @@ class KarafFeaturesTask extends AbstractKarafTask {
             }
 
             def out = new BufferedWriter(new FileWriter(outputFile))
-            out.write(generateFeatures(extension.features))
+            out.write(generateFeatures(karaf.features))
             out.close()
         }
     }
 
-    String generateFeatures(KarafFeaturesExtension featuresExtension) {
+    String generateFeatures(KarafFeaturesExtension karaf) {
 
         def builder = new KarafFeaturesBuilder()
-        def xsdVer13 = VersionNumber.parse(featuresExtension.xsdVersion).compareTo(XMLNS_V13) >= 0
-        def resolver = featuresExtension.resolver
+        def xsdVer13 = VersionNumber.parse(karaf.xsdVersion).compareTo(XMLNS_V13) >= 0
+        def resolver = karaf.resolver
 
         builder.mkp.xmlDeclaration(version: "1.0", encoding: "UTF-8", standalone: "yes")
-        builder.features(xmlns:FEATURES_XMLNS_PREFIX + featuresExtension.xsdVersion, name: featuresExtension.name) {
-            featuresExtension.repositories.each {
+        builder.features(xmlns:FEATURES_XMLNS_PREFIX + karaf.xsdVersion, name: karaf.name) {
+            karaf.repositories.each {
                 builder.repository( it )
             }
-            featuresExtension.featureDescriptors.each { feature ->
+            karaf.featureDescriptors.each { feature ->
                 builder.feature(name: feature.name, version: feature.version, description: feature.description) {
                     if(feature.details) {
                         builder.details(feature.details)
