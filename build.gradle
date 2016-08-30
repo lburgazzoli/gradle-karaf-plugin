@@ -40,17 +40,18 @@ sourceCompatibility = JavaVersion.VERSION_1_7
 targetCompatibility = JavaVersion.VERSION_1_7
 
 ext {
-    gradleVersion     = '3.0'
-    gradleScriptDir   = "${rootProject.projectDir}/gradle"
-    gradlePluginId    = "com.github.lburgazzoli.karaf"
-    gradlePluginTags  = [ 'karaf' ]
     isReleaseVersion  = !version.endsWith("SNAPSHOT")
     isSnapshotVersion = version.endsWith("SNAPSHOT")
     isCI              = Boolean.valueOf("$System.env.CI")
     gitRoot           = "https://github.com/lburgazzoli"
     gitProject        = "https://github.com/lburgazzoli/gradle-karaf-plugin"
     gitURL            = "git@github.com:lburgazzoli/gradle-karaf-plugin"
-    groovyVersion     = GroovySystem.version.replaceAll(/\.\d+$/,'')
+    groovyVersion     = GroovySystem.version.replaceAll(/\.\d+$/,'')    
+    gradleVersion     = '3.0'
+    gradleScriptDir   = "${rootProject.projectDir}/gradle"
+    gradlePluginId    = "com.github.lburgazzoli.karaf"
+    gradlePluginTags  = [ 'karaf' ]    
+    gradleCiTasks     = isReleaseVersion ? ['clean', 'test'] : ['clean', 'test', 'uploadArchives']
 
     versions = [
         slf4j : '1.7.21',
@@ -63,10 +64,7 @@ ext {
         nexusUrl = 'https://oss.sonatype.org/content/repositories/snapshots/'
     }
 
-    if (isCI && isReleaseVersion) {
-        nexusUsername = ""
-        nexusPassword = ""
-    } else if(!project.hasProperty('nexusUsername') && !project.hasProperty('nexusPassword')) {
+    if(!project.hasProperty('nexusUsername') && !project.hasProperty('nexusPassword')) {
         nexusUsername = "$System.env.CI_DEPLOY_USERNAME"
         nexusPassword = "$System.env.CI_DEPLOY_PASSWORD"
     }
@@ -166,7 +164,10 @@ uploadArchives {
     repositories {
         mavenDeployer {
             repository(url: project.nexusUrl) {
-                authentication(userName: project.nexusUsername, password: project.nexusPassword)
+                authentication(
+                    userName: project.nexusUsername, 
+                    password: project.nexusPassword
+                )
             }
 
             beforeDeployment { 
@@ -212,3 +213,9 @@ uploadArchives {
 // *****************************************************************************
 
 afterReleaseBuild.dependsOn publishPlugins, uploadArchives
+
+task ci(dependsOn: project.gradleCiTasks) {
+}
+
+task rel(dependsOn: [ 'afterReleaseBuild', 'closeAndPromoteRepository' ]) {
+}
