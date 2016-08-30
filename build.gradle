@@ -217,5 +217,5 @@ afterReleaseBuild.dependsOn publishPlugins, uploadArchives
 task ci(dependsOn: project.gradleCiTasks) {
 }
 
-task rel(dependsOn: [ 'afterReleaseBuild', 'closeAndPromoteRepository' ]) {
+task rel(dependsOn: [ 'release', 'closeAndPromoteRepository' ]) {
 }
