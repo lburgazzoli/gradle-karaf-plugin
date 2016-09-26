@@ -216,6 +216,10 @@ class KarafFeaturesTest extends KarafTestSupport {
             featuresXml != null
 
             println featuresStr
+
+            featuresXml.feature.configfile.'**'.findAll {
+                    it.@finalname?.equals('/etc/hazelcast.xml')
+                }.size() == 1
     }
 
     def 'Simple Single Project With Conditions'() {

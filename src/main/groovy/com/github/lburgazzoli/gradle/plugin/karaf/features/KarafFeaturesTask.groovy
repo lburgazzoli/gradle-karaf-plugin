@@ -82,7 +82,7 @@ class KarafFeaturesTask extends DefaultTask implements KarafTaskTrait  {
                     feature.configFiles.each {
                         if (it.filename && it.uri) {
                             builder.configfile(
-                                [filename: it.filename],
+                                [ finalname: it.filename ],
                                 it.uri
                             )
                         }
@@ -127,7 +127,7 @@ class KarafFeaturesTask extends DefaultTask implements KarafTaskTrait  {
                             feature.configFiles.each {
                                 if (it.filename && it.uri) {
                                     builder.configfile(
-                                        [filename: it.filename],
+                                        [ finalname: it.filename ],
                                         it.uri
                                     )
                                 }
