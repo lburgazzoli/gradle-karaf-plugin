@@ -46,16 +46,17 @@ ext {
     gitRoot           = "https://github.com/lburgazzoli"
     gitProject        = "https://github.com/lburgazzoli/gradle-karaf-plugin"
     gitURL            = "git@github.com:lburgazzoli/gradle-karaf-plugin"
-    groovyVersion     = GroovySystem.version.replaceAll(/\.\d+$/,'')    
+    groovyVersion     = GroovySystem.version.replaceAll(/\.\d+$/,'')
     gradleVersion     = '3.0'
     gradleScriptDir   = "${rootProject.projectDir}/gradle"
     gradlePluginId    = "com.github.lburgazzoli.karaf"
-    gradlePluginTags  = [ 'karaf' ]    
+    gradlePluginTags  = [ 'karaf' ]
     gradleCiTasks     = isReleaseVersion ? ['clean', 'test'] : ['clean', 'test', 'uploadArchives']
 
     versions = [
-        slf4j : '1.7.21',
-        spock : "1.0-groovy-${groovyVersion}"
+        slf4j  : '1.7.21',
+        paxUrl : '2.5.0',
+        spock  : "1.0-groovy-${groovyVersion}"
     ]
 
     if (isReleaseVersion) {
@@ -71,7 +72,7 @@ ext {
 }
 
 repositories {
-    mavenCentral()    
+    mavenCentral()
     mavenLocal()
     jcenter()
 }
@@ -79,6 +80,8 @@ repositories {
 dependencies {
     compile gradleApi()
     compile localGroovy()
+
+    compile "org.ops4j.pax.url:pax-url-aether:$versions.paxUrl"
 
     testCompile("org.spockframework:spock-core:$versions.spock") {
         exclude(module: 'groovy-all')
@@ -105,9 +108,9 @@ jar {
     }
 }
 
-test { 
-    testLogging { 
-        events "started", "passed", "skipped", "failed", "standardOut", "standardError" 
+test {
+    testLogging {
+        events "started", "passed", "skipped", "failed", "standardOut", "standardError"
     }
 }
 
@@ -160,7 +163,7 @@ pluginBundle {
 // *****************************************************************************
 
 signing {
-    required { 
+    required {
         isReleaseVersion
     }
 
@@ -172,13 +175,13 @@ uploadArchives {
         mavenDeployer {
             repository(url: project.nexusUrl) {
                 authentication(
-                    userName: project.nexusUsername, 
+                    userName: project.nexusUsername,
                     password: project.nexusPassword
                 )
             }
 
-            beforeDeployment { 
-                MavenDeployment deployment -> signing.signPom(deployment) 
+            beforeDeployment {
+                MavenDeployment deployment -> signing.signPom(deployment)
             }
 
             pom.groupId = project.group

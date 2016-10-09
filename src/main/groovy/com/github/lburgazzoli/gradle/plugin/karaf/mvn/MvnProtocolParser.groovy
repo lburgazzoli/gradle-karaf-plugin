@@ -15,40 +15,23 @@
  */
 package com.github.lburgazzoli.gradle.plugin.karaf.mvn
 
+import org.ops4j.pax.url.mvn.internal.Parser
 import com.github.lburgazzoli.gradle.plugin.karaf.features.model.Dependency
 
 /**
  * @author lburgazzoli
  */
 class MvnProtocolParser {
-    private static final String PROTOCOL_PREFIX = 'mvn:'
-    private static final String REPOSITORY_SEPARATOR = '!'
-    private static final String ARTIFACT_SEPARATOR = '/'
 
     static Dependency parse(String path) {
-        int pos = path.lastIndexOf(REPOSITORY_SEPARATOR);
-        if (pos >= 0) {
-            path = path.substring(pos + 1)
-        } else if (path.startsWith(PROTOCOL_PREFIX)){
-            path = path.substring(PROTOCOL_PREFIX.length())
-        }
-
-        String[] segments = path.split(ARTIFACT_SEPARATOR)
-        if (segments.length < 3) {
-            throw new MalformedURLException("Invalid path (${path})")
-        }
+        def parser = new Parser(path)
 
         def dependency = new Dependency()
-        dependency.group = segments[0].trim()
-        dependency.name = segments[1].trim()
-        dependency.version = segments[2].trim()
-
-        if (segments.length >= 4) {
-            dependency.type = segments[3].trim()
-        }
-        if (segments.length >= 5) {
-            dependency.classifier = segments[4].trim()
-        }
+        dependency.group = parser.group
+        dependency.name = parser.artifact
+        dependency.version = parser.version
+        dependency.type = parser.type ?: dependency.type
+        dependency.classifier = parser.classifier ?: dependency.classifier
 
         return dependency
     }
