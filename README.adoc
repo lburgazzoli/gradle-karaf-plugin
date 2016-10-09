@@ -12,6 +12,7 @@ image:http://img.shields.io/:license-apache-brightgreen.svg[title="License", lin
 - [x] Karaf features
 - [x] Karaf KAR
 - [ ] Karaf custom distribution
+- [ ] Nice documentation
 
 == Example
 
