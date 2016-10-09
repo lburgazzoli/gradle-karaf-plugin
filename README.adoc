@@ -1,11 +1,7 @@
 gradle-karaf-plugin
 ===================
 
-image:https://travis-ci.org/lburgazzoli/gradle-karaf-plugin.svg[title="Build Status", link="https://travis-ci.org/lburgazzoli/gradle-karaf-plugin"]
-
-image:https://maven-badges.herokuapp.com/maven-central/com.github.lburgazzoli/gradle-karaf-plugin/badge.svg[title="Maven Central", link="https://maven-badges.herokuapp.com/maven-central/com.github.lburgazzoli/gradle-karaf-plugin"]
-
-image:http://img.shields.io/:license-apache-brightgreen.svg[title="License", link="http://www.apache.org/licenses/LICENSE-2.0.html"]
+image:https://travis-ci.org/lburgazzoli/gradle-karaf-plugin.svg[title="Build Status", link="https://travis-ci.org/lburgazzoli/gradle-karaf-plugin"] image:https://maven-badges.herokuapp.com/maven-central/com.github.lburgazzoli/gradle-karaf-plugin/badge.svg[title="Maven Central", link="https://maven-badges.herokuapp.com/maven-central/com.github.lburgazzoli/gradle-karaf-plugin"] image:http://img.shields.io/:license-apache-brightgreen.svg[title="License", link="http://www.apache.org/licenses/LICENSE-2.0.html"]
 
 == Features
 
