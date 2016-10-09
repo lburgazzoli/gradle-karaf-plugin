@@ -1,4 +1,8 @@
 = gradle-karaf-plugin
+[![Build Status](https://travis-ci.org/lburgazzoli/gradle-karaf-plugin.svg)](https://travis-ci.org/lburgazzoli/gradle-karaf-plugin)
+[![Maven Central](https://maven-badges.herokuapp.com/maven-central/com.github.lburgazzoli/gradle-karaf-plugin/badge.svg)](https://maven-badges.herokuapp.com/maven-central/com.github.lburgazzoli/gradle-karaf-plugin)
+[![License](http://img.shields.io/:license-apache-brightgreen.svg)](http://www.apache.org/licenses/LICENSE-2.0.html)
+
 
 - [x] Karaf features
 - [x] Karaf KAR
