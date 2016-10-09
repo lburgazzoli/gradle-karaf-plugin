@@ -7,6 +7,7 @@ image:https://maven-badges.herokuapp.com/maven-central/com.github.lburgazzoli/gr
 
 image:http://img.shields.io/:license-apache-brightgreen.svg[title="License", link="http://www.apache.org/licenses/LICENSE-2.0.html"]
 
+== Features
 
 - [x] Karaf features
 - [x] Karaf KAR
