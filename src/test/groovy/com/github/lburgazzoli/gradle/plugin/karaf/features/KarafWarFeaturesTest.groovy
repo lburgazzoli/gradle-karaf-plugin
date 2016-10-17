@@ -66,7 +66,7 @@ class KarafWarFeaturesTest extends KarafTestSupport {
             featuresXml.feature.@version == '1.2.3'
 
             featuresXml.feature.bundle.'**'.findAll {
-                it.text().contains('war:mvn:org.apache.activemq/activemq-web-console/5.13.2/war')
+                it.text().contains('war:mvn:org.apache.activemq/activemq-web-console/5.13.2/war?Webapp-Context=activemq-web-console')
             }.size() == 1
     }
 }
