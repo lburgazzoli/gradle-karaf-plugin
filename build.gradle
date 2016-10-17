@@ -24,7 +24,7 @@ plugins {
     id 'groovy'
     id 'maven'
     id 'signing'
-    id 'com.gradle.plugin-publish' version '0.9.5'
+    id 'com.gradle.plugin-publish' version '0.9.6'
     id 'net.researchgate.release' version '2.4.1'
 }
 
@@ -43,6 +43,7 @@ ext {
     isReleaseVersion  = !version.endsWith("SNAPSHOT")
     isSnapshotVersion = version.endsWith("SNAPSHOT")
     isCI              = Boolean.valueOf("$System.env.CI")
+    isPR              = Boolean.valueOf("$System.env.TRAVIS_PULL_REQUEST")
     gitRoot           = "https://github.com/lburgazzoli"
     gitProject        = "https://github.com/lburgazzoli/gradle-karaf-plugin"
     gitURL            = "git@github.com:lburgazzoli/gradle-karaf-plugin"
@@ -51,7 +52,7 @@ ext {
     gradleScriptDir   = "${rootProject.projectDir}/gradle"
     gradlePluginId    = "com.github.lburgazzoli.karaf"
     gradlePluginTags  = [ 'karaf' ]
-    gradleCiTasks     = isReleaseVersion ? ['clean', 'test'] : ['clean', 'test', 'uploadArchives']
+    gradleCiTasks     = (isReleaseVersion || isPR) ? ['clean', 'test'] : ['clean', 'test', 'uploadArchives']
 
     versions = [
         slf4j  : '1.7.21',
