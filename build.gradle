@@ -26,6 +26,7 @@ plugins {
     id 'signing'
     id 'com.gradle.plugin-publish' version '0.9.6'
     id 'net.researchgate.release' version '2.4.1'
+    id 'com.github.ben-manes.versions' version '0.13.0'
 }
 
 apply plugin: 'io.codearte.nexus-staging'
@@ -56,7 +57,7 @@ ext {
 
     versions = [
         slf4j  : '1.7.21',
-        paxUrl : '2.5.0',
+        paxUrl : '2.5.1',
         spock  : "1.0-groovy-${groovyVersion}"
     ]
 
