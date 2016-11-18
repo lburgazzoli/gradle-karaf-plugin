@@ -96,6 +96,40 @@ class KarafFeaturesTest extends KarafTestSupport {
             extension.features.featureDescriptors.size() == 1
     }
 
+    def 'Multi version deps'() {
+        given:
+            def project = setupProject('com.lburgazzoli.github', 'gradle-karaf', '1.2.3') {
+                dependencies {
+                    compile 'com.graphql-java:graphql-java-servlet:0.9.0'
+                    compile 'com.google.guava:guava:20.0'
+                }
+            }
+            def task = getKarafFeaturesTasks(project)
+        when:
+            def extension = getKarafExtension(project)
+            extension.features {
+                feature {
+                    name = "feature-1"
+                    description = "my feature n1"
+                }
+            }
+
+            def featuresStr = task.generateFeatures(extension.features)
+            def featuresXml = new XmlSlurper().parseText(featuresStr)
+        then:
+            featuresStr != null
+            featuresXml != null
+
+            println featuresStr
+
+            featuresXml.feature.bundle.'**'.findAll {
+                it.text().contains('mvn:com.google.guava/guava/20.0')
+            }.size() == 1
+            featuresXml.feature.bundle.'**'.findAll {
+                it.text().contains('mvn:com.google.guava/guava/19.0')
+            }.size() == 0
+    }
+
     def 'Simple Single Project Dependencies'() {
         given:
             def project = setupProject('com.lburgazzoli.github', 'gradle-karaf', '1.2.3') {
