@@ -23,7 +23,6 @@ import org.gradle.api.artifacts.ModuleVersionIdentifier
 import org.gradle.api.artifacts.ResolvedArtifact
 import org.gradle.api.artifacts.component.ProjectComponentIdentifier
 import org.gradle.api.artifacts.result.ResolvedComponentResult
-import org.gradle.api.tasks.bundling.AbstractArchiveTask
 
 import com.github.lburgazzoli.gradle.plugin.karaf.KarafPlugin
 import com.github.lburgazzoli.gradle.plugin.karaf.KarafPluginExtension
@@ -59,20 +58,18 @@ class KarafFeaturesUtils extends KarafUtils {
             ProjectComponentIdentifier pci = root.id as ProjectComponentIdentifier
             Project prj = featureDescriptor.project.findProject(pci.getProjectPath())
 
-            if(prj.equals(featureDescriptor.project) && !ext.features.includeProject) {
+            if(prj == featureDescriptor.project && !ext.features.includeProject) {
                 return
             }
 
             KarafUtils.forEachTask(prj, KarafPlugin.ARTIFACT_TASKS) {
-                AbstractArchiveTask task ->
-                    container << DependencyDescriptor.make(root, task, instruction)
+                container << DependencyDescriptor.make(root, it, instruction)
             }
         } else {
-            container << DependencyDescriptor.make(
-                root,
-                findArtifact(configuration, root.moduleVersion),
-                instruction
-            )
+
+            findArtifact(configuration, root.moduleVersion)?.each {
+                container << DependencyDescriptor.make(root, it, instruction)
+            }
         }
     }
 
@@ -101,8 +98,8 @@ class KarafFeaturesUtils extends KarafUtils {
         return v1.group.equals(v2.group) && v1.name.equals(v2.name) && v1.version.equals(v2.version)
     }
 
-    static ResolvedArtifact findArtifact(Configuration configuration, ModuleVersionIdentifier versionIdentifier) {
-        return configuration.resolvedConfiguration.resolvedArtifacts.find {
+    static Collection<ResolvedArtifact> findArtifact(Configuration configuration, ModuleVersionIdentifier versionIdentifier) {
+        return configuration.resolvedConfiguration.resolvedArtifacts.findAll {
             matches(versionIdentifier, it.moduleVersion.id)
         }
     }

@@ -96,6 +96,40 @@ class KarafFeaturesTest extends KarafTestSupport {
             extension.features.featureDescriptors.size() == 1
     }
 
+    def 'Same GAV'() {
+        given:
+            def project = setupProject('com.lburgazzoli.github', 'gradle-karaf', '1.2.3') {
+                dependencies {
+                    compile 'ca.uhn.hapi.fhir:hapi-fhir-testpage-overlay:2.0:classes@jar'
+                    compile 'ca.uhn.hapi.fhir:hapi-fhir-testpage-overlay:2.0@war'
+                }
+            }
+            def task = getKarafFeaturesTasks(project)
+        when:
+            def extension = getKarafExtension(project)
+            extension.features {
+                feature {
+                    name = "feature-1"
+                    description = "my feature n1"
+                }
+            }
+
+            def featuresStr = task.generateFeatures(extension.features)
+            def featuresXml = new XmlSlurper().parseText(featuresStr)
+        then:
+            featuresStr != null
+            featuresXml != null
+
+            println featuresStr
+
+            featuresXml.feature.bundle.'**'.findAll {
+                it.text().contains('wrap:mvn:ca.uhn.hapi.fhir/hapi-fhir-testpage-overlay/2.0')
+            }.size() == 1
+            featuresXml.feature.bundle.'**'.findAll {
+                it.text().contains('war:mvn:ca.uhn.hapi.fhir/hapi-fhir-testpage-overlay/2.0/war')
+            }.size() == 1
+    }
+
     def 'Multi version deps'() {
         given:
             def project = setupProject('com.lburgazzoli.github', 'gradle-karaf', '1.2.3') {

@@ -26,8 +26,8 @@ class DependencyDescriptor extends Dependency {
 
     BundleDescriptor bundle
 
-    DependencyDescriptor(ResolvedComponentResult component, String type, File file, BundleDescriptor bundle) {
-        super(component, type, file)
+    DependencyDescriptor(ResolvedComponentResult component, String classifier, String type, File file, BundleDescriptor bundle) {
+        super(component, classifier, type, file)
         this.bundle = bundle
 
         if(bundle && bundle.remap) {
@@ -44,15 +44,15 @@ class DependencyDescriptor extends Dependency {
     // Helpers
     // *************************************************************************
 
-    public static DependencyDescriptor make(
+    static DependencyDescriptor make(
             ResolvedComponentResult componentResult, ResolvedArtifact artifact, BundleDescriptor descriptor) {
 
-        return new DependencyDescriptor(componentResult, artifact?.type, artifact?.file, descriptor)
+        return new DependencyDescriptor(componentResult, artifact.classifier, artifact.type, artifact.file, descriptor)
     }
 
-    public static DependencyDescriptor make(
+    static DependencyDescriptor make(
         ResolvedComponentResult componentResult, AbstractArchiveTask task, BundleDescriptor descriptor) {
 
-        return new DependencyDescriptor(componentResult, task.extension, task.archivePath, descriptor)
+        return new DependencyDescriptor(componentResult, task.classifier, task.extension, task.archivePath, descriptor)
     }
 }

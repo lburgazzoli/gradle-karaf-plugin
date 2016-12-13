@@ -39,7 +39,7 @@ class Dependency {
     String name
     String version
     String type
-    String classifier;
+    String classifier
     File file
     Kind kind
     String url
@@ -49,17 +49,21 @@ class Dependency {
         this.name = null
         this.version = null
         this.type = null
-        this.classifier = null;
+        this.classifier = null
         this.file = null
         this.kind = Kind.UNKNOWN
         this.url = null
     }
 
     Dependency(ResolvedComponentResult component, String type, File file) {
+        this(component, null, type, file)
+    }
+
+    Dependency(ResolvedComponentResult component, String classifier, String type, File file) {
         this.group = component.moduleVersion.group
         this.name = component.moduleVersion.name
         this.version = component.moduleVersion.version
-        this.classifier = null
+        this.classifier = classifier
         this.type = type
         this.file = file
 
