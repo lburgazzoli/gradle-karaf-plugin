@@ -13,7 +13,6 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 package com.github.lburgazzoli.gradle.plugin.karaf.features
 
 import java.nio.file.Path
@@ -24,6 +23,7 @@ import org.gradle.util.ConfigureUtil
 import com.github.lburgazzoli.gradle.plugin.karaf.features.model.DependencyResolver
 import com.github.lburgazzoli.gradle.plugin.karaf.mvn.MvnDependencyResolver
 import com.github.lburgazzoli.gradle.plugin.karaf.features.model.FeatureDescriptor
+
 /**
  * @author lburgazzoli
  */

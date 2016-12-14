@@ -32,7 +32,7 @@ class KarafFeaturesTask extends DefaultTask implements KarafTaskTrait  {
     public static final String FEATURES_XMLNS_PREFIX = 'http://karaf.apache.org/xmlns/features/v'
     public static final VersionNumber XMLNS_V13 = new  VersionNumber(1, 3, 0, null)
 
-    public KarafFeaturesTask() {
+    KarafFeaturesTask() {
         // TODO: to be improved
         outputs.upToDateWhen {
             false
@@ -40,7 +40,7 @@ class KarafFeaturesTask extends DefaultTask implements KarafTaskTrait  {
     }
 
     @TaskAction
-    def run() {
+    void run() {
         if(karaf.hasFeatures()) {
             File outputFile = karaf.features.getOutputFile()
 
@@ -56,9 +56,8 @@ class KarafFeaturesTask extends DefaultTask implements KarafTaskTrait  {
     }
 
     String generateFeatures(KarafFeaturesExtension karaf) {
-
         def builder = new KarafFeaturesBuilder()
-        def xsdVer13 = VersionNumber.parse(karaf.xsdVersion).compareTo(XMLNS_V13) >= 0
+        def xsdVer13 = VersionNumber.parse(karaf.xsdVersion) == XMLNS_V13
         def resolver = karaf.resolver
 
         builder.mkp.xmlDeclaration(version: "1.0", encoding: "UTF-8", standalone: "yes")

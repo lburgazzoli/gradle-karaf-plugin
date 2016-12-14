@@ -22,6 +22,7 @@ import org.gradle.api.artifacts.component.ProjectComponentIdentifier
 import org.gradle.api.artifacts.result.ResolvedComponentResult
 
 import com.github.lburgazzoli.gradle.plugin.karaf.features.KarafFeaturesUtils
+
 /**
  * @author lburgazzoli
  */
@@ -29,7 +30,7 @@ import com.github.lburgazzoli.gradle.plugin.karaf.features.KarafFeaturesUtils
 @EqualsAndHashCode(includes = [ "group", "name", "version", "type", "classifier"])
 class Dependency {
     @ToString(includeNames = true)
-    public enum Kind {
+    enum Kind {
         UNKNOWN,
         MODULE,
         PROJECT

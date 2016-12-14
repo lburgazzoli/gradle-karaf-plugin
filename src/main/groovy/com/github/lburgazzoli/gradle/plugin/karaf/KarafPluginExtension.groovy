@@ -31,7 +31,7 @@ class KarafPluginExtension {
     private KarafFeaturesExtension features
     private KarafKarExtension kar
 
-    public KarafPluginExtension(Project project) {
+    KarafPluginExtension(Project project) {
         this.project = project
         this.features = null
         this.kar = null
@@ -84,11 +84,11 @@ class KarafPluginExtension {
     // Helpers
     // *************************************************************************
 
-    public static KarafPluginExtension lookup(Project project) {
+    static KarafPluginExtension lookup(Project project) {
         return project.extensions.findByName(NAME) as KarafPluginExtension
     }
 
-    public static KarafPluginExtension create(Project project) {
-        return project.extensions.create( NAME, KarafPluginExtension, project )
+    static KarafPluginExtension create(Project project) {
+        return project.extensions.create(NAME, KarafPluginExtension, project)
     }
 }

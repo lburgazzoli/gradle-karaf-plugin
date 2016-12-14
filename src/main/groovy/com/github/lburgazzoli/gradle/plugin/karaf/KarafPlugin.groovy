@@ -27,6 +27,7 @@ import org.gradle.api.plugins.WarPlugin
 
 import com.github.lburgazzoli.gradle.plugin.karaf.features.KarafFeaturesTask
 import com.github.lburgazzoli.gradle.plugin.karaf.kar.KarafKarTask
+
 /**
  * @author lburgazzoli
  */
@@ -75,7 +76,7 @@ class KarafPlugin implements Plugin<Project> {
                             ProjectComponentIdentifier pci = root.id as ProjectComponentIdentifier
                             Project prj = project.findProject(pci.getProjectPath())
 
-                            if(!prj.equals(project) || ext.features.includeProject) {
+                            if(prj != project || ext.features.includeProject) {
                                 KarafUtils.forEachTask(prj, KarafPlugin.ARTIFACT_TASKS) {
                                     Task task -> feat.dependsOn task
                                 }
@@ -90,7 +91,9 @@ class KarafPlugin implements Plugin<Project> {
                 }
             }
 
-            project.artifacts.add(ARTIFACTS_CONFIGURATION_NAME, ext.features.outputFile)
+            project.artifacts.add(ARTIFACTS_CONFIGURATION_NAME, ext.features.outputFile) {
+                classifier = 'features'
+            }
             project.artifacts.add(ARTIFACTS_CONFIGURATION_NAME, kar)
         }
     }

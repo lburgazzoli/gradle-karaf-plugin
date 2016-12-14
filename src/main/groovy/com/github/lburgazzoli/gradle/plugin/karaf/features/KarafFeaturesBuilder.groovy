@@ -21,13 +21,13 @@ import groovy.xml.MarkupBuilder
  * @author lburgazzoli
  */
 class KarafFeaturesBuilder extends MarkupBuilder {
-    private final Writer writer;
+    private final Writer writer
 
-    public KarafFeaturesBuilder() {
+    KarafFeaturesBuilder() {
         this(new StringWriter())
     }
 
-    public KarafFeaturesBuilder(Writer writer) {
+    KarafFeaturesBuilder(Writer writer) {
         super(writer)
 
         this.writer = writer
@@ -36,12 +36,12 @@ class KarafFeaturesBuilder extends MarkupBuilder {
         super.setDoubleQuotes(true)
     }
 
-    public getWriter() {
-        return this.writer;
+    Writer getWriter() {
+        return this.writer
     }
 
     @Override
-    public String toString() {
-        return writer.toString();
+    String toString() {
+        return writer.toString()
     }
 }

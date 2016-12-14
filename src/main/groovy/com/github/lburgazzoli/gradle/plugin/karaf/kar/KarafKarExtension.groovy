@@ -19,6 +19,7 @@ package com.github.lburgazzoli.gradle.plugin.karaf.kar
 import java.nio.file.Path
 import org.gradle.api.Project
 import org.gradle.api.tasks.OutputDirectory
+
 /**
  * @author lburgazzoli
  */

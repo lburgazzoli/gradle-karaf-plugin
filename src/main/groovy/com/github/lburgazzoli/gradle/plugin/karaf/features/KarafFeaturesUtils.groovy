@@ -29,6 +29,7 @@ import com.github.lburgazzoli.gradle.plugin.karaf.KarafPluginExtension
 import com.github.lburgazzoli.gradle.plugin.karaf.KarafUtils
 import com.github.lburgazzoli.gradle.plugin.karaf.features.model.DependencyDescriptor
 import com.github.lburgazzoli.gradle.plugin.karaf.features.model.FeatureDescriptor
+
 /**
  * @author lburgazzoli
  */
@@ -95,7 +96,7 @@ class KarafFeaturesUtils extends KarafUtils {
     }
 
     static boolean matches(ModuleVersionIdentifier v1, ModuleVersionIdentifier v2) {
-        return v1.group.equals(v2.group) && v1.name.equals(v2.name) && v1.version.equals(v2.version)
+        return v1.group == v2.group && v1.name == v2.name && v1.version == v2.version
     }
 
     static Collection<ResolvedArtifact> findArtifact(Configuration configuration, ModuleVersionIdentifier versionIdentifier) {

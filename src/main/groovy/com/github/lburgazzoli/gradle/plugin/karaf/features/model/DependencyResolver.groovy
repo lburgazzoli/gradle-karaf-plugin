@@ -21,7 +21,6 @@ import com.github.lburgazzoli.gradle.plugin.karaf.features.KarafFeaturesUtils
  * @author lburgazzoli
  */
 abstract class DependencyResolver {
-
     Collection<DependencyDescriptor> resolve(FeatureDescriptor featureDescriptor) {
         def deps = KarafFeaturesUtils.collectDependencies(
             featureDescriptor,

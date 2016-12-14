@@ -15,19 +15,13 @@
  */
 package com.github.lburgazzoli.gradle.plugin.karaf
 
-import java.nio.file.Files
-import java.nio.file.Path
-import java.nio.file.StandardCopyOption
-import org.gradle.jvm.tasks.Jar
-
-import com.github.lburgazzoli.gradle.plugin.karaf.KarafPluginExtension
-import com.github.lburgazzoli.gradle.plugin.karaf.mvn.MvnProtocolParser
+import org.gradle.util.ConfigureUtil
 
 /**
  * @author lburgazzoli
  */
 trait KarafTaskTrait {
-    private KarafPluginExtension pluginExtension;
+    private KarafPluginExtension pluginExtension
 
     void karaf(Closure closure) {
         this.pluginExtension = ConfigureUtil.configure(
