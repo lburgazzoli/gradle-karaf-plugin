@@ -18,6 +18,7 @@ package com.github.lburgazzoli.gradle.plugin.karaf.features.model
 import groovy.transform.EqualsAndHashCode
 import groovy.transform.ToString
 import org.gradle.api.artifacts.ModuleVersionIdentifier
+import org.gradle.api.artifacts.ResolvedArtifact
 import org.gradle.util.ConfigureUtil
 
 /**
@@ -66,12 +67,34 @@ abstract class FeatureDefinition {
         return this.bundleDescriptors
     }
 
+    BundleDescriptor findBundleDescriptors(ResolvedArtifact artifact) {
+        return this.bundleDescriptors.find {
+            it.matcher.matches(
+                artifact.moduleVersion.id.group,
+                artifact.moduleVersion.id.name,
+                artifact.moduleVersion.id.version,
+                artifact.type,
+                artifact.classifier
+            )
+        }
+    }
+
     BundleDescriptor findBundleDescriptors(DependencyDescriptor dependency) {
-        return this.bundleDescriptors.find { it.matches( dependency ) }
+        return this.bundleDescriptors.find {
+            it.matcher.matches(dependency)
+        }
     }
 
     BundleDescriptor findBundleDescriptors(ModuleVersionIdentifier identifier) {
-        return this.bundleDescriptors.find { it.matches( identifier ) }
+        return this.bundleDescriptors.find {
+            it.matcher.matches(
+                identifier.group,
+                identifier.name,
+                identifier.version,
+                null,
+                null
+            )
+        }
     }
 
     // *************************************************************************

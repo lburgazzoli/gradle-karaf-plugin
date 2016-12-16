@@ -100,8 +100,15 @@ class KarafFeaturesTest extends KarafTestSupport {
         given:
             def project = setupProject('com.lburgazzoli.github', 'gradle-karaf', '1.2.3') {
                 dependencies {
-                    compile 'ca.uhn.hapi.fhir:hapi-fhir-testpage-overlay:2.0:classes@jar'
-                    compile 'ca.uhn.hapi.fhir:hapi-fhir-testpage-overlay:2.0@war'
+                    compile group      : 'ca.uhn.hapi.fhir',
+                            name       : 'hapi-fhir-testpage-overlay',
+                            version    : '2.1',
+                            classifier : 'classes'
+                            //ext      : 'jar', // adding ext cause the resolution to fail
+                    compile group      : 'ca.uhn.hapi.fhir',
+                            name       : 'hapi-fhir-testpage-overlay',
+                            version    : '2.1',
+                            ext        : 'war'
                 }
             }
             def task = getKarafFeaturesTasks(project)
@@ -123,10 +130,59 @@ class KarafFeaturesTest extends KarafTestSupport {
             println featuresStr
 
             featuresXml.feature.bundle.'**'.findAll {
-                it.text().contains('wrap:mvn:ca.uhn.hapi.fhir/hapi-fhir-testpage-overlay/2.0')
+                it.text().contains('mvn:ca.uhn.hapi.fhir/hapi-fhir-testpage-overlay/2.1/jar/classes')
             }.size() == 1
             featuresXml.feature.bundle.'**'.findAll {
-                it.text().contains('war:mvn:ca.uhn.hapi.fhir/hapi-fhir-testpage-overlay/2.0/war')
+                it.text().contains('war:mvn:ca.uhn.hapi.fhir/hapi-fhir-testpage-overlay/2.1/war')
+            }.size() == 1
+    }
+
+    def 'Same GAV and reset type'() {
+        given:
+            def project = setupProject('com.lburgazzoli.github', 'gradle-karaf', '1.2.3') {
+                dependencies {
+                    compile group      : 'ca.uhn.hapi.fhir',
+                        name       : 'hapi-fhir-testpage-overlay',
+                        version    : '2.1',
+                        classifier : 'classes',
+                        transitive : true
+                    //ext      : 'jar', // adding ext cause the resolution to fail
+                    compile group      : 'ca.uhn.hapi.fhir',
+                        name       : 'hapi-fhir-testpage-overlay',
+                        version    : '2.1',
+                        ext        : 'war',
+                        transitive : true
+                }
+            }
+            def task = getKarafFeaturesTasks(project)
+        when:
+            def extension = getKarafExtension(project)
+            extension.features {
+                feature {
+                    name = "feature-1"
+                    description = "my feature n1"
+
+                    bundle ('ca.uhn.hapi.fhir:hapi-fhir-testpage-overlay:2.1:classes') {
+                        remap {
+                            type = null
+                        }
+                    }
+                }
+            }
+
+            def featuresStr = task.generateFeatures(extension.features)
+            def featuresXml = new XmlSlurper().parseText(featuresStr)
+        then:
+            featuresStr != null
+            featuresXml != null
+
+            println featuresStr
+
+            featuresXml.feature.bundle.'**'.findAll {
+                it.text().contains('mvn:ca.uhn.hapi.fhir/hapi-fhir-testpage-overlay/2.1//classes')
+            }.size() == 1
+            featuresXml.feature.bundle.'**'.findAll {
+                it.text().contains('war:mvn:ca.uhn.hapi.fhir/hapi-fhir-testpage-overlay/2.1/war')
             }.size() == 1
     }
 
@@ -241,8 +297,6 @@ class KarafFeaturesTest extends KarafTestSupport {
                     it.text().contains('mvn:com.squareup.retrofit/converter-jackson/1.9.0')
                 }.size() == 0
     }
-
-
 
     def 'Simple Single Project Wit ConfigFile'() {
         given:
@@ -383,6 +437,52 @@ class KarafFeaturesTest extends KarafTestSupport {
                 }.size() == 1
             featuresXml.feature.capability.'**'.findAll {
                     it.text().contains('osgi.service;filter')
+                }.size() == 1
+    }
+
+    def 'Simple Single Project Wit Wrap'() {
+        given:
+            def project = setupProject('com.lburgazzoli.github', 'gradle-karaf', '1.2.3') {
+                dependencies {
+                    compile 'org.apache.geronimo.specs:geronimo-jta_1.1_spec:1.1.1'
+                    compile 'com.eclipsesource.minimal-json:minimal-json:0.9.2'
+                    compile 'com.hazelcast:hazelcast-all:3.6.1'
+                }
+            }
+
+            def task = getKarafFeaturesTasks(project)
+        when:
+            def extension = getKarafExtension(project)
+            extension.features {
+                xsdVersion = "1.3.0"
+                feature {
+                    name        = 'hazelcast'
+                    description = 'In memory data grid'
+
+                    bundle('com.eclipsesource.minimal-json:minimal-json:0.9.2') {
+                        wrap {
+                            instruction 'Bundle-SymbolicName', 'my-bundle-name'
+                        }
+                    }
+                }
+            }
+
+            def featuresStr = task.generateFeatures(extension.features)
+            def featuresXml = new XmlSlurper().parseText(featuresStr)
+        then:
+            featuresStr != null
+            featuresXml != null
+
+            println featuresStr
+
+            featuresXml.feature.bundle.'**'.findAll {
+                    it.text().contains('wrap:mvn:com.eclipsesource.minimal-json/minimal-json/0.9.2$Bundle-SymbolicName=my-bundle-name')
+                }.size() == 1
+            featuresXml.feature.bundle.'**'.findAll {
+                    it.text().contains('mvn:org.apache.geronimo.specs/geronimo-jta_1.1_spec/1.1.1')
+                }.size() == 1
+            featuresXml.feature.bundle.'**'.findAll {
+                    it.text().contains('mvn:com.hazelcast/hazelcast-all/3.6.1')
                 }.size() == 1
     }
 }

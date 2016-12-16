@@ -17,53 +17,76 @@ package com.github.lburgazzoli.gradle.plugin.karaf.features.model
 
 import groovy.transform.ToString
 import org.gradle.api.IllegalDependencyNotation
-import org.gradle.api.artifacts.ModuleVersionIdentifier
-import org.gradle.api.artifacts.result.ResolvedComponentResult
 
 /**
  * @author Steve Ebersole
  * @author Luca Burgazzoli
  */
 @ToString(includeNames = true)
-public class DependencyMatcher {
-	String group
+class DependencyMatcher {
+    String group
     String name
     String version
+    String type
+    String classifier
 
-	public DependencyMatcher(String group, String name, String version) {
+    DependencyMatcher(String group, String name, String version, String type, String classifier) {
         this.group = group
         this.name = name
         this.version = version
-	}
+        this.type = type
+        this.classifier = classifier
+    }
 
-	public boolean matches(ResolvedComponentResult resolvedComponent) {
-		return matches( resolvedComponent.moduleVersion )
-	}
-
-	public boolean matches(ModuleVersionIdentifier check) {
-		return ( check.group.equals( group )
-            && ( name == null || check.name.equals( name ) )
-            && ( version == null || check.version.equals( version ) )
+    boolean matches(Dependency dependency) {
+        return this.matches(
+            dependency.group,
+            dependency.name,
+            dependency.version,
+            dependency.type,
+            dependency.classifier
         )
-	}
+    }
 
-	public boolean matches(Dependency check) {
-		return ( check.group.equals( group )
-			&& ( name == null || check.name.equals( name ) )
-			&& ( version == null || check.version.equals( version ) )
-		)
-	}
+    boolean matches(String group, String name, String version, String type, String classifier) {
+        if (this.group && this.group != group) {
+            return false
+        }
+        if (this.name && this.name != name) {
+            return false
+        }
+        if (this.version && this.version != version) {
+            return false
+        }
+        if (this.type && this.type != type) {
+            return false
+        }
+        if (this.classifier && this.classifier != classifier) {
+            return false
+        }
 
-	public static DependencyMatcher from(String notation) {
-		final String[] notationParts = notation.split(":");
-		if (notationParts.length < 1 || notationParts.length > 3) {
-			throw new IllegalDependencyNotation(
-                "Supplied String module notation '${notation}' is invalid.");
-		}
+        return true
+    }
+
+    static DependencyMatcher from(String notation) {
+        String type = null
+        if (notation.contains('@')) {
+            String[] fields = notation.split('@')
+            notation = fields[0]
+            type = fields[1]
+        }
+
+        String[] notationParts = notation.split(":")
+        if (notationParts.length < 1 || notationParts.length > 4) {
+            throw new IllegalDependencyNotation(
+                "Supplied String module notation '${notation}' is invalid.")
+        }
 
         return new DependencyMatcher(
             notationParts.length >= 1 ? notationParts[0] : null,
             notationParts.length >= 2 ? notationParts[1] : null,
-            notationParts.length == 3 ? notationParts[2] : null)
-	}
+            notationParts.length >= 3 ? notationParts[2] : null,
+            type,
+            notationParts.length == 4 ? notationParts[3] : null)
+    }
 }

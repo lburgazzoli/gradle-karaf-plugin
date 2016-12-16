@@ -31,12 +31,7 @@ class DependencyDescriptor extends Dependency {
         this.bundle = bundle
 
         if(bundle && bundle.remap) {
-            this.group   = bundle.remap.group ?: this.group
-            this.name    = bundle.remap.name ?: this.name
-            this.version = bundle.remap.version ?: this.version
-            this.type    = bundle.remap.type ?: this.type
-            this.file    = bundle.remap.file ?: this.file
-            this.kind    = bundle.remap.file ?: this.kind
+            bundle.remap.call(this)
         }
     }
 

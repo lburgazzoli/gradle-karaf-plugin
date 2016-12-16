@@ -145,7 +145,7 @@ class KarafFeaturesTask extends DefaultTask implements KarafTaskTrait  {
 
                             dependencies.each { dependency ->
                                 condition.bundleDescriptors.each {
-                                    if(it.matches(dependency)) {
+                                    if(it.matcher.matches(dependency)) {
                                         if (dependency.bundle) {
                                             builder.bundle(dependency.bundle.attributes, dependency.url)
                                         } else {

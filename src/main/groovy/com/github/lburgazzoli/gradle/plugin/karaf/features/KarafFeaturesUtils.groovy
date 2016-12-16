@@ -50,10 +50,6 @@ class KarafFeaturesUtils extends KarafUtils {
             FeatureDescriptor featureDescriptor, Configuration configuration, ResolvedComponentResult root,  Set<DependencyDescriptor> container) {
 
         def ext = KarafPluginExtension.lookup(featureDescriptor.project)
-        def instruction = featureDescriptor.findBundleDescriptors(root.moduleVersion)
-        if(instruction && !instruction.include) {
-            return
-        }
 
         if(root.id instanceof ProjectComponentIdentifier) {
             ProjectComponentIdentifier pci = root.id as ProjectComponentIdentifier
@@ -63,13 +59,19 @@ class KarafFeaturesUtils extends KarafUtils {
                 return
             }
 
-            KarafUtils.forEachTask(prj, KarafPlugin.ARTIFACT_TASKS) {
-                container << DependencyDescriptor.make(root, it, instruction)
+            def instruction = featureDescriptor.findBundleDescriptors(root.moduleVersion)
+            if(instruction == null || instruction.include) {
+                KarafUtils.forEachTask(prj, KarafPlugin.ARTIFACT_TASKS) {
+                    container << DependencyDescriptor.make(root, it, instruction)
+                }
             }
         } else {
 
             findArtifact(configuration, root.moduleVersion)?.each {
-                container << DependencyDescriptor.make(root, it, instruction)
+                def instruction = featureDescriptor.findBundleDescriptors(it)
+                if(instruction == null || instruction.include) {
+                    container << DependencyDescriptor.make(root, it, instruction)
+                }
             }
         }
     }

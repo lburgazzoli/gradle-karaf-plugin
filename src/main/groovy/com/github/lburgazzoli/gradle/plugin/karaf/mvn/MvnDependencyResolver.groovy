@@ -59,8 +59,15 @@ class MvnDependencyResolver extends DependencyResolver {
      * @param bundleCoordinates
      * @return
      */
-    public static String baseMvnUrl(DependencyDescriptor dependencyDescriptor) {
-        def gnv = "${dependencyDescriptor.group}/${dependencyDescriptor.name}/${dependencyDescriptor.version}";
+    static String baseMvnUrl(DependencyDescriptor dependencyDescriptor) {
+        def gnv = "${dependencyDescriptor.group}/${dependencyDescriptor.name}/${dependencyDescriptor.version}"
+
+        if (dependencyDescriptor.type && dependencyDescriptor.classifier) {
+            gnv = "${gnv}/${dependencyDescriptor.type}/${dependencyDescriptor.classifier}"
+        } else if (!dependencyDescriptor.type && dependencyDescriptor.classifier) {
+            gnv = "${gnv}//${dependencyDescriptor.classifier}"
+        }
+
         return dependencyDescriptor.isWar() ? "war:mvn:${gnv}/war" : "mvn:${gnv}"
     }
 }

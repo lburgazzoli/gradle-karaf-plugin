@@ -86,11 +86,11 @@ class Dependency {
     }
 
     boolean isJar() {
-        return this.type && this.type.equals('jar')
+        return this.type && this.type == 'jar'
     }
 
     boolean isWar() {
-        return this.type && this.type.equals('war')
+        return this.type && this.type == 'war'
     }
 
     boolean isOSGi() {

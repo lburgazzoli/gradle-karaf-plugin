@@ -35,7 +35,7 @@ class FeatureDescriptor extends FeatureDefinition {
     final List<Configuration> configurations
     final List<FeatureCondition> conditions
 
-    public FeatureDescriptor(Project project) {
+    FeatureDescriptor(Project project) {
         this.project = project
         this.name = null
         this.version = project.version
@@ -110,7 +110,7 @@ class FeatureDescriptor extends FeatureDefinition {
     boolean isConditional(DependencyDescriptor dependency) {
         return this.conditions.find {
             condition -> condition.bundleDescriptors.find {
-                instruction -> instruction.matches(dependency)
+                instruction -> instruction.matcher.matches(dependency)
             }
         } != null
     }
@@ -121,19 +121,19 @@ class FeatureDescriptor extends FeatureDefinition {
 
     class ConfigurationsHelper {
 
-        public add(String configurationName) {
+        def add(String configurationName) {
             add(project.configurations.getByName(configurationName))
         }
 
-        public add(Configuration configuration) {
+        def add(Configuration configuration) {
             FeatureDescriptor.this.configuration(configuration)
         }
 
-        public del(String configurationName) {
+        def del(String configurationName) {
             del(project.configurations.getByName(configurationName))
         }
 
-        public del(Configuration configuration) {
+        def del(Configuration configuration) {
             configurations.remove(configuration)
         }
     }

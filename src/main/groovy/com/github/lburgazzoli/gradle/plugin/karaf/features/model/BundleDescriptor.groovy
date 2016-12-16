@@ -15,9 +15,7 @@
  */
 package com.github.lburgazzoli.gradle.plugin.karaf.features.model
 
-import org.gradle.api.artifacts.ModuleVersionIdentifier
 import org.gradle.util.ConfigureUtil
-
 /**
  * DSL extension allowing instruction on how to produce a {@code <bundle/>} entry
  * in a Karaf features repository file
@@ -27,7 +25,7 @@ import org.gradle.util.ConfigureUtil
  */
 class BundleDescriptor {
 	private DependencyMatcher matcher
-    private Dependency remap
+    private Closure remap
 
 	boolean include
     boolean wrap
@@ -47,14 +45,6 @@ class BundleDescriptor {
 	DependencyMatcher getMatcher() {
 		return matcher
 	}
-
-    boolean matches(Dependency dependency) {
-        return matcher.matches(dependency)
-    }
-
-    boolean matches(ModuleVersionIdentifier identifier) {
-        return matcher.matches(identifier)
-    }
 
     // *************************************************************************
     // Shortcuts for attributes/instructions
@@ -82,25 +72,23 @@ class BundleDescriptor {
     // Remap
     // *************************************************************************
 
-	def remap(Closure closure) {
-		remap = ConfigureUtil.configure(
-            closure,
-            new Dependency()
-        )
+	def remap(final Closure closure) {
+		remap = {
+            dependency -> ConfigureUtil.configure(closure, dependency)
+        }
 	}
 
-    def remap(Map properties) {
-		remap = ConfigureUtil.configureByMap(
-            properties,
-            new Dependency()
-        )
+    def remap(final Map properties) {
+		remap = {
+            dependency -> ConfigureUtil.configureByMap(properties, dependency)
+        }
 	}
 
     boolean hasRemap() {
-        return this.remap != null;
+        return this.remap != null
     }
 
-    DependencyDescriptor getRemap() {
+    Closure getRemap() {
 		return remap
 	}
 
@@ -118,12 +106,20 @@ class BundleDescriptor {
 	}
 
     private class WrapInstructionsHelper {
-        public void attribute(String key, String value) {
-            instruction(key, value);
+        void attribute(String key, String value) {
+            instruction(key, value)
         }
 
-        public void attribute(Map<String, String> instructions) {
+        void attribute(Map<String, String> instructions) {
             instruction(instructions)
+        }
+
+        void instruction(String key, String value) {
+            BundleDescriptor.this.instruction(key, value)
+        }
+
+        void instruction(Map<String, String> instructions) {
+            BundleDescriptor.this.instruction(instructions)
         }
     }
 
