@@ -24,7 +24,7 @@ import com.github.lburgazzoli.gradle.plugin.karaf.KarafTaskTrait
 /**
  * @author lburgazzoli
  */
-class KarafFeaturesTask extends DefaultTask implements KarafTaskTrait  {
+class KarafFeaturesTask extends DefaultTask implements KarafTaskTrait {
     public static final String GROUP = "karaf"
     public static final String NAME = "generateFeatures"
     public static final String DESCRIPTION = "Generates Karaf features file"

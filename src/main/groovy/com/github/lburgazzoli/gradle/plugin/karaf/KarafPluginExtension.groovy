@@ -15,6 +15,7 @@
  */
 package com.github.lburgazzoli.gradle.plugin.karaf
 
+import com.github.lburgazzoli.gradle.plugin.karaf.distribution.KarafDistributionExtension
 import org.gradle.api.Project
 import org.gradle.util.ConfigureUtil
 
@@ -30,11 +31,13 @@ class KarafPluginExtension {
     private final Project project
     private KarafFeaturesExtension features
     private KarafKarExtension kar
+    private KarafDistributionExtension distribution
 
     KarafPluginExtension(Project project) {
         this.project = project
         this.features = null
         this.kar = null
+        this.distribution = null
     }
 
     // *************************************************************************
@@ -78,6 +81,29 @@ class KarafPluginExtension {
 
     boolean hasKar() {
         return getKar().enabled
+    }
+
+    // *************************************************************************
+    // Distribution
+    // *************************************************************************
+
+    def distribution(Closure closure) {
+        getKar()
+
+        kar.enabled = true
+        kar = ConfigureUtil.configure(closure, kar)
+    }
+
+    KarafDistributionExtension getDistribution() {
+        if (!this.distribution) {
+            this.distribution = new KarafDistributionExtension(project)
+        }
+
+        return this.distribution
+    }
+
+    boolean hasDistribution() {
+        return getDistribution().enabled
     }
 
     // *************************************************************************

@@ -25,7 +25,8 @@ import org.gradle.api.tasks.OutputDirectory
  */
 class KarafKarExtension {
     private final Project project
-    boolean enabled;
+
+    boolean enabled
     String archiveName
 
     @OutputDirectory

@@ -58,7 +58,8 @@ ext {
     versions = [
         slf4j  : '1.7.21',
         paxUrl : '2.5.1',
-        spock  : "1.0-groovy-${groovyVersion}"
+        spock  : "1.0-groovy-${groovyVersion}",
+        karaf  : '4.0.8'
     ]
 
     if (isReleaseVersion) {
@@ -84,6 +85,7 @@ dependencies {
     compile localGroovy()
 
     compile "org.ops4j.pax.url:pax-url-aether:$versions.paxUrl"
+    compile "org.apache.karaf.profile:org.apache.karaf.profile.core:$versions.karaf"
 
     testCompile("org.spockframework:spock-core:$versions.spock") {
         exclude(module: 'groovy-all')
