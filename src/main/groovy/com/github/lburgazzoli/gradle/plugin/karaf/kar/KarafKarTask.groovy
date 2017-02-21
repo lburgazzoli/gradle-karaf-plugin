@@ -71,7 +71,7 @@ class KarafKarTask extends Jar implements KarafTaskTrait  {
                 if (it.filename && it.uri && it.file) {
                     def dep = MvnProtocolParser.parse(it.uri)
                     if (dep) {
-                        def dep = MvnProtocolParser.parse(it.uri)
+                       def(protocol, groupArtifact) = dep.group.tokenize(':')
                         copy(
                             it.file,
                             asKarPath(
