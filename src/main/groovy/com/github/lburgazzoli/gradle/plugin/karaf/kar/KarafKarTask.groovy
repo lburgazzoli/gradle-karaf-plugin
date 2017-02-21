@@ -71,11 +71,12 @@ class KarafKarTask extends Jar implements KarafTaskTrait  {
                 if (it.filename && it.uri && it.file) {
                     def dep = MvnProtocolParser.parse(it.uri)
                     if (dep) {
+                        def dep = MvnProtocolParser.parse(it.uri)
                         copy(
                             it.file,
                             asKarPath(
                                 root,
-                                "${dep.group.replaceAll("\\.", "/")}/${dep.name}/${dep.version}",
+                                "${groupArtifact.replaceAll("\\.", "/")}/${dep.name}/${dep.version}",
                                 dep.hasClassifier()
                                     ? "${dep.name}-${dep.version}-${dep.classifier}.${dep.type}"
                                     : "${dep.name}-${dep.version}.${dep.type}"
