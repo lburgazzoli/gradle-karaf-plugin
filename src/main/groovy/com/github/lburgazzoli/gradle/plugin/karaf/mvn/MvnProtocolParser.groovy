@@ -27,7 +27,8 @@ class MvnProtocolParser {
         def parser = new Parser(path)
 
         def dependency = new Dependency()
-        dependency.group = parser.group
+        def(protocol, groupArtifact) = parser.group.tokenize(':')
+        dependency.group = groupArtifact
         dependency.name = parser.artifact
         dependency.version = parser.version
         dependency.type = parser.type ?: dependency.type
