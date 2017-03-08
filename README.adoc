@@ -17,7 +17,7 @@ image:https://travis-ci.org/lburgazzoli/gradle-karaf-plugin.svg[title="Build Sta
 plugins {
     id 'maven'
     id 'java'
-    id 'com.github.lburgazzoli.karaf' version '0.0.32'
+    id 'com.github.lburgazzoli.karaf' version '0.0.44'
 }
 
 repositories {
