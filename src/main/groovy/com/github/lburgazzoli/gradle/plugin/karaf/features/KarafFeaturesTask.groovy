@@ -24,7 +24,7 @@ import com.github.lburgazzoli.gradle.plugin.karaf.KarafTaskTrait
 /**
  * @author lburgazzoli
  */
-class KarafFeaturesTask extends DefaultTask implements KarafTaskTrait  {
+class KarafFeaturesTask extends DefaultTask implements KarafTaskTrait {
     public static final String GROUP = "karaf"
     public static final String NAME = "generateFeatures"
     public static final String DESCRIPTION = "Generates Karaf features file"
@@ -80,10 +80,18 @@ class KarafFeaturesTask extends DefaultTask implements KarafTaskTrait  {
 
                     feature.configFiles.each {
                         if (it.filename && it.uri) {
-                            builder.configfile(
-                                [ finalname: it.filename ],
-                                it.uri
-                            )
+                            if (it.override) {
+                                builder.configfile(
+                                     [ finalname: it.filename,
+                                       override: it.override ],
+                                     it.uri
+                                )
+                            } else {
+                                builder.configfile(
+                                    [ finalname: it.filename ],
+                                    it.uri
+                                )
+                            }
                         }
                     }
 
