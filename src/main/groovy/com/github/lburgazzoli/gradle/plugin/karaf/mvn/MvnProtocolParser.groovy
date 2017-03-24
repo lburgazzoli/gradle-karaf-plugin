@@ -25,9 +25,11 @@ class MvnProtocolParser {
 
     static Dependency parse(String path) {
         def parser = new Parser(path)
-
         def dependency = new Dependency()
-        dependency.group = parser.group
+
+        // Parser.getGroup() returns a group prefixed with 'mvn:' which should
+        // be removed
+        dependency.group = parser.group - ~/^mvn:/
         dependency.name = parser.artifact
         dependency.version = parser.version
         dependency.type = parser.type ?: dependency.type
