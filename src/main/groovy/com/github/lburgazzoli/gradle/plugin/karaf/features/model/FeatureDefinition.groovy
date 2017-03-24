@@ -150,6 +150,15 @@ abstract class FeatureDefinition {
 
         configFiles << configFile
     }
+    
+    def configFile(String uri, String fileName, boolean override, Closure closure) {
+        def configFile = new ConfigFile(uri, fileName, override)
+        if(closure) {
+            ConfigureUtil.configure(closure, configFile)
+        }
+
+        configFiles << configFile
+    }
 
     def configFile(Closure closure) {
         def configFile = new ConfigFile()
@@ -187,7 +196,7 @@ abstract class FeatureDefinition {
     }
 
     @ToString(includeNames = true)
-    @EqualsAndHashCode(includes = [ 'uri', 'filename' ])
+    @EqualsAndHashCode(includes = [ 'uri', 'filename', 'override' ])
     class ConfigFile {
         String uri
         String filename
@@ -203,10 +212,14 @@ abstract class FeatureDefinition {
         }
 
         public ConfigFile(String uri, String filename, File file) {
+            this(uri, filename, file, false)
+        }
+        
+        public ConfigFile(String uri, String filename, File file, boolean override) {
             this.uri = name
             this.filename = filename
-            this.file = file;
-            this.override = false
+            this.file = file
+            this.override = override
         }
     }
 
