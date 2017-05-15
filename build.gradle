@@ -3,33 +3,16 @@
 //
 // *****************************************************************************
 
-buildscript {
-    repositories {
-        mavenCentral()
-        mavenLocal()
-        jcenter()
-    }
-
-    dependencies {
-        classpath 'io.codearte.gradle.nexus:gradle-nexus-staging-plugin:0.5.3'
-    }
-}
-
-// *****************************************************************************
-//
-// *****************************************************************************
-
 plugins {
     id 'java'
     id 'groovy'
     id 'maven'
     id 'signing'
-    id 'com.gradle.plugin-publish' version '0.9.6'
-    id 'net.researchgate.release' version '2.5.0'
+    id 'com.gradle.plugin-publish' version '0.9.7'
+    id 'net.researchgate.release' version '2.6.0'
     id 'com.github.ben-manes.versions' version '0.14.0'
+    id "io.codearte.nexus-staging" version "0.8.0"
 }
-
-apply plugin: 'io.codearte.nexus-staging'
 
 // *****************************************************************************
 //

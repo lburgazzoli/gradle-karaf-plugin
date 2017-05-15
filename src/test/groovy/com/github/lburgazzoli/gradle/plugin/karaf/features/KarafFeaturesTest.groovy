@@ -141,7 +141,7 @@ class KarafFeaturesTest extends KarafTestSupport {
         given:
             def project = setupProject('com.lburgazzoli.github', 'gradle-karaf', '1.2.3') {
                 dependencies {
-                    compile group      : 'ca.uhn.hapi.fhir',
+                    compile group  : 'ca.uhn.hapi.fhir',
                         name       : 'hapi-fhir-testpage-overlay',
                         version    : '2.1',
                         classifier : 'classes',
