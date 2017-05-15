@@ -80,18 +80,13 @@ class KarafFeaturesTask extends DefaultTask implements KarafTaskTrait {
 
                     feature.configFiles.each {
                         if (it.filename && it.uri) {
-                            if (it.override) {
-                                builder.configfile(
-                                     [ finalname: it.filename,
-                                       override: it.override ],
-                                     it.uri
-                                )
-                            } else {
-                                builder.configfile(
-                                    [ finalname: it.filename ],
-                                    it.uri
-                                )
-                            }
+                            builder.configfile(
+                                [ 
+                                    finalname: it.filename,
+                                    override: it.override 
+                                ],
+                                it.uri
+                            )
                         }
                     }
 
