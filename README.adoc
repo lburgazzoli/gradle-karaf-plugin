@@ -121,6 +121,10 @@ karaf {
         // Include the current project, false by default
         includeProject = false
 
+        // Add in extra repositories to the features xml file
+        repository "mvn:org.apache.karaf.cellar/apache-karaf-cellar/4.0.0/xml/features"
+        repository "mvn:org.apache.karaf.features/standard/4.0.0/xml/features"
+
         // Define a feature named 'common' with dependencies from runtime
         // configuration (default) and commons
         feature {
@@ -217,6 +221,8 @@ karaf {
 ----
 <?xml version="1.0" encoding="UTF-8" standalone="yes"?>
 <features xmlns="http://karaf.apache.org/xmlns/features/v1.2.0" name="gradle-karaf-features-plugin-examples">
+  <repository>mvn:org.apache.karaf.cellar/apache-karaf-cellar/4.0.0/xml/features</repository>
+  <repository>mvn:org.apache.karaf.features/standard/4.0.0/xml/features</repository>
   <feature name="common" version="0.0.1" description="Common dependencies">
     <bundle>mvn:com.google.guava/guava/19.0</bundle>
     <bundle>mvn:commons-io/commons-io/2.4</bundle>
