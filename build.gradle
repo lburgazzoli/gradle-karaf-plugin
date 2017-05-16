@@ -210,6 +210,11 @@ uploadArchives {
 afterReleaseBuild.dependsOn publishPlugins, uploadArchives
 
 task ci(dependsOn: project.gradleCiTasks) {
+    doFirst {
+        println "=============================================================="
+        println "CI Tasks: ${project.gradleCiTasks}"
+        println "=============================================================="
+    }
 }
 
 task close(dependsOn: 'closeAndPromoteRepository') {
