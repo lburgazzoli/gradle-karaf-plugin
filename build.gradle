@@ -27,7 +27,7 @@ ext {
     isReleaseVersion  = !version.endsWith("SNAPSHOT")
     isSnapshotVersion = version.endsWith("SNAPSHOT")
     isCI              = Boolean.valueOf("$System.env.CI")
-    isPR              = null != System.env.CI_PULL_REQUEST
+    isPR              = System.env.CI_PULL_REQUEST?.trim() as Boolean
     gitRoot           = "https://github.com/lburgazzoli"
     gitProject        = "https://github.com/lburgazzoli/gradle-karaf-plugin"
     gitURL            = "git@github.com:lburgazzoli/gradle-karaf-plugin"
