@@ -27,7 +27,7 @@ ext {
     isReleaseVersion  = !version.endsWith("SNAPSHOT")
     isSnapshotVersion = version.endsWith("SNAPSHOT")
     isCI              = Boolean.valueOf("$System.env.CI")
-    isPR              = "false" != System.env.TRAVIS_PULL_REQUEST || null != System.env.CI_PULL_REQUEST
+    isPR              = null != System.env.CI_PULL_REQUEST
     gitRoot           = "https://github.com/lburgazzoli"
     gitProject        = "https://github.com/lburgazzoli/gradle-karaf-plugin"
     gitURL            = "git@github.com:lburgazzoli/gradle-karaf-plugin"
@@ -50,7 +50,7 @@ ext {
         nexusUrl = 'https://oss.sonatype.org/content/repositories/snapshots/'
     }
 
-    if(!project.hasProperty('nexusUsername') && !project.hasProperty('nexusPassword')) {
+    if (!project.hasProperty('nexusUsername') && !project.hasProperty('nexusPassword')) {
         nexusUsername = "$System.env.CI_DEPLOY_USERNAME"
         nexusPassword = "$System.env.CI_DEPLOY_PASSWORD"
     }
@@ -95,7 +95,7 @@ jar {
 
 test {
     testLogging {
-        events "started", "passed", "skipped", "failed", "standardOut", "standardError"
+        events "started", "passed", "skipped", "failed", "standardError"
     }
 }
 
@@ -217,5 +217,5 @@ task ci(dependsOn: project.gradleCiTasks) {
     }
 }
 
-task close(dependsOn: 'closeAndPromoteRepository') {
+task close(dependsOn: 'closeAndReleaseRepository') {
 }
