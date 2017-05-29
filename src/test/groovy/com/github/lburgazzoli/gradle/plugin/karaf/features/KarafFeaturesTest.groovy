@@ -229,6 +229,11 @@ class KarafFeaturesTest extends KarafTestSupport {
                     runtime "com.squareup.retrofit:converter-jackson:1.9.0"
                     compile "org.apache.activemq:activemq-web:5.13.2"
                     compile "org.apache.activemq:activemq-web-console:5.13.2@war"
+                    compile "commons-codec:commons-codec:1.10"
+                    compile "commons-collections:commons-collections:3.2.2"
+                    compile "commons-fileupload:commons-fileupload:1.3.2"
+                    compile "commons-io:commons-io:2.5"
+                    compile "commons-lang:commons-lang:2.6"
                 }
             }
 
@@ -263,6 +268,10 @@ class KarafFeaturesTest extends KarafTestSupport {
                     bundle('com.squareup.retrofit:converter-jackson') {
                         include = false
                     }
+
+                    bundle('commons-*:*-c*') {
+                        attribute 'dependency', 'true'
+                    }
                 }
             }
 
@@ -296,6 +305,9 @@ class KarafFeaturesTest extends KarafTestSupport {
             featuresXml.feature.bundle.'**'.findAll {
                     it.text().contains('mvn:com.squareup.retrofit/converter-jackson/1.9.0')
                 }.size() == 0
+            featuresXml.feature.bundle.'**'.findAll {
+                    it.text().contains('mvn:commons-') && it.@dependency == "true"
+                }.size() == 2
     }
 
     def 'Simple Single Project With ConfigFile'() {
