@@ -1,7 +1,9 @@
 gradle-karaf-plugin
 ===================
 
-image:https://travis-ci.org/lburgazzoli/gradle-karaf-plugin.svg[title="Build Status", link="https://travis-ci.org/lburgazzoli/gradle-karaf-plugin"] image:https://maven-badges.herokuapp.com/maven-central/com.github.lburgazzoli/gradle-karaf-plugin/badge.svg[title="Maven Central", link="https://maven-badges.herokuapp.com/maven-central/com.github.lburgazzoli/gradle-karaf-plugin"] image:http://img.shields.io/:license-apache-brightgreen.svg[title="License", link="http://www.apache.org/licenses/LICENSE-2.0.html"]
+image:https://badges.gitter.im/lburgazzoli/gradle-karaf-plugin.svg[link="https://gitter.im/lburgazzoli/gradle-karaf-plugin?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge&utm_content=badge"]
+
+image:https://circleci.com/gh/lburgazzoli/gradle-karaf-plugin.svg?style=shield["CircleCI", link="https://circleci.com/gh/lburgazzoli/gradle-karaf-plugin"] image:https://maven-badges.herokuapp.com/maven-central/com.github.lburgazzoli/gradle-karaf-plugin/badge.svg[title="Maven Central", link="https://maven-badges.herokuapp.com/maven-central/com.github.lburgazzoli/gradle-karaf-plugin"] image:http://img.shields.io/:license-apache-brightgreen.svg[title="License", link="http://www.apache.org/licenses/LICENSE-2.0.html"] image:https://img.shields.io/gitter/room/nwjs/nw.js.svg?maxAge=2592000[title="Gitter", link="https://gitter.im/gradle-karaf-plugin)[link="https://gitter.im/gradle-karaf-plugin?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge&utm_content=badge"]
 
 == Features
 
@@ -10,14 +12,64 @@ image:https://travis-ci.org/lburgazzoli/gradle-karaf-plugin.svg[title="Build Sta
 - [ ] Karaf custom distribution
 - [ ] Nice documentation
 
+== Tasks
+Automatically generate Karaf feature file in /build/karaf/features
+[source,groovy]
+----
+gradle generateFeatures
+----
+
+Automatically generate Karaf kar file in /build/karaf/kar
+[source,groovy]
+----
+gradle generateKar
+----
+
+
+== Description
+
+The *gradle-karaf-plugin* is designed to automate the process of creating Apache Karaf *feature* and *kar* files.
+
+This plugin generates the desired karaf files by utilizing the native gradle configurations mechanism. As gradle automatically determines all direct and transitive dependencies, a complete list of dependencies is provided to the plugin for a given set of configurations.
+
+As OSGi can only install bundles, standard jars must be wrapped to add necessary manifest information specifying the jar's import and export packages. To simply this process Karaf provides a native wrap tool that can be run during jar/bundle installation. This plugin determines if each dependency is already a bundle and adds the _wrap_ tag if it is not (see example below).
+
+== Notes
+ - Considering that gradle automatically "promotes" dependency version conflicts, only a single version of a dependency is avalible per each gradle configuration. As OSGi bundles can mandate certain versions of dependencies, it is likely that multiple versions of a jar/bundle are needed. In this case, it is recommended to add another gradle configuration, perhaps "karaf", and specify the other dependency version under this new configuration. Include both configurations to the karaf->features->feature->configurations statement (see example below). This will result in both versions of the dependency being added to the feature/kar file.
+
+ - Karaf 4 support requires the xsd version be at least '1.3.0'
+
+ - This plugin is an extension of the previous https://github.com/lburgazzoli/gradle-karaf-features-plugin[gradle-karaf-feature-plugin^]
+
+== Requirements
+ - Gradle 3.0+
+
+== Usage
+[source,groovy]
+----
+apply plugin: 'com.github.lburgazzoli.karaf'
+
+buildscript {
+    dependencies {
+        classpath "gradle.plugin.com.github.lburgazzoli:gradle-karaf-plugin:0.0.46"
+    }
+}
+
+repositories {
+    mavenCentral()
+}
+----
+
 == Example
+
+=== build.gradle
 
 [source,groovy]
 ----
 plugins {
     id 'maven'
     id 'java'
-    id 'com.github.lburgazzoli.karaf' version '0.0.32'
+    id 'com.github.lburgazzoli.karaf' version '0.0.46'
 }
 
 repositories {
@@ -34,7 +86,7 @@ configurations {
     square
     hazelcast
 
-    // Avoid adding transitive dependencies
+    // This will avoid adding transitive dependencies
     ariesBlueprint {
         transitive = false
     }
@@ -63,12 +115,17 @@ dependencies {
 
 karaf {
     features {
+        // See section below for karaf 4 support if using 1.3.0
         xsdVersion  = '1.2.0'
-        version     = '4.0.0'
+        version     = '4.0.0' // Your project version
         description = 'Karaf features'
 
         // Include the current project, false by default
         includeProject = false
+
+        // Add in extra repositories to the features xml file
+        repository "mvn:org.apache.karaf.cellar/apache-karaf-cellar/4.0.0/xml/features"
+        repository "mvn:org.apache.karaf.features/standard/4.0.0/xml/features"
 
         // Define a feature named 'common' with dependencies from runtime
         // configuration (default) and commons
@@ -97,7 +154,7 @@ karaf {
             // Override configurations
             configurations 'ariesBlueprint'
 
-            // Add feature dependency
+            // Add feature dependency (newest)
             feature 'aries-proxy'
 
             // Customize artifacts with group 'org.apache.aries.blueprint'
@@ -142,6 +199,7 @@ karaf {
                 filename = "/etc/hazelcast-clustered.xml"
                 file     = file("etc/hazelcast-clustered-defaults.xml")
                 uri      = "mvn:org.apache.karaf.cellar/apache-karaf-cellar/${project.version}/xml/hazelcast-clustered"
+                override = true // (optional) Override existing configuration files within karaf. False by default
             }
         }
     }
@@ -159,11 +217,14 @@ karaf {
 }
 ----
 
+=== Generated Result from "gradle generateFeatures"
 
 [source,xml]
 ----
 <?xml version="1.0" encoding="UTF-8" standalone="yes"?>
 <features xmlns="http://karaf.apache.org/xmlns/features/v1.2.0" name="gradle-karaf-features-plugin-examples">
+  <repository>mvn:org.apache.karaf.cellar/apache-karaf-cellar/4.0.0/xml/features</repository>
+  <repository>mvn:org.apache.karaf.features/standard/4.0.0/xml/features</repository>
   <feature name="common" version="0.0.1" description="Common dependencies">
     <bundle>mvn:com.google.guava/guava/19.0</bundle>
     <bundle>mvn:commons-io/commons-io/2.4</bundle>
@@ -201,4 +262,49 @@ karaf {
     <bundle>mvn:com.hazelcast/hazelcast-all/3.6.1</bundle>
   </feature>
 </features>
+----
+
+=== Karaf 4 Support
+
+
+Karaf 4 features xsd v1.3.0 partially supported
+[source,groovy]
+----
+<feature version="1.2.3" dependency="true">dependent-feature</feature>
+----
+
+To generate this stuff
+
+1. Set xsdVersion to 1.3.0
+2. Use dependency with configuration closure
+
+[source,groovy]
+----
+karafFeatures {
+  name = 'featuresName'
+  xsdVersion = '1.3.0'
+  outputFile = file("${project.buildDir}/karaf/features/${project.name}-feature.xml")
+  features {
+    mainFeature {
+      name = 'main-feature-name'
+      feature('dependent-feature') {
+        dependency = true              //false by default
+        version = "1.2.3"              //empty by default
+      }
+    }
+  }
+}
+----
+
+generated file `build/karaf/features/project1-feature.xml` will look like below
+
+[source,groovy]
+----
+
+<features xmlns='http://karaf.apache.org/xmlns/features/v1.3.0' name='featuresName'>
+  <feature name='main-feature-name' version='1.0.0'>
+    <feature version="1.2.3" dependency="true">dependent-feature</feature>
+  </feature>
+</features>
+
 ----
