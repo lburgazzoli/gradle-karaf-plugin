@@ -35,7 +35,7 @@ As OSGi can only install bundles, standard jars must be wrapped to add necessary
 == Notes
  - Considering that gradle automatically "promotes" dependency version conflicts, only a single version of a dependency is avalible per each gradle configuration. As OSGi bundles can mandate certain versions of dependencies, it is likely that multiple versions of a jar/bundle are needed. In this case, it is recommended to add another gradle configuration, perhaps "karaf", and specify the other dependency version under this new configuration. Include both configurations to the karaf->features->feature->configurations statement (see example below). This will result in both versions of the dependency being added to the feature/kar file.
 
- - Karaf 4 support requires the xsd version be at least '1.3.0'
+ - Karaf 4 support requires the xsd version be at least '1.3.0'.
 
  - This plugin is an extension of the previous https://github.com/lburgazzoli/gradle-karaf-features-plugin[gradle-karaf-feature-plugin^]
 
@@ -49,7 +49,7 @@ apply plugin: 'com.github.lburgazzoli.karaf'
 
 buildscript {
     dependencies {
-        classpath "gradle.plugin.com.github.lburgazzoli:gradle-karaf-plugin:0.0.46"
+        classpath "gradle.plugin.com.github.lburgazzoli:gradle-karaf-plugin:0.0.47"
     }
 }
 
@@ -67,7 +67,7 @@ repositories {
 plugins {
     id 'maven'
     id 'java'
-    id 'com.github.lburgazzoli.karaf' version '0.0.46'
+    id 'com.github.lburgazzoli.karaf' version '0.0.47'
 }
 
 repositories {
