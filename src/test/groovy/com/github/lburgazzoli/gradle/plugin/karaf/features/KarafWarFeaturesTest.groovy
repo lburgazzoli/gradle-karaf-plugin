@@ -69,4 +69,44 @@ class KarafWarFeaturesTest extends KarafTestSupport {
                 it.text().contains('war:mvn:org.apache.activemq/activemq-web-console/5.13.2/war?Webapp-Context=activemq-web-console')
             }.size() == 1
     }
+
+    def 'Project War Dependencies'() {
+        given:
+            def project = setupProject('com.lburgazzoli.github', 'gradle-karaf', '1.2.3') {
+                apply plugin: 'war'
+                apply plugin: 'osgi'
+
+                war {
+                    manifest = osgiManifest {
+                        instruction 'Web-ContextPath', '/context-path'
+                        instruction 'Webapp-Context', '/context-path'
+                        instruction 'Bundle-ClassPath', '.;/WEB-INF/classes'
+                    }
+                }
+            }
+
+            def task = getKarafFeaturesTasks(project)
+        when:
+            def extension = getKarafExtension(project)
+            extension.features {
+                feature {
+                    includeProject = true
+                }
+            }
+
+            def featuresStr = task.generateFeatures(extension.features)
+            def featuresXml = new XmlSlurper().parseText(featuresStr)
+        then:
+            featuresStr != null
+            featuresXml != null
+
+            println featuresStr
+
+            featuresXml.feature.bundle.'**'.findAll {
+                it.text().equals('war:mvn:com.lburgazzoli.github/gradle-karaf/1.2.3/war')
+            }.size() == 1
+            featuresXml.feature.bundle.'**'.findAll {
+                it.text().equals('mvn:com.lburgazzoli.github/gradle-karaf/1.2.3')
+            }.size() == 0
+    }
 }
