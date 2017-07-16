@@ -1,0 +1,14 @@
+sudo: false
+language: java
+addons:
+  apt:
+    packages:
+    - oracle-java8-installer
+script: "
+  ./gradlew ci
+"
+jdk:
+- oraclejdk8
+env:
+  global:
+  - CI: true
