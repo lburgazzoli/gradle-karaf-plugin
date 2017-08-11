@@ -161,9 +161,9 @@ class KarafFeaturesTask extends DefaultTask implements KarafTaskTrait {
                     }
 
                     if (feature.capabilities) {
-                        builder.capability(
-                            feature.capabilities.collect { it.format() }.join(',')
-                        )
+                        feature.capabilities.each {
+                            builder.capability(it.format())
+                        }
                     }
                 }
             }

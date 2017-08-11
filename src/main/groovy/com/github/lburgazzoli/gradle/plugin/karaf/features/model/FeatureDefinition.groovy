@@ -29,14 +29,14 @@ abstract class FeatureDefinition {
     final List<FeatureDependencyDescriptor> featureDependencies
     final Set<Config> configs
     final Set<ConfigFile> configFiles
-    final Set<Capability> capabilities
+    final List<Capability> capabilities
 
     protected FeatureDefinition() {
         this.bundleDescriptors = new LinkedList<>()
         this.featureDependencies = new LinkedList<>()
         this.configs = new LinkedHashSet<>()
         this.configFiles = new LinkedHashSet<>()
-        this.capabilities = new LinkedHashSet<>()
+        this.capabilities = new LinkedList<>()
     }
 
     // *************************************************************************

@@ -490,6 +490,10 @@ class KarafFeaturesTest extends KarafTestSupport {
                         effective = 'active'
                         filter    = '(&(osgi.extender=osgi.enroute.configurer)${frange;1.2.3})'
                     }
+                    capability('osgi.service') {
+                        effective = 'active'
+                        extra    = 'objectClass=javax.jms.ConnectionFactory'
+                    }
                 }
             }
 
@@ -507,6 +511,9 @@ class KarafFeaturesTest extends KarafTestSupport {
             featuresXml.feature.capability.'**'.findAll {
                     it.text().contains('osgi.service;filter')
                 }.size() == 1
+            featuresXml.feature.capability.'**'.findAll {
+                it.text().contains('osgi.service;effective:=\'active\';resolution:=\'mandatory\';objectClass=javax.jms.ConnectionFactory')
+            }.size() == 1
     }
 
     def 'Simple Single Project Wit Wrap'() {
