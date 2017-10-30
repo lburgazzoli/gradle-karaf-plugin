@@ -80,18 +80,13 @@ class KarafFeaturesTask extends DefaultTask implements KarafTaskTrait {
 
                     feature.configFiles.each {
                         if (it.filename && it.uri) {
-                            if (it.override) {
-                                builder.configfile(
-                                     [ finalname: it.filename,
-                                       override: it.override ],
-                                     it.uri
-                                )
-                            } else {
-                                builder.configfile(
-                                    [ finalname: it.filename ],
-                                    it.uri
-                                )
-                            }
+                            builder.configfile(
+                                [ 
+                                    finalname: it.filename,
+                                    override: it.override 
+                                ],
+                                it.uri
+                            )
                         }
                     }
 
@@ -166,9 +161,9 @@ class KarafFeaturesTask extends DefaultTask implements KarafTaskTrait {
                     }
 
                     if (feature.capabilities) {
-                        builder.capability(
-                            feature.capabilities.collect { it.format() }.join(',')
-                        )
+                        feature.capabilities.each {
+                            builder.capability(it.format())
+                        }
                     }
                 }
             }

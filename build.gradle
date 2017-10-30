@@ -3,33 +3,16 @@
 //
 // *****************************************************************************
 
-buildscript {
-    repositories {
-        mavenCentral()
-        mavenLocal()
-        jcenter()
-    }
-
-    dependencies {
-        classpath 'io.codearte.gradle.nexus:gradle-nexus-staging-plugin:0.5.3'
-    }
-}
-
-// *****************************************************************************
-//
-// *****************************************************************************
-
 plugins {
     id 'java'
     id 'groovy'
     id 'maven'
     id 'signing'
-    id 'com.gradle.plugin-publish' version '0.9.6'
-    id 'net.researchgate.release' version '2.5.0'
-    id 'com.github.ben-manes.versions' version '0.14.0'
+    id 'com.gradle.plugin-publish' version '0.9.7'
+    id 'net.researchgate.release' version '2.6.0'
+    id 'com.github.ben-manes.versions' version '0.15.0'
+    id "io.codearte.nexus-staging" version "0.9.0"
 }
-
-apply plugin: 'io.codearte.nexus-staging'
 
 // *****************************************************************************
 //
@@ -58,7 +41,7 @@ ext {
     versions = [
         slf4j  : '1.7.21',
         paxUrl : '2.5.2',
-        spock  : "1.0-groovy-${groovyVersion}"
+        spock  : "1.1-groovy-${groovyVersion}"
     ]
 
     if (isReleaseVersion) {
@@ -67,7 +50,7 @@ ext {
         nexusUrl = 'https://oss.sonatype.org/content/repositories/snapshots/'
     }
 
-    if(!project.hasProperty('nexusUsername') && !project.hasProperty('nexusPassword')) {
+    if (!project.hasProperty('nexusUsername') && !project.hasProperty('nexusPassword')) {
         nexusUsername = "$System.env.CI_DEPLOY_USERNAME"
         nexusPassword = "$System.env.CI_DEPLOY_PASSWORD"
     }
@@ -112,7 +95,7 @@ jar {
 
 test {
     testLogging {
-        events "started", "passed", "skipped", "failed", "standardOut", "standardError"
+        events "started", "passed", "skipped", "failed", "standardError"
     }
 }
 
@@ -227,7 +210,12 @@ uploadArchives {
 afterReleaseBuild.dependsOn publishPlugins, uploadArchives
 
 task ci(dependsOn: project.gradleCiTasks) {
+    doFirst {
+        println "=============================================================="
+        println "CI Tasks: ${project.gradleCiTasks}"
+        println "=============================================================="
+    }
 }
 
-task close(dependsOn: 'closeAndPromoteRepository') {
+task close(dependsOn: 'closeAndReleaseRepository') {
 }

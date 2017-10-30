@@ -23,13 +23,13 @@ import org.gradle.api.artifacts.ModuleVersionIdentifier
 import org.gradle.api.artifacts.ResolvedArtifact
 import org.gradle.api.artifacts.component.ProjectComponentIdentifier
 import org.gradle.api.artifacts.result.ResolvedComponentResult
+import org.gradle.api.plugins.JavaPlugin
+import org.gradle.api.plugins.WarPlugin
 
-import com.github.lburgazzoli.gradle.plugin.karaf.KarafPlugin
 import com.github.lburgazzoli.gradle.plugin.karaf.KarafPluginExtension
 import com.github.lburgazzoli.gradle.plugin.karaf.KarafUtils
 import com.github.lburgazzoli.gradle.plugin.karaf.features.model.DependencyDescriptor
 import com.github.lburgazzoli.gradle.plugin.karaf.features.model.FeatureDescriptor
-
 /**
  * @author lburgazzoli
  */
@@ -61,8 +61,13 @@ class KarafFeaturesUtils extends KarafUtils {
 
             def instruction = featureDescriptor.findBundleDescriptors(root.moduleVersion)
             if(instruction == null || instruction.include) {
-                KarafUtils.forEachTask(prj, KarafPlugin.ARTIFACT_TASKS) {
-                    container << DependencyDescriptor.make(root, it, instruction)
+                def war = prj.tasks.find { it.name == WarPlugin.WAR_TASK_NAME }
+                def jar = prj.tasks.find { it.name == JavaPlugin.JAR_TASK_NAME }
+
+                if (war) {
+                    container << DependencyDescriptor.make(root, war, instruction)
+                }  else if (jar) {
+                    container << DependencyDescriptor.make(root, jar, instruction)
                 }
             }
         } else {

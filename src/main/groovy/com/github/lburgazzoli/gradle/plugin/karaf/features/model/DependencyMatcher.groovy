@@ -15,8 +15,11 @@
  */
 package com.github.lburgazzoli.gradle.plugin.karaf.features.model
 
+import java.util.regex.Pattern
 import groovy.transform.ToString
 import org.gradle.api.IllegalDependencyNotation
+
+import com.github.lburgazzoli.gradle.plugin.karaf.util.AntPathMatcher
 
 /**
  * @author Steve Ebersole
@@ -49,19 +52,19 @@ class DependencyMatcher {
     }
 
     boolean matches(String group, String name, String version, String type, String classifier) {
-        if (this.group && this.group != group) {
+        if (this.group && this.group != group && !patternMatch(this.group, group)) {
             return false
         }
-        if (this.name && this.name != name) {
+        if (this.name && this.name != name && !patternMatch(this.name, name)) {
             return false
         }
-        if (this.version && this.version != version) {
+        if (this.version && this.version != version && !patternMatch(this.version, version)) {
             return false
         }
-        if (this.type && this.type != type) {
+        if (this.type && this.type != type && !patternMatch(this.type, type)) {
             return false
         }
-        if (this.classifier && this.classifier != classifier) {
+        if (this.classifier && this.classifier != classifier && !patternMatch(this.classifier, classifier)) {
             return false
         }
 
@@ -88,5 +91,26 @@ class DependencyMatcher {
             notationParts.length >= 3 ? notationParts[2] : null,
             type,
             notationParts.length == 4 ? notationParts[3] : null)
+    }
+
+    protected boolean patternMatch(String pattern, String target) {
+        if (pattern && target) {
+            boolean rex = false
+            boolean ant = false
+
+            try {
+                rex = Pattern.compile(pattern).matcher(target).matches()
+            } catch (Exception e) {
+            }
+
+            try {
+                ant = new AntPathMatcher().match(pattern, target)
+            } catch (Exception e) {
+            }
+
+            return rex || ant
+        } else {
+            return false
+        }
     }
 }

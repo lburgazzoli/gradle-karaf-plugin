@@ -17,7 +17,6 @@ package com.github.lburgazzoli.gradle.plugin.karaf
 
 import org.gradle.api.Plugin
 import org.gradle.api.Project
-import org.gradle.api.Task
 import org.gradle.api.artifacts.Configuration
 import org.gradle.api.artifacts.component.ProjectComponentIdentifier
 import org.gradle.api.artifacts.result.ResolvedComponentResult
@@ -27,7 +26,6 @@ import org.gradle.api.plugins.WarPlugin
 
 import com.github.lburgazzoli.gradle.plugin.karaf.features.KarafFeaturesTask
 import com.github.lburgazzoli.gradle.plugin.karaf.kar.KarafKarTask
-
 /**
  * @author lburgazzoli
  */
@@ -57,8 +55,13 @@ class KarafPlugin implements Plugin<Project> {
 
         kar.dependsOn feat
 
-        KarafUtils.forEachTask(project, ARCHIVE_TASKS) {
-            Task task -> task.dependsOn kar
+        def war = project.tasks.find { it.name == WarPlugin.WAR_TASK_NAME }
+        def jar = project.tasks.find { it.name == JavaPlugin.JAR_TASK_NAME }
+
+        if (war) {
+            feat.dependsOn war
+        }  else if (jar) {
+            feat.dependsOn jar
         }
 
         project.afterEvaluate {
@@ -76,10 +79,13 @@ class KarafPlugin implements Plugin<Project> {
                             ProjectComponentIdentifier pci = root.id as ProjectComponentIdentifier
                             Project prj = project.findProject(pci.getProjectPath())
 
-                            if(prj != project || ext.features.includeProject) {
-                                KarafUtils.forEachTask(prj, KarafPlugin.ARTIFACT_TASKS) {
-                                    Task task -> feat.dependsOn task
-                                }
+                            war = prj.tasks.find { it.name == WarPlugin.WAR_TASK_NAME }
+                            jar = prj.tasks.find { it.name == JavaPlugin.JAR_TASK_NAME }
+
+                            if (war) {
+                                feat.dependsOn war
+                            }  else if (jar) {
+                                feat.dependsOn jar
                             }
                         }
                     }

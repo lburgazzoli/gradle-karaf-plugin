@@ -141,7 +141,7 @@ class KarafFeaturesTest extends KarafTestSupport {
         given:
             def project = setupProject('com.lburgazzoli.github', 'gradle-karaf', '1.2.3') {
                 dependencies {
-                    compile group      : 'ca.uhn.hapi.fhir',
+                    compile group  : 'ca.uhn.hapi.fhir',
                         name       : 'hapi-fhir-testpage-overlay',
                         version    : '2.1',
                         classifier : 'classes',
@@ -229,6 +229,11 @@ class KarafFeaturesTest extends KarafTestSupport {
                     runtime "com.squareup.retrofit:converter-jackson:1.9.0"
                     compile "org.apache.activemq:activemq-web:5.13.2"
                     compile "org.apache.activemq:activemq-web-console:5.13.2@war"
+                    compile "commons-codec:commons-codec:1.10"
+                    compile "commons-collections:commons-collections:3.2.2"
+                    compile "commons-fileupload:commons-fileupload:1.3.2"
+                    compile "commons-io:commons-io:2.5"
+                    compile "commons-lang:commons-lang:2.6"
                 }
             }
 
@@ -263,6 +268,10 @@ class KarafFeaturesTest extends KarafTestSupport {
                     bundle('com.squareup.retrofit:converter-jackson') {
                         include = false
                     }
+
+                    bundle('commons-*:*-c*') {
+                        attribute 'dependency', 'true'
+                    }
                 }
             }
 
@@ -296,9 +305,12 @@ class KarafFeaturesTest extends KarafTestSupport {
             featuresXml.feature.bundle.'**'.findAll {
                     it.text().contains('mvn:com.squareup.retrofit/converter-jackson/1.9.0')
                 }.size() == 0
+            featuresXml.feature.bundle.'**'.findAll {
+                    it.text().contains('mvn:commons-') && it.@dependency == "true"
+                }.size() == 2
     }
 
-    def 'Simple Single Project Wit ConfigFile'() {
+    def 'Simple Single Project With ConfigFile'() {
         given:
         def project = setupProject('com.lburgazzoli.github', 'gradle-karaf', '1.2.3') {
             configurations {
@@ -340,7 +352,64 @@ class KarafFeaturesTest extends KarafTestSupport {
             println featuresStr
 
             featuresXml.feature.configfile.'**'.findAll {
-                    it.@finalname?.equals('/etc/hazelcast.xml')
+                    it.@finalname == '/etc/hazelcast.xml' && !it.attributes().containsKey('overrides')
+                }.size() == 1
+    }
+
+    def 'Simple Single Project With ConfigFile Override'() {
+        given:
+        def project = setupProject('com.lburgazzoli.github', 'gradle-karaf', '1.2.3') {
+            configurations {
+                hazelcast
+            }
+            dependencies {
+                hazelcast 'org.apache.geronimo.specs:geronimo-jta_1.1_spec:1.1.1'
+                hazelcast 'com.eclipsesource.minimal-json:minimal-json:0.9.2'
+                hazelcast 'com.hazelcast:hazelcast-all:3.6.1'
+            }
+        }
+
+            def task = getKarafFeaturesTasks(project)
+        when:
+            def extension = getKarafExtension(project)
+            extension.features {
+                xsdVersion = "1.3.0"
+                feature {
+                    name        = 'hazelcast'
+                    description = 'In memory data grid'
+
+                    configurations {
+                        add 'hazelcast'
+                    }
+
+                    configFile {
+                        filename = "/etc/hazelcast-1.xml"
+                        uri      = "mvn:org.apache.karaf.cellar/apache-karaf-cellar/${project.version}/xml/hazelcast"
+                        override = true
+                    }
+
+                    configFile {
+                        filename = "/etc/hazelcast-2.xml"
+                        uri      = "mvn:org.apache.karaf.cellar/apache-karaf-cellar/${project.version}/xml/hazelcast"
+                        override = false
+                    }
+                }
+            }
+
+            def featuresStr = task.generateFeatures(extension.features)
+            def featuresXml = new XmlSlurper().parseText(featuresStr)
+        then:
+            featuresStr != null
+            featuresXml != null
+
+            println featuresStr
+
+            featuresXml.feature.configfile.'**'.findAll {
+                    it.@finalname?.equals('/etc/hazelcast-1.xml') && it.@override == true
+                }.size() == 1
+
+            featuresXml.feature.configfile.'**'.findAll {
+                    it.@finalname?.equals('/etc/hazelcast-2.xml') && it.@override == false
                 }.size() == 1
     }
 
@@ -421,6 +490,10 @@ class KarafFeaturesTest extends KarafTestSupport {
                         effective = 'active'
                         filter    = '(&(osgi.extender=osgi.enroute.configurer)${frange;1.2.3})'
                     }
+                    capability('osgi.service') {
+                        effective = 'active'
+                        extra    = 'objectClass=javax.jms.ConnectionFactory'
+                    }
                 }
             }
 
@@ -438,6 +511,9 @@ class KarafFeaturesTest extends KarafTestSupport {
             featuresXml.feature.capability.'**'.findAll {
                     it.text().contains('osgi.service;filter')
                 }.size() == 1
+            featuresXml.feature.capability.'**'.findAll {
+                it.text().contains('osgi.service;effective:=\'active\';resolution:=\'mandatory\';objectClass=javax.jms.ConnectionFactory')
+            }.size() == 1
     }
 
     def 'Simple Single Project Wit Wrap'() {

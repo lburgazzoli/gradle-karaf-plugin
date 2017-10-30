@@ -29,14 +29,14 @@ abstract class FeatureDefinition {
     final List<FeatureDependencyDescriptor> featureDependencies
     final Set<Config> configs
     final Set<ConfigFile> configFiles
-    final Set<Capability> capabilities
+    final List<Capability> capabilities
 
     protected FeatureDefinition() {
         this.bundleDescriptors = new LinkedList<>()
         this.featureDependencies = new LinkedList<>()
         this.configs = new LinkedHashSet<>()
         this.configFiles = new LinkedHashSet<>()
-        this.capabilities = new LinkedHashSet<>()
+        this.capabilities = new LinkedList<>()
     }
 
     // *************************************************************************
@@ -201,21 +201,21 @@ abstract class FeatureDefinition {
         String uri
         String filename
         File file
-        boolean override
+        Boolean override
 
         public ConfigFile() {
-            this(null, null, null)
+            this(null, null, null, null)
         }
 
         public ConfigFile(String uri, String filename) {
-            this(uri, filename, null)
+            this(uri, filename, null, null)
         }
 
         public ConfigFile(String uri, String filename, File file) {
-            this(uri, filename, file, false)
+            this(uri, filename, file, null)
         }
         
-        public ConfigFile(String uri, String filename, File file, boolean override) {
+        public ConfigFile(String uri, String filename, File file, Boolean override) {
             this.uri = name
             this.filename = filename
             this.file = file
