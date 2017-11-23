@@ -23,20 +23,20 @@ import org.gradle.api.artifacts.ModuleVersionIdentifier
 import org.gradle.api.artifacts.ResolvedArtifact
 import org.gradle.api.artifacts.component.ProjectComponentIdentifier
 import org.gradle.api.artifacts.result.ResolvedComponentResult
-import org.gradle.api.plugins.JavaPlugin
-import org.gradle.api.plugins.WarPlugin
 
+import com.github.lburgazzoli.gradle.plugin.karaf.KarafPlugin
 import com.github.lburgazzoli.gradle.plugin.karaf.KarafPluginExtension
 import com.github.lburgazzoli.gradle.plugin.karaf.KarafUtils
 import com.github.lburgazzoli.gradle.plugin.karaf.features.model.DependencyDescriptor
 import com.github.lburgazzoli.gradle.plugin.karaf.features.model.FeatureDescriptor
+
 /**
  * @author lburgazzoli
  */
 class KarafFeaturesUtils extends KarafUtils {
 
     static Set<DependencyDescriptor> collectDependencies(
-        FeatureDescriptor featureDescriptor, Set<DependencyDescriptor> container) {
+            FeatureDescriptor featureDescriptor, Set<DependencyDescriptor> container) {
 
         KarafUtils.walkDeps(featureDescriptor.configurations) {
             Configuration configuration, ResolvedComponentResult root ->
@@ -50,31 +50,26 @@ class KarafFeaturesUtils extends KarafUtils {
             FeatureDescriptor featureDescriptor, Configuration configuration, ResolvedComponentResult root,  Set<DependencyDescriptor> container) {
 
         def ext = KarafPluginExtension.lookup(featureDescriptor.project)
+        def artifacts = findArtifact(configuration, root.moduleVersion)
 
-        if(root.id instanceof ProjectComponentIdentifier) {
+        if (!artifacts?.empty) {
+            artifacts.each {
+                def instruction = featureDescriptor.findBundleDescriptors(it)
+                if (instruction == null || instruction.include) {
+                    container << DependencyDescriptor.make(root, it, instruction)
+                }
+            }
+        } else if (root.id instanceof ProjectComponentIdentifier) {
             ProjectComponentIdentifier pci = root.id as ProjectComponentIdentifier
             Project prj = featureDescriptor.project.findProject(pci.getProjectPath())
 
-            if(prj == featureDescriptor.project && !ext.features.includeProject) {
+            if (prj == featureDescriptor.project && !ext.features.includeProject) {
                 return
             }
 
             def instruction = featureDescriptor.findBundleDescriptors(root.moduleVersion)
-            if(instruction == null || instruction.include) {
-                def war = prj.tasks.find { it.name == WarPlugin.WAR_TASK_NAME }
-                def jar = prj.tasks.find { it.name == JavaPlugin.JAR_TASK_NAME }
-
-                if (war) {
-                    container << DependencyDescriptor.make(root, war, instruction)
-                }  else if (jar) {
-                    container << DependencyDescriptor.make(root, jar, instruction)
-                }
-            }
-        } else {
-
-            findArtifact(configuration, root.moduleVersion)?.each {
-                def instruction = featureDescriptor.findBundleDescriptors(it)
-                if(instruction == null || instruction.include) {
+            if (instruction == null || instruction.include) {
+                KarafUtils.forEachTask(prj, KarafPlugin.ARTIFACT_TASKS) {
                     container << DependencyDescriptor.make(root, it, instruction)
                 }
             }
