@@ -308,6 +308,9 @@ class KarafFeaturesTest extends KarafTestSupport {
             featuresXml.feature.bundle.'**'.findAll {
                     it.text().contains('mvn:commons-') && it.@dependency == "true"
                 }.size() == 2
+            featuresXml.feature.bundle.'**'.findAll {
+                    it.text().contains('wrap:mvn:com.lburgazzoli.github/gradle-karaf/1.2.3')
+                }.size() == 1
     }
 
     def 'Simple Single Project With ConfigFile'() {
@@ -559,6 +562,63 @@ class KarafFeaturesTest extends KarafTestSupport {
                 }.size() == 1
             featuresXml.feature.bundle.'**'.findAll {
                     it.text().contains('mvn:com.hazelcast/hazelcast-all/3.6.1')
+                }.size() == 1
+    }
+
+
+
+    def 'Simple Single Project With Multiple features'() {
+        given:
+        def project = setupProject('com.lburgazzoli.github', 'gradle-karaf', '1.2.3') {
+            configurations {
+                hazelcast
+                squareup
+            }
+            dependencies {
+                hazelcast 'org.apache.geronimo.specs:geronimo-jta_1.1_spec:1.1.1'
+                hazelcast 'com.eclipsesource.minimal-json:minimal-json:0.9.2'
+                hazelcast 'com.hazelcast:hazelcast-all:3.6.1'
+
+                squareup "com.squareup.retrofit:retrofit:1.9.0"
+                squareup "com.squareup.retrofit:converter-jackson:1.9.0"
+            }
+        }
+
+            def task = getKarafFeaturesTasks(project)
+        when:
+            def extension = getKarafExtension(project)
+            extension.features {
+                xsdVersion = "1.3.0"
+                feature {
+                    name           = 'hazelcast'
+                    description    = 'In memory data grid'
+                    includeProject = false
+
+                    configurations 'hazelcast'
+                }
+
+                feature {
+                    name           = 'squareup'
+                    description    = 'Squareup'
+                    includeProject = true
+
+                    configurations 'squareup' 
+                }
+            }
+
+            def featuresStr = task.generateFeatures(extension.features)
+            def featuresXml = new XmlSlurper().parseText(featuresStr)
+        then:
+            featuresStr != null
+            featuresXml != null
+
+            println featuresStr
+
+            featuresXml.feature.'**'.find { it.@name == 'hazelcast'}.bundle.'**'.findAll {
+                    it.text().contains('wrap:mvn:com.lburgazzoli.github/gradle-karaf/1.2.3')
+                }.size() == 0
+            featuresXml.feature.'**'.find { it.@name == 'squareup'}.bundle.'**'.findAll {
+                    it.text().contains('wrap:mvn:com.lburgazzoli.github/gradle-karaf/1.2.3')
                 }.size() == 1
     }
 }

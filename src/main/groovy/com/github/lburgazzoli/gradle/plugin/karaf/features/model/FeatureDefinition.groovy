@@ -30,6 +30,8 @@ abstract class FeatureDefinition {
     final Set<Config> configs
     final Set<ConfigFile> configFiles
     final List<Capability> capabilities
+    
+    Boolean includeProject
 
     protected FeatureDefinition() {
         this.bundleDescriptors = new LinkedList<>()
