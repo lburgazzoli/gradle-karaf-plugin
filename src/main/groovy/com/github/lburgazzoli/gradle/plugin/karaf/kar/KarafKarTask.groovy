@@ -15,14 +15,13 @@
  */
 package com.github.lburgazzoli.gradle.plugin.karaf.kar
 
+import com.github.lburgazzoli.gradle.plugin.karaf.KarafTaskTrait
+import com.github.lburgazzoli.gradle.plugin.karaf.mvn.MvnProtocolParser
+import org.gradle.jvm.tasks.Jar
+
 import java.nio.file.Files
 import java.nio.file.Path
 import java.nio.file.StandardCopyOption
-import org.gradle.jvm.tasks.Jar
-
-import com.github.lburgazzoli.gradle.plugin.karaf.KarafPluginExtension
-import com.github.lburgazzoli.gradle.plugin.karaf.KarafTaskTrait
-import com.github.lburgazzoli.gradle.plugin.karaf.mvn.MvnProtocolParser
 
 /**
  * @author lburgazzoli
@@ -33,8 +32,7 @@ class KarafKarTask extends Jar implements KarafTaskTrait  {
     public static final String DESCRIPTION = 'Generates Karaf KAR Archive'
     public static final String EXTENSION = 'kar'
 
-    public KarafKarTask() {
-        // TODO: to be improved
+    KarafKarTask() {
         outputs.upToDateWhen {
             false
         }
@@ -97,13 +95,16 @@ class KarafKarTask extends Jar implements KarafTaskTrait  {
             )
         )
 
-        baseName = features.name
-        version = features.version
-        extension = EXTENSION
-        destinationDir = kar.outputDir
+        archiveAppendix.set(null)
+        archiveClassifier.set(null)
+        archiveBaseName.set(features.name)
+        archiveVersion.set(features.version)
+        archiveExtension.set(EXTENSION)
+        destinationDirectory.set(kar.outputDir)
 
         if (kar.archiveName) {
-            archiveName = "${kar.archiveName}.kar"
+            archiveVersion.set(null)
+            archiveBaseName.set(kar.archiveName)
         }
 
         from(kar.explodedDir)

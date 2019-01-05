@@ -40,8 +40,7 @@ class KarafFeaturesExtension {
     String version
     String xsdVersion
     Boolean includeProject
-
-    private File outputFile
+    File outputFile
 
     KarafFeaturesExtension(Project project) {
         this.project = project

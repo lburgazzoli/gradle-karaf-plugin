@@ -16,6 +16,7 @@
 
 package com.github.lburgazzoli.gradle.plugin.karaf
 
+import com.github.lburgazzoli.gradle.plugin.karaf.kar.KarafKarTask
 import org.gradle.api.Project
 import org.gradle.testfixtures.ProjectBuilder
 import org.gradle.util.ConfigureUtil
@@ -38,6 +39,10 @@ class KarafTestSupport extends Specification {
 
     KarafFeaturesTask  getKarafFeaturesTasks(Project project) {
         project.tasks.getByName(KarafFeaturesTask.NAME)
+    }
+
+    KarafKarTask getKarafKarTasks(Project project) {
+        project.tasks.getByName(KarafKarTask.NAME)
     }
 
     // *************************************************************************
