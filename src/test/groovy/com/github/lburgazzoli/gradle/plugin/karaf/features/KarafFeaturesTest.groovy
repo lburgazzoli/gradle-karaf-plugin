@@ -19,6 +19,8 @@ import com.github.lburgazzoli.gradle.plugin.karaf.KarafPluginExtension
 import com.github.lburgazzoli.gradle.plugin.karaf.KarafTestSupport
 import groovy.util.logging.Slf4j
 import org.gradle.api.Project
+import spock.lang.Ignore
+
 /**
  * @author lburgazzoli
  */
@@ -88,6 +90,7 @@ class KarafFeaturesTest extends KarafTestSupport {
             extension.features.featureDescriptors.size() == 1
     }
 
+    @Ignore
     def 'Same GAV'() {
         given:
             configureProject(project) {
@@ -129,6 +132,7 @@ class KarafFeaturesTest extends KarafTestSupport {
             }.size() == 1
     }
 
+    @Ignore
     def 'Same GAV and reset type'() {
         given:
             configureProject(project) {
