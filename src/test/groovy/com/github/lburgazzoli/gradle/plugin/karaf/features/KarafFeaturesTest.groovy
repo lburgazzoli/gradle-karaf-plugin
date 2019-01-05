@@ -15,16 +15,11 @@
  */
 package com.github.lburgazzoli.gradle.plugin.karaf.features
 
-import com.github.lburgazzoli.gradle.plugin.karaf.KarafPluginExtension
 import com.github.lburgazzoli.gradle.plugin.karaf.KarafTestSupport
-import groovy.util.logging.Slf4j
 import org.gradle.api.Project
-import spock.lang.Ignore
-
 /**
  * @author lburgazzoli
  */
-@Slf4j
 class KarafFeaturesTest extends KarafTestSupport {
 
     Project project
@@ -65,32 +60,6 @@ class KarafFeaturesTest extends KarafTestSupport {
             feature.configurations[0] == project.configurations.runtime
     }
 
-    def 'Recursive Dependency'() {
-        given:
-           configureProject(project) {
-                dependencies {
-                    compile 'com.jcabi:jcabi-github:0.28'
-                }
-            }
-            def task = getKarafFeaturesTasks(project)
-        when:
-            def extension = getKarafExtension(project)
-            extension.features {
-                feature {
-                    name = "feature-1"
-                    description = "my feature n1"
-                }
-            }
-        then:
-            task.generateFeatures(extension.features)
-            extension != null
-            extension.features != null
-            extension.features.featureDescriptors != null
-            extension.features.featureDescriptors.empty == false
-            extension.features.featureDescriptors.size() == 1
-    }
-
-    @Ignore
     def 'Same GAV'() {
         given:
             configureProject(project) {
@@ -99,66 +68,67 @@ class KarafFeaturesTest extends KarafTestSupport {
                             name       : 'hapi-fhir-testpage-overlay',
                             version    : '2.1',
                             classifier : 'classes'
-                            //ext      : 'jar', // adding ext cause the resolution to fail
                     compile group      : 'ca.uhn.hapi.fhir',
                             name       : 'hapi-fhir-testpage-overlay',
                             version    : '2.1',
                             ext        : 'war'
                 }
             }
+
+            def karaf = getKarafExtension(project)
             def task = getKarafFeaturesTasks(project)
         when:
-            def extension = getKarafExtension(project)
-            extension.features {
+            karaf.features {
                 feature {
                     name = "feature-1"
                     description = "my feature n1"
                 }
             }
 
-            def featuresStr = task.generateFeatures(extension.features)
-            def featuresXml = new XmlSlurper().parseText(featuresStr)
+            task.run()
         then:
-            featuresStr != null
+            assert karaf.hasFeatures()
+
+            def featuresFile = karaf.features.getOutputFile()
+            featuresFile != null
+
+            def featuresXml = new XmlSlurper().parse(featuresFile)
             featuresXml != null
 
-            println featuresStr
+            println featuresFile.text
 
-            featuresXml.feature.bundle.'**'.findAll {
-                it.text().contains('mvn:ca.uhn.hapi.fhir/hapi-fhir-testpage-overlay/2.1/jar/classes')
-            }.size() == 1
-            featuresXml.feature.bundle.'**'.findAll {
-                it.text().contains('war:mvn:ca.uhn.hapi.fhir/hapi-fhir-testpage-overlay/2.1/war')
-            }.size() == 1
+            findAllBundles(featuresXml, 'wrap:mvn:ca.uhn.hapi.fhir/hapi-fhir-testpage-overlay/2.1/jar/classes').size() == 1
+            findAllBundles(featuresXml, 'war:mvn:ca.uhn.hapi.fhir/hapi-fhir-testpage-overlay/2.1/war').size() == 1
     }
 
-    @Ignore
     def 'Same GAV and reset type'() {
         given:
             configureProject(project) {
                 dependencies {
                     compile group  : 'ca.uhn.hapi.fhir',
-                        name       : 'hapi-fhir-testpage-overlay',
-                        version    : '2.1',
-                        classifier : 'classes',
-                        transitive : true
-                    //ext      : 'jar', // adding ext cause the resolution to fail
+                            name       : 'hapi-fhir-testpage-overlay',
+                            version    : '2.1',
+                            classifier : 'classes',
+                            transitive : true
                     compile group      : 'ca.uhn.hapi.fhir',
-                        name       : 'hapi-fhir-testpage-overlay',
-                        version    : '2.1',
-                        ext        : 'war',
-                        transitive : true
+                            name       : 'hapi-fhir-testpage-overlay',
+                            version    : '2.1',
+                            ext        : 'war',
+                            transitive : true
                 }
             }
+
+            def karaf = getKarafExtension(project)
             def task = getKarafFeaturesTasks(project)
         when:
-            def extension = getKarafExtension(project)
-            extension.features {
+            karaf.features {
                 feature {
                     name = "feature-1"
                     description = "my feature n1"
 
                     bundle ('ca.uhn.hapi.fhir:hapi-fhir-testpage-overlay:2.1:classes') {
+                        wrap = true
+
                         remap {
                             type = null
                         }
@@ -166,20 +136,18 @@ class KarafFeaturesTest extends KarafTestSupport {
                 }
             }
 
-            def featuresStr = task.generateFeatures(extension.features)
-            def featuresXml = new XmlSlurper().parseText(featuresStr)
+            task.run()
         then:
-            featuresStr != null
+            assert karaf.hasFeatures()
+
+            def featuresFile = karaf.features.getOutputFile()
+            featuresFile != null
+
+            def featuresXml = new XmlSlurper().parse(featuresFile)
             featuresXml != null
 
-            println featuresStr
-
-            featuresXml.feature.bundle.'**'.findAll {
-                it.text().contains('mvn:ca.uhn.hapi.fhir/hapi-fhir-testpage-overlay/2.1//classes')
-            }.size() == 1
-            featuresXml.feature.bundle.'**'.findAll {
-                it.text().contains('war:mvn:ca.uhn.hapi.fhir/hapi-fhir-testpage-overlay/2.1/war')
-            }.size() == 1
+            findAllBundles(featuresXml, 'wrap:mvn:ca.uhn.hapi.fhir/hapi-fhir-testpage-overlay/2.1//classes').size() == 1
+            findAllBundles(featuresXml, 'war:mvn:ca.uhn.hapi.fhir/hapi-fhir-testpage-overlay/2.1/war').size() == 1
     }
 
     def 'Multi version deps'() {
@@ -190,30 +158,29 @@ class KarafFeaturesTest extends KarafTestSupport {
                     compile 'com.google.guava:guava:20.0'
                 }
             }
+
+            def karaf = getKarafExtension(project)
             def task = getKarafFeaturesTasks(project)
         when:
-            def extension = getKarafExtension(project)
-            extension.features {
+            karaf.features {
                 feature {
                     name = "feature-1"
                     description = "my feature n1"
                 }
             }
 
-            def featuresStr = task.generateFeatures(extension.features)
-            def featuresXml = new XmlSlurper().parseText(featuresStr)
+            task.run()
         then:
-            featuresStr != null
+            assert karaf.hasFeatures()
+
+            def featuresFile = karaf.features.getOutputFile()
+            featuresFile != null
+
+            def featuresXml = new XmlSlurper().parse(featuresFile)
             featuresXml != null
 
-            println featuresStr
-
-            featuresXml.feature.bundle.'**'.findAll {
-                it.text().contains('mvn:com.google.guava/guava/20.0')
-            }.size() == 1
-            featuresXml.feature.bundle.'**'.findAll {
-                it.text().contains('mvn:com.google.guava/guava/19.0')
-            }.size() == 0
+            findAllBundles(featuresXml, 'mvn:com.google.guava/guava/20.0').size() == 1
+            findAllBundles(featuresXml, 'mvn:com.google.guava/guava/19.0').size() == 0
     }
 
     def 'Single Project Dependencies'() {
@@ -233,10 +200,10 @@ class KarafFeaturesTest extends KarafTestSupport {
                 }
             }
 
+            def karaf = getKarafExtension(project)
             def task = getKarafFeaturesTasks(project)
         when:
-            def extension = getKarafExtension(project)
-            extension.features {
+            karaf.features {
                 xsdVersion = "1.3.0"
                 repository "mvn:org.apache.karaf.cellar/apache-karaf-cellar/4.0.0/xml/features"
                 repository "mvn:org.apache.karaf.features/standard/4.0.0/xml/features"
@@ -271,13 +238,15 @@ class KarafFeaturesTest extends KarafTestSupport {
                 }
             }
 
-            def featuresStr = task.generateFeatures(extension.features)
-            def featuresXml = new XmlSlurper().parseText(featuresStr)
+            task.run()
         then:
-            featuresStr != null
-            featuresXml != null
+            assert karaf.hasFeatures()
 
-            println featuresStr
+            def featuresFile = karaf.features.getOutputFile()
+            featuresFile != null
+
+            def featuresXml = new XmlSlurper().parse(featuresFile)
+            featuresXml != null
 
             featuresXml.feature.@name == 'karaf-features-simple-project'
             featuresXml.feature.@description == 'feature-description'
@@ -287,26 +256,14 @@ class KarafFeaturesTest extends KarafTestSupport {
             featuresXml.feature.feature[1].@version == '5.6.7'
             featuresXml.feature.feature[1].@dependency == 'true'
 
-            featuresStr.contains("xmlns=\"http://karaf.apache.org/xmlns/features/v1.3.0\"") == true
+            featuresFile.text.contains("xmlns=\"http://karaf.apache.org/xmlns/features/v1.3.0\"") == true
 
-            featuresXml.feature.bundle.'**'.findAll {
-                    it.text().contains('mvn:com.google.guava/guava/19.0')
-                }.size() == 1
-            featuresXml.feature.bundle.'**'.findAll {
-                    it.text().contains('mvn:com.google.code.gson/gson/2.3.1')
-                }.size() == 1
-            featuresXml.feature.bundle.'**'.findAll {
-                    it.text().contains('mvn:com.squareup.retrofit/retrofit/1.9.0')
-                }.size() == 1
-            featuresXml.feature.bundle.'**'.findAll {
-                    it.text().contains('mvn:com.squareup.retrofit/converter-jackson/1.9.0')
-                }.size() == 0
-            featuresXml.feature.bundle.'**'.findAll {
-                    it.text().contains('mvn:commons-') && it.@dependency == "true"
-                }.size() == 2
-            featuresXml.feature.bundle.'**'.findAll {
-                    it.text().contains('wrap:mvn:com.lburgazzoli.github/gradle-karaf/1.2.3')
-                }.size() == 1
+            findAllBundles(featuresXml, 'wrap:mvn:com.lburgazzoli.github/gradle-karaf/1.2.3').size() == 1
+            findAllBundles(featuresXml, 'mvn:com.google.guava/guava/19.0').size() == 1
+            findAllBundles(featuresXml, 'mvn:com.google.code.gson/gson/2.3.1').size() == 1
+            findAllBundles(featuresXml, '^*.mvn:com.squareup.retrofit/retrofit/1.9.0$').size() == 1
+            findAllBundles(featuresXml, '^*.mvn:com.squareup.retrofit/converter-jackson/1.9.0$').size() == 0
+            findAllBundles(featuresXml, { it.text().contains('mvn:commons-') && it.@dependency == "true" }).size() == 2
     }
 
     def 'Single Project With ConfigFile'() {
@@ -322,10 +279,10 @@ class KarafFeaturesTest extends KarafTestSupport {
                 }
             }
 
+            def karaf = getKarafExtension(project)
             def task = getKarafFeaturesTasks(project)
         when:
-            def extension = getKarafExtension(project)
-            extension.features {
+            karaf.features {
                 xsdVersion = "1.3.0"
                 feature {
                     name        = 'hazelcast'
@@ -342,13 +299,15 @@ class KarafFeaturesTest extends KarafTestSupport {
                 }
             }
 
-            def featuresStr = task.generateFeatures(extension.features)
-            def featuresXml = new XmlSlurper().parseText(featuresStr)
+            task.run()
         then:
-            featuresStr != null
-            featuresXml != null
+            assert karaf.hasFeatures()
 
-            println featuresStr
+            def featuresFile = karaf.features.getOutputFile()
+            featuresFile != null
+
+            def featuresXml = new XmlSlurper().parse(featuresFile)
+            featuresXml != null
 
             featuresXml.feature.configfile.'**'.findAll {
                     it.@finalname == '/etc/hazelcast.xml' && !it.attributes().containsKey('overrides')
@@ -368,10 +327,10 @@ class KarafFeaturesTest extends KarafTestSupport {
                 }
             }
 
+            def karaf = getKarafExtension(project)
             def task = getKarafFeaturesTasks(project)
         when:
-            def extension = getKarafExtension(project)
-            extension.features {
+            karaf.features {
                 xsdVersion = "1.3.0"
                 feature {
                     name        = 'hazelcast'
@@ -395,13 +354,15 @@ class KarafFeaturesTest extends KarafTestSupport {
                 }
             }
 
-            def featuresStr = task.generateFeatures(extension.features)
-            def featuresXml = new XmlSlurper().parseText(featuresStr)
+            task.run()
         then:
-            featuresStr != null
-            featuresXml != null
+            assert karaf.hasFeatures()
 
-            println featuresStr
+            def featuresFile = karaf.features.getOutputFile()
+            featuresFile != null
+
+            def featuresXml = new XmlSlurper().parse(featuresFile)
+            featuresXml != null
 
             featuresXml.feature.configfile.'**'.findAll {
                     it.@finalname?.equals('/etc/hazelcast-1.xml') && it.@override == true
@@ -425,10 +386,10 @@ class KarafFeaturesTest extends KarafTestSupport {
                 }
             }
 
+            def karaf = getKarafExtension(project)
             def task = getKarafFeaturesTasks(project)
         when:
-            def extension = getKarafExtension(project)
-            extension.features {
+            karaf.features {
                 xsdVersion = "1.3.0"
 
                 feature {
@@ -445,13 +406,15 @@ class KarafFeaturesTest extends KarafTestSupport {
                 }
             }
 
-            def featuresStr = task.generateFeatures(extension.features)
-            def featuresXml = new XmlSlurper().parseText(featuresStr)
+            task.run()
         then:
-            featuresStr != null
-            featuresXml != null
+            assert karaf.hasFeatures()
 
-            println featuresStr
+            def featuresFile = karaf.features.getOutputFile()
+            featuresFile != null
+
+            def featuresXml = new XmlSlurper().parse(featuresFile)
+            featuresXml != null
     }
 
     def 'Single Project With Capabilities'() {
@@ -467,10 +430,10 @@ class KarafFeaturesTest extends KarafTestSupport {
                 }
             }
 
+            def karaf = getKarafExtension(project)
             def task = getKarafFeaturesTasks(project)
         when:
-            def extension = getKarafExtension(project)
-            extension.features {
+            karaf.features {
                 xsdVersion = "1.3.0"
 
                 feature {
@@ -496,13 +459,15 @@ class KarafFeaturesTest extends KarafTestSupport {
                 }
             }
 
-            def featuresStr = task.generateFeatures(extension.features)
-            def featuresXml = new XmlSlurper().parseText(featuresStr)
+            task.run()
         then:
-            featuresStr != null
-            featuresXml != null
+            assert karaf.hasFeatures()
 
-            println featuresStr
+            def featuresFile = karaf.features.getOutputFile()
+            featuresFile != null
+
+            def featuresXml = new XmlSlurper().parse(featuresFile)
+            featuresXml != null
 
             featuresXml.feature.capability.'**'.findAll {
                     it.text().contains('osgi.extender;filter')
@@ -525,10 +490,10 @@ class KarafFeaturesTest extends KarafTestSupport {
                 }
             }
 
+            def karaf = getKarafExtension(project)
             def task = getKarafFeaturesTasks(project)
         when:
-            def extension = getKarafExtension(project)
-            extension.features {
+            karaf.features {
                 xsdVersion = "1.3.0"
                 feature {
                     name        = 'hazelcast'
@@ -542,26 +507,20 @@ class KarafFeaturesTest extends KarafTestSupport {
                 }
             }
 
-            def featuresStr = task.generateFeatures(extension.features)
-            def featuresXml = new XmlSlurper().parseText(featuresStr)
+            task.run()
         then:
-            featuresStr != null
+            assert karaf.hasFeatures()
+
+            def featuresFile = karaf.features.getOutputFile()
+            featuresFile != null
+
+            def featuresXml = new XmlSlurper().parse(featuresFile)
             featuresXml != null
 
-            println featuresStr
-
-            featuresXml.feature.bundle.'**'.findAll {
-                    it.text().contains('wrap:mvn:com.eclipsesource.minimal-json/minimal-json/0.9.2$Bundle-SymbolicName=my-bundle-name')
-                }.size() == 1
-            featuresXml.feature.bundle.'**'.findAll {
-                    it.text().contains('mvn:org.apache.geronimo.specs/geronimo-jta_1.1_spec/1.1.1')
-                }.size() == 1
-            featuresXml.feature.bundle.'**'.findAll {
-                    it.text().contains('mvn:com.hazelcast/hazelcast-all/3.6.1')
-                }.size() == 1
+            findAllBundles(featuresXml, 'wrap:mvn:com.eclipsesource.minimal-json/minimal-json/0.9.2\\$Bundle-SymbolicName=my-bundle-name').size() == 1
+            findAllBundles(featuresXml, 'mvn:org.apache.geronimo.specs/geronimo-jta_1.1_spec/1.1.1').size() == 1
+            findAllBundles(featuresXml, 'mvn:com.hazelcast/hazelcast-all/3.6.1').size() == 1
     }
-
-
 
     def 'Single Project With Multiple features'() {
         given:
@@ -580,10 +539,10 @@ class KarafFeaturesTest extends KarafTestSupport {
                 }
             }
 
+            def karaf = getKarafExtension(project)
             def task = getKarafFeaturesTasks(project)
         when:
-            def extension = getKarafExtension(project)
-            extension.features {
+            karaf.features {
                 xsdVersion = "1.3.0"
                 feature {
                     name           = 'hazelcast'
@@ -602,13 +561,15 @@ class KarafFeaturesTest extends KarafTestSupport {
                 }
             }
 
-            def featuresStr = task.generateFeatures(extension.features)
-            def featuresXml = new XmlSlurper().parseText(featuresStr)
+            task.run()
         then:
-            featuresStr != null
-            featuresXml != null
+            assert karaf.hasFeatures()
 
-            println featuresStr
+            def featuresFile = karaf.features.getOutputFile()
+            featuresFile != null
+
+            def featuresXml = new XmlSlurper().parse(featuresFile)
+            featuresXml != null
 
             featuresXml.feature.'**'.find { it.@name == 'hazelcast'}.bundle.'**'.findAll {
                     it.text().contains('wrap:mvn:com.lburgazzoli.github/gradle-karaf/1.2.3')

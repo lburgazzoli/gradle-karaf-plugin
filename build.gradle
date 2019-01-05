@@ -93,10 +93,6 @@ jar {
     }
 }
 
-test {
-    forkEvery 1
-}
-
 testlogger {
     showStandardStreams false
     slowThreshold 30000

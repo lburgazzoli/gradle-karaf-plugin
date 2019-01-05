@@ -49,17 +49,17 @@ class KarafKarTest extends KarafTestSupport {
                 }
             }
 
+            def karaf = getKarafExtension(project)
             def features = getKarafFeaturesTasks(project)
             def kar = getKarafKarTasks(project)
         when:
-            def extension = getKarafExtension(project)
-            extension.features {
+            karaf.features {
                 feature {
                     name = "feature-1"
                     description = "my feature n1"
                 }
             }
-            extension.kar {
+            karaf.kar {
             }
         then:
             features.run()

@@ -16,12 +16,12 @@
 
 package com.github.lburgazzoli.gradle.plugin.karaf
 
+import com.github.lburgazzoli.gradle.plugin.karaf.features.KarafFeaturesTask
 import com.github.lburgazzoli.gradle.plugin.karaf.kar.KarafKarTask
+import groovy.util.slurpersupport.GPathResult
 import org.gradle.api.Project
 import org.gradle.testfixtures.ProjectBuilder
 import org.gradle.util.ConfigureUtil
-
-import com.github.lburgazzoli.gradle.plugin.karaf.features.KarafFeaturesTask
 import spock.lang.Specification
 
 /**
@@ -39,18 +39,6 @@ class KarafTestSupport extends Specification {
 
     KarafKarTask getKarafKarTasks(Project project) {
         project.tasks.getByName(KarafKarTask.NAME)
-    }
-
-
-    def setUpProject(String name) {
-        configureProject(ProjectBuilder.builder().withName(name).build())
-    }
-
-    def setUpProject(String name, Closure closure) {
-        ConfigureUtil.configure(
-            closure,
-            setUpProject(ProjectBuilder.builder().withName(name).build())
-        )
     }
 
     def setUpProject(String group, String name, String version) {
@@ -90,5 +78,13 @@ class KarafTestSupport extends Specification {
         ConfigureUtil.configure(closure, project)
 
         return project
+    }
+
+    def findAllBundles(GPathResult features, Closure closure) {
+        return features.feature.bundle.'**'.findAll(closure)
+    }
+
+    def findAllBundles(GPathResult features, String id) {
+        return findAllBundles(features) { it.text() =~ id }
     }
 }

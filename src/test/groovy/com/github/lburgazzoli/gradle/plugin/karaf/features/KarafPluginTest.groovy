@@ -17,12 +17,11 @@ package com.github.lburgazzoli.gradle.plugin.karaf.features
 
 import com.github.lburgazzoli.gradle.plugin.karaf.KarafPluginExtension
 import com.github.lburgazzoli.gradle.plugin.karaf.KarafTestSupport
-import groovy.util.logging.Slf4j
 import org.gradle.api.Project
+
 /**
  * @author lburgazzoli
  */
-@Slf4j
 class KarafPluginTest extends KarafTestSupport {
 
     Project project
