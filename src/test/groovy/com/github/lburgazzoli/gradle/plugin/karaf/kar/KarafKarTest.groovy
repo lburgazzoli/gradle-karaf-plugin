@@ -17,6 +17,7 @@ package com.github.lburgazzoli.gradle.plugin.karaf.kar
 
 import com.github.lburgazzoli.gradle.plugin.karaf.KarafTestSupport
 import groovy.util.logging.Slf4j
+import org.gradle.api.Project
 
 /**
  * @author lburgazzoli
@@ -24,16 +25,32 @@ import groovy.util.logging.Slf4j
 @Slf4j
 class KarafKarTest extends KarafTestSupport {
 
+    Project project
+
+    def setup() {
+        project = setUpProject('com.lburgazzoli.github', 'gradle-karaf', '1.2.3')
+    }
+
+    def cleanup() {
+        project?.buildDir?.deleteDir()
+    }
+
+    // *************************
+    //
+    // Test
+    //
+    // *************************
+
     def 'Simple Kar Project'() {
         given:
-        def project = setupProject('com.lburgazzoli.github', 'gradle-karaf', '1.2.3') {
-            dependencies {
-                compile "commons-lang:commons-lang:2.6"
+            configureProject(project) {
+                dependencies {
+                    compile "commons-lang:commons-lang:2.6"
+                }
             }
-        }
 
-        def features = getKarafFeaturesTasks(project)
-        def kar = getKarafKarTasks(project)
+            def features = getKarafFeaturesTasks(project)
+            def kar = getKarafKarTasks(project)
         when:
             def extension = getKarafExtension(project)
             extension.features {
@@ -48,15 +65,15 @@ class KarafKarTest extends KarafTestSupport {
             features.run()
             kar.copy()
 
-        def baseName = kar.archiveBaseName.get()
-        def ext = kar.archiveExtension.get()
+            def baseName = kar.archiveBaseName.get()
+            def ext = kar.archiveExtension.get()
 
-        baseName == project.name
-        ext == KarafKarTask.EXTENSION
+            baseName == project.name
+            ext == KarafKarTask.EXTENSION
 
-        def archive = kar.archiveFile.get().asFile
-        def zf = new java.util.zip.ZipFile(archive)
-        null != zf.getEntry("repository/com/lburgazzoli/github/${project.name}/${project.version}/${project.name}-${project.version}.xml")
-        null != zf.getEntry("repository/commons-lang/commons-lang/2.6/commons-lang-2.6.jar")
+            def archive = kar.archiveFile.get().asFile
+            def zf = new java.util.zip.ZipFile(archive)
+            null != zf.getEntry("repository/com/lburgazzoli/github/${project.name}/${project.version}/${project.name}-${project.version}.xml")
+            null != zf.getEntry("repository/commons-lang/commons-lang/2.6/commons-lang-2.6.jar")
     }
 }

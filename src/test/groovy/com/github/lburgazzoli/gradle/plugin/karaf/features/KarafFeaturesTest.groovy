@@ -15,41 +15,33 @@
  */
 package com.github.lburgazzoli.gradle.plugin.karaf.features
 
-import groovy.util.logging.Slf4j
-import org.gradle.testfixtures.ProjectBuilder
-
 import com.github.lburgazzoli.gradle.plugin.karaf.KarafPluginExtension
 import com.github.lburgazzoli.gradle.plugin.karaf.KarafTestSupport
-
+import groovy.util.logging.Slf4j
+import org.gradle.api.Project
 /**
  * @author lburgazzoli
  */
 @Slf4j
 class KarafFeaturesTest extends KarafTestSupport {
 
-    // *************************************************************************
-    //
-    // *************************************************************************
+    Project project
 
-    def 'Apply plugin'() {
-        given:
-            def project = ProjectBuilder.builder().build()
-        when:
-            setupProject(project)
-        then:
-            getKarafExtension(project) instanceof KarafPluginExtension
-            getKarafFeaturesTasks(project) instanceof KarafFeaturesTask
+    def setup() {
+        project = setUpProject('com.lburgazzoli.github', 'gradle-karaf', '1.2.3')
     }
 
-    // *************************************************************************
-    //
-    // *************************************************************************
+    def cleanup() {
+        project?.buildDir?.deleteDir()
+    }
 
-    def 'Simple Single Project Setup'() {
-        given:
-            def project = setupProject(ProjectBuilder.builder().build())
-            project.group = 'com.lburgazzoli.github'
-            project.version = '1.2.3'
+    // *************************
+    //
+    // Test
+    //
+    // *************************
+
+    def 'Single Project Setup'() {
         when:
             def extension = getKarafExtension(project)
             extension.features {
@@ -73,7 +65,7 @@ class KarafFeaturesTest extends KarafTestSupport {
 
     def 'Recursive Dependency'() {
         given:
-            def project = setupProject('com.lburgazzoli.github', 'gradle-karaf', '1.2.3') {
+           configureProject(project) {
                 dependencies {
                     compile 'com.jcabi:jcabi-github:0.28'
                 }
@@ -98,7 +90,7 @@ class KarafFeaturesTest extends KarafTestSupport {
 
     def 'Same GAV'() {
         given:
-            def project = setupProject('com.lburgazzoli.github', 'gradle-karaf', '1.2.3') {
+            configureProject(project) {
                 dependencies {
                     compile group      : 'ca.uhn.hapi.fhir',
                             name       : 'hapi-fhir-testpage-overlay',
@@ -139,7 +131,7 @@ class KarafFeaturesTest extends KarafTestSupport {
 
     def 'Same GAV and reset type'() {
         given:
-            def project = setupProject('com.lburgazzoli.github', 'gradle-karaf', '1.2.3') {
+            configureProject(project) {
                 dependencies {
                     compile group  : 'ca.uhn.hapi.fhir',
                         name       : 'hapi-fhir-testpage-overlay',
@@ -188,7 +180,7 @@ class KarafFeaturesTest extends KarafTestSupport {
 
     def 'Multi version deps'() {
         given:
-            def project = setupProject('com.lburgazzoli.github', 'gradle-karaf', '1.2.3') {
+            configureProject(project) {
                 dependencies {
                     compile 'com.graphql-java:graphql-java-servlet:0.9.0'
                     compile 'com.google.guava:guava:20.0'
@@ -220,9 +212,9 @@ class KarafFeaturesTest extends KarafTestSupport {
             }.size() == 0
     }
 
-    def 'Simple Single Project Dependencies'() {
+    def 'Single Project Dependencies'() {
         given:
-            def project = setupProject('com.lburgazzoli.github', 'gradle-karaf', '1.2.3') {
+            configureProject(project) {
                 dependencies {
                     runtime "com.google.guava:guava:19.0"
                     runtime "com.squareup.retrofit:retrofit:1.9.0"
@@ -313,18 +305,18 @@ class KarafFeaturesTest extends KarafTestSupport {
                 }.size() == 1
     }
 
-    def 'Simple Single Project With ConfigFile'() {
+    def 'Single Project With ConfigFile'() {
         given:
-        def project = setupProject('com.lburgazzoli.github', 'gradle-karaf', '1.2.3') {
-            configurations {
-                hazelcast
+            configureProject(project) {
+                configurations {
+                    hazelcast
+                }
+                dependencies {
+                    hazelcast 'org.apache.geronimo.specs:geronimo-jta_1.1_spec:1.1.1'
+                    hazelcast 'com.eclipsesource.minimal-json:minimal-json:0.9.2'
+                    hazelcast 'com.hazelcast:hazelcast-all:3.6.1'
+                }
             }
-            dependencies {
-                hazelcast 'org.apache.geronimo.specs:geronimo-jta_1.1_spec:1.1.1'
-                hazelcast 'com.eclipsesource.minimal-json:minimal-json:0.9.2'
-                hazelcast 'com.hazelcast:hazelcast-all:3.6.1'
-            }
-        }
 
             def task = getKarafFeaturesTasks(project)
         when:
@@ -359,18 +351,18 @@ class KarafFeaturesTest extends KarafTestSupport {
                 }.size() == 1
     }
 
-    def 'Simple Single Project With ConfigFile Override'() {
+    def 'Single Project With ConfigFile Override'() {
         given:
-        def project = setupProject('com.lburgazzoli.github', 'gradle-karaf', '1.2.3') {
-            configurations {
-                hazelcast
+            configureProject(project) {
+                configurations {
+                    hazelcast
+                }
+                dependencies {
+                    hazelcast 'org.apache.geronimo.specs:geronimo-jta_1.1_spec:1.1.1'
+                    hazelcast 'com.eclipsesource.minimal-json:minimal-json:0.9.2'
+                    hazelcast 'com.hazelcast:hazelcast-all:3.6.1'
+                }
             }
-            dependencies {
-                hazelcast 'org.apache.geronimo.specs:geronimo-jta_1.1_spec:1.1.1'
-                hazelcast 'com.eclipsesource.minimal-json:minimal-json:0.9.2'
-                hazelcast 'com.hazelcast:hazelcast-all:3.6.1'
-            }
-        }
 
             def task = getKarafFeaturesTasks(project)
         when:
@@ -416,9 +408,9 @@ class KarafFeaturesTest extends KarafTestSupport {
                 }.size() == 1
     }
 
-    def 'Simple Single Project With Conditions'() {
+    def 'Single Project With Conditions'() {
         given:
-            def project = setupProject('com.lburgazzoli.github', 'gradle-karaf', '1.2.3') {
+            configureProject(project) {
                 dependencies {
                     compile "com.google.guava:guava:19.0"
                     compile "com.squareup.retrofit:retrofit:1.9.0"
@@ -458,9 +450,9 @@ class KarafFeaturesTest extends KarafTestSupport {
             println featuresStr
     }
 
-    def 'Simple Single Project With Capabilities'() {
+    def 'Single Project With Capabilities'() {
         given:
-            def project = setupProject('com.lburgazzoli.github', 'gradle-karaf', '1.2.3') {
+            configureProject(project) {
                 dependencies {
                     compile "com.google.guava:guava:19.0"
                     compile "com.squareup.retrofit:retrofit:1.9.0"
@@ -519,9 +511,9 @@ class KarafFeaturesTest extends KarafTestSupport {
             }.size() == 1
     }
 
-    def 'Simple Single Project Wit Wrap'() {
+    def 'Single Project Wit Wrap'() {
         given:
-            def project = setupProject('com.lburgazzoli.github', 'gradle-karaf', '1.2.3') {
+            configureProject(project) {
                 dependencies {
                     compile 'org.apache.geronimo.specs:geronimo-jta_1.1_spec:1.1.1'
                     compile 'com.eclipsesource.minimal-json:minimal-json:0.9.2'
@@ -567,22 +559,22 @@ class KarafFeaturesTest extends KarafTestSupport {
 
 
 
-    def 'Simple Single Project With Multiple features'() {
+    def 'Single Project With Multiple features'() {
         given:
-        def project = setupProject('com.lburgazzoli.github', 'gradle-karaf', '1.2.3') {
-            configurations {
-                hazelcast
-                squareup
-            }
-            dependencies {
-                hazelcast 'org.apache.geronimo.specs:geronimo-jta_1.1_spec:1.1.1'
-                hazelcast 'com.eclipsesource.minimal-json:minimal-json:0.9.2'
-                hazelcast 'com.hazelcast:hazelcast-all:3.6.1'
+            configureProject(project) {
+                configurations {
+                    hazelcast
+                    squareup
+                }
+                dependencies {
+                    hazelcast 'org.apache.geronimo.specs:geronimo-jta_1.1_spec:1.1.1'
+                    hazelcast 'com.eclipsesource.minimal-json:minimal-json:0.9.2'
+                    hazelcast 'com.hazelcast:hazelcast-all:3.6.1'
 
-                squareup "com.squareup.retrofit:retrofit:1.9.0"
-                squareup "com.squareup.retrofit:converter-jackson:1.9.0"
+                    squareup "com.squareup.retrofit:retrofit:1.9.0"
+                    squareup "com.squareup.retrofit:converter-jackson:1.9.0"
+                }
             }
-        }
 
             def task = getKarafFeaturesTasks(project)
         when:

@@ -29,10 +29,6 @@ import spock.lang.Specification
  */
 class KarafTestSupport extends Specification {
 
-    // *************************************************************************
-    //
-    // *************************************************************************
-
     KarafPluginExtension getKarafExtension(Project project) {
         KarafPluginExtension.lookup(project)
     }
@@ -45,41 +41,38 @@ class KarafTestSupport extends Specification {
         project.tasks.getByName(KarafKarTask.NAME)
     }
 
-    // *************************************************************************
-    //
-    // *************************************************************************
 
-    def setupProject(String name) {
-        setupProject(ProjectBuilder.builder().withName(name).build())
+    def setUpProject(String name) {
+        configureProject(ProjectBuilder.builder().withName(name).build())
     }
 
-    def setupProject(String name, Closure closure) {
+    def setUpProject(String name, Closure closure) {
         ConfigureUtil.configure(
             closure,
-            setupProject(ProjectBuilder.builder().withName(name).build())
+            setUpProject(ProjectBuilder.builder().withName(name).build())
         )
     }
 
-    def setupProject(String group, String name, String version) {
+    def setUpProject(String group, String name, String version) {
         Project project = ProjectBuilder.builder().withName(name).build()
         project.group = group
         project.version = version
 
-        setupProject(project)
+        setUpProject(project)
     }
 
-    def setupProject(String group, String name, String version, Closure closure) {
+    def setUpProject(String group, String name, String version, Closure closure) {
         Project project = ProjectBuilder.builder().withName(name).build()
         project.group = group
         project.version = version
 
         ConfigureUtil.configure(
             closure,
-            setupProject(project)
+            setUpProject(project)
         )
     }
 
-    def setupProject(Project project) {
+    def setUpProject(Project project) {
         project.apply plugin: 'java'
         project.apply plugin: 'maven'
 
@@ -89,6 +82,12 @@ class KarafTestSupport extends Specification {
         }
 
         new KarafPlugin().apply(project)
+
+        return project
+    }
+
+    def configureProject(Project project, Closure closure) {
+        ConfigureUtil.configure(closure, project)
 
         return project
     }

@@ -18,6 +18,7 @@ package com.github.lburgazzoli.gradle.plugin.karaf.features
 import groovy.util.logging.Slf4j
 
 import com.github.lburgazzoli.gradle.plugin.karaf.KarafTestSupport
+import org.gradle.api.Project
 
 /**
  * @author lburgazzoli
@@ -25,9 +26,25 @@ import com.github.lburgazzoli.gradle.plugin.karaf.KarafTestSupport
 @Slf4j
 class KarafWarFeaturesTest extends KarafTestSupport {
 
-    def 'Simple War Dependencies'() {
+    Project project
+
+    def setup() {
+        project = setUpProject('com.lburgazzoli.github', 'gradle-karaf', '1.2.3')
+    }
+
+    def cleanup() {
+        project?.buildDir?.deleteDir()
+    }
+
+    // *************************
+    //
+    // Test
+    //
+    // *************************
+
+    def 'War Dependencies'() {
         given:
-            def project = setupProject('com.lburgazzoli.github', 'gradle-karaf', '1.2.3') {
+            configureProject(project) {
                 dependencies {
                     compile("org.apache.activemq:activemq-web-console:5.13.2@war") {
                         transitive = false
@@ -72,7 +89,7 @@ class KarafWarFeaturesTest extends KarafTestSupport {
 
     def 'Project War Dependencies'() {
         given:
-            def project = setupProject('com.lburgazzoli.github', 'gradle-karaf', '1.2.3') {
+            configureProject(project) {
                 apply plugin: 'war'
                 apply plugin: 'osgi'
 

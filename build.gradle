@@ -84,13 +84,17 @@ project.tasks.withType(org.gradle.api.tasks.compile.GroovyCompile) {
 }
 
 jar {
-    baseName = "${project.name}"
+    archiveBaseName = "${project.name}"
 
     manifest {
         attributes['Implementation-Title'   ] = "${group}.${project.name}-${project.version}"
         attributes['Implementation-Version' ] = project.version
         attributes['Implementation-Vendor'  ] = 'Luca Burgazzoli'
     }
+}
+
+test {
+    forkEvery 1
 }
 
 testlogger {
@@ -217,10 +221,4 @@ task ci(dependsOn: project.gradleCiTasks) {
 }
 
 task close(dependsOn: 'closeAndReleaseRepository') {
-}
-
-tasks.register("gv") {
-    doLast {
-        println groovyVersion
-    }
 }
