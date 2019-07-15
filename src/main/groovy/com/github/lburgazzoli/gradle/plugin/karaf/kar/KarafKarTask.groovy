@@ -91,7 +91,7 @@ class KarafKarTask extends Jar implements KarafTaskTrait  {
             asKarPath(
                 root,
                 "${features.group.replaceAll("\\.", "/")}/${features.name}/${features.version}",
-                "${features.name}-${features.version}.xml"
+                "${features.name}-${features.version}-features.xml"
             )
         )
 
