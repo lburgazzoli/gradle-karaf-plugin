@@ -41,7 +41,7 @@ class KarafRepoTask extends DefaultTask implements KarafTaskTrait  {
     @TaskAction
     void run() {
         def karaf = getKaraf()
-        if (!karaf.hasRepo()) {
+        if (!karaf.hasRepo() && !karaf.hasKar()) {
             return;
         }
 

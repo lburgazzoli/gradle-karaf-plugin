@@ -202,6 +202,12 @@ karaf {
         }
     }
 
+    // Enable generation of an OSGi bundles repository, laid out as a Maven 2 repository based on the features defined above. 
+    // This can be used to provision the 'system' directory of a custom Karaf distribution.
+    // To generate repo use generateRepo, assemble or install
+    repo {
+    }
+
     // Enable generation of Karaf Archive KAR based on features defined above.
     // To generate kar either use generateKar, assemble or install
     kar {

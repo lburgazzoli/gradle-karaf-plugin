@@ -46,54 +46,9 @@ class KarafKarTask extends Jar implements KarafTaskTrait  {
         }
 
         def features = karaf.features
+        def repo = karaf.repo
         def kar = karaf.kar
-        def resolver = features.resolver
-        def root = kar.explodedPath
-
-        root.deleteDir()
-        Files.createDirectories(root)
-
-        features.featureDescriptors.each { feature ->
-            resolver.resolve(feature).each {
-                copy(
-                    it.file,
-                    asKarPath(
-                        root,
-                        "${it.group.replaceAll("\\.", "/")}/${it.name}/${it.version}",
-                        it.hasClassifier() && it.classifier
-                            ? "${it.name}-${it.version}-${it.classifier}.${it.type}"
-                            : "${it.name}-${it.version}.${it.type}"
-                    )
-                )
-            }
-
-            feature.configFiles.each {
-                if (it.filename && it.uri && it.file) {
-                    def dep = MvnProtocolParser.parse(it.uri)
-                    if (dep) {
-                        copy(
-                            it.file,
-                            asKarPath(
-                                root,
-                                "${dep.group.replaceAll("\\.", "/")}/${dep.name}/${dep.version}",
-                                dep.hasClassifier()
-                                    ? "${dep.name}-${dep.version}-${dep.classifier}.${dep.type}"
-                                    : "${dep.name}-${dep.version}.${dep.type}"
-                            )
-                        )
-                    }
-                }
-            }
-        }
-
-        copy(
-            features.outputPath,
-            asKarPath(
-                root,
-                "${features.group.replaceAll("\\.", "/")}/${features.name}/${features.version}",
-                "${features.name}-${features.version}-features.xml"
-            )
-        )
+        Files.createDirectories(kar.outputPath)
 
         archiveAppendix.set(null)
         archiveClassifier.set(null)
@@ -107,40 +62,9 @@ class KarafKarTask extends Jar implements KarafTaskTrait  {
             archiveBaseName.set(kar.archiveName)
         }
 
-        from(kar.explodedDir)
+        from(repo.outputDir)
+        into('repository')
 
         super.copy()
-    }
-
-
-    def copy(File source, Path destination) {
-        if (source && destination) {
-            copy(source.toPath(), destination)
-        }
-    }
-
-    def copy(File source, File destination) {
-        if (source && destination) {
-            copy(source.toPath(), destination.toPath())
-        }
-    }
-
-    def copy(Path source, Path destination) {
-        if (source) {
-            if (!Files.exists(destination.parent)) {
-                Files.createDirectories(destination.parent)
-            }
-
-            Files.copy(
-                source,
-                destination,
-                StandardCopyOption.REPLACE_EXISTING,
-                StandardCopyOption.COPY_ATTRIBUTES
-            )
-        }
-    }
-
-    def asKarPath(Path root, String path, String name) {
-        return root.resolve("repository").resolve(path).resolve(name)
     }
 }

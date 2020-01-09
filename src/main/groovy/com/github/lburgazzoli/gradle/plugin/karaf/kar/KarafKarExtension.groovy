@@ -31,19 +31,11 @@ class KarafKarExtension {
     @OutputDirectory
     File outputDir
 
-    @OutputDirectory
-    File explodedDir
-
     KarafKarExtension(Project project) {
         this.project = project
         this.enabled = false
         this.outputDir = new File("${project.buildDir}/karaf/kar")
-        this.explodedDir = new File("${project.buildDir}/karaf/kar/exploded")
         this.archiveName = null
-    }
-
-    Path getExplodedPath() {
-        return explodedDir.toPath()
     }
 
     Path getOutputPath() {
