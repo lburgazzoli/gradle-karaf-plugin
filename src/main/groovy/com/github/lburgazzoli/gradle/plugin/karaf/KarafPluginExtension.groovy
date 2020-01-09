@@ -19,6 +19,7 @@ import org.gradle.api.Project
 import org.gradle.util.ConfigureUtil
 
 import com.github.lburgazzoli.gradle.plugin.karaf.features.KarafFeaturesExtension
+import com.github.lburgazzoli.gradle.plugin.karaf.repo.KarafRepoExtension
 import com.github.lburgazzoli.gradle.plugin.karaf.kar.KarafKarExtension
 
 /**
@@ -29,11 +30,13 @@ class KarafPluginExtension {
 
     private final Project project
     private KarafFeaturesExtension features
+    private KarafRepoExtension repo
     private KarafKarExtension kar
 
     KarafPluginExtension(Project project) {
         this.project = project
         this.features = null
+        this.repo = null
         this.kar = null
     }
 
@@ -56,7 +59,30 @@ class KarafPluginExtension {
     boolean hasFeatures() {
         return !getFeatures().featureDescriptors.empty
     }
+    
+    // *************************************************************************
+    // Repo
+    // *************************************************************************
 
+    def repo(Closure closure)  {
+        getRepo()
+      
+        repo.enabled = true
+        repo = ConfigureUtil.configure(closure, repo)
+    }
+    
+    KarafRepoExtension getRepo() {
+        if (!this.repo) {
+          this.repo = new KarafRepoExtension(project)
+        }
+        
+        return this.repo
+    }
+    
+    boolean hasRepo() {
+        return getRepo().enabled
+    }
+  
     // *************************************************************************
     // Kar
     // *************************************************************************

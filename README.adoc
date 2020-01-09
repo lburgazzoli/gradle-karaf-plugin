@@ -17,6 +17,12 @@ Automatically generate Karaf feature file in /build/karaf/features
 gradle generateFeatures
 ----
 
+Automatically generate Karaf repo (system directory) in /build/karaf/repo
+[source,groovy]
+----
+gradle generateRepo
+----
+
 Automatically generate Karaf kar file in /build/karaf/kar
 [source,groovy]
 ----
@@ -26,7 +32,7 @@ gradle generateKar
 
 == Description
 
-The *gradle-karaf-plugin* is designed to automate the process of creating Apache Karaf *feature* and *kar* files.
+The *gradle-karaf-plugin* is designed to automate the process of creating Apache Karaf *feature*, *repo*, and *kar* files.
 
 This plugin generates the desired karaf files by utilizing the native gradle configurations mechanism. As gradle automatically determines all direct and transitive dependencies, a complete list of dependencies is provided to the plugin for a given set of configurations.
 
@@ -192,6 +198,13 @@ karaf {
                 override = true // (optional) Override existing configuration files within karaf. False by default
             }
         }
+    }
+
+    // Enable generation of an OSGi bundles repository, laid out as a Maven 2 repository based on
+    // the features defined above. This can be used to provision the 'system' directory of a
+    // custom Karaf distribution.
+    // To generate repo use generateRepo, assemble or install
+    repo {
     }
 
     // Enable generation of Karaf Archive KAR based on features defined above.

@@ -17,6 +17,7 @@
 package com.github.lburgazzoli.gradle.plugin.karaf
 
 import com.github.lburgazzoli.gradle.plugin.karaf.features.KarafFeaturesTask
+import com.github.lburgazzoli.gradle.plugin.karaf.repo.KarafRepoTask
 import com.github.lburgazzoli.gradle.plugin.karaf.kar.KarafKarTask
 import groovy.util.slurpersupport.GPathResult
 import org.gradle.api.Project
@@ -35,6 +36,10 @@ class KarafTestSupport extends Specification {
 
     KarafFeaturesTask  getKarafFeaturesTasks(Project project) {
         project.tasks.getByName(KarafFeaturesTask.NAME)
+    }
+    
+    KarafRepoTask  getKarafRepoTasks(Project project) {
+        project.tasks.getByName(KarafRepoTask.NAME)
     }
 
     KarafKarTask getKarafKarTasks(Project project) {
