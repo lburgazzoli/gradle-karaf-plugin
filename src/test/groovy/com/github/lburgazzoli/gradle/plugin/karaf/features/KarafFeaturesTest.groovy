@@ -480,7 +480,7 @@ class KarafFeaturesTest extends KarafTestSupport {
             }.size() == 1
     }
 
-    def 'Single Project Wit Wrap'() {
+    def 'Single Project With Wrap'() {
         given:
             configureProject(project) {
                 dependencies {
