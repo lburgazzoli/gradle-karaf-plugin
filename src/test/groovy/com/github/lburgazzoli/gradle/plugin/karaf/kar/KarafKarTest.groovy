@@ -51,6 +51,7 @@ class KarafKarTest extends KarafTestSupport {
 
             def karaf = getKarafExtension(project)
             def features = getKarafFeaturesTasks(project)
+            def repo = getKarafRepoTasks(project)
             def kar = getKarafKarTasks(project)
         when:
             karaf.features {
@@ -63,6 +64,7 @@ class KarafKarTest extends KarafTestSupport {
             }
         then:
             features.run()
+            repo.run()
             kar.copy()
 
             def baseName = kar.archiveBaseName.get()
@@ -73,7 +75,7 @@ class KarafKarTest extends KarafTestSupport {
 
             def archive = kar.archiveFile.get().asFile
             def zf = new java.util.zip.ZipFile(archive)
-            null != zf.getEntry("repository/com/lburgazzoli/github/${project.name}/${project.version}/${project.name}-${project.version}.xml")
+            null != zf.getEntry("repository/com/lburgazzoli/github/${project.name}/${project.version}/${project.name}-${project.version}-features.xml")
             null != zf.getEntry("repository/commons-lang/commons-lang/2.6/commons-lang-2.6.jar")
     }
 }

@@ -88,13 +88,14 @@ class KarafWarFeaturesTest extends KarafTestSupport {
         given:
             configureProject(project) {
                 apply plugin: 'war'
-                apply plugin: 'osgi'
 
                 war {
-                    manifest = osgiManifest {
-                        instruction 'Web-ContextPath', '/context-path'
-                        instruction 'Webapp-Context', '/context-path'
-                        instruction 'Bundle-ClassPath', '.;/WEB-INF/classes'
+                    manifest {
+                        attributes(
+                            'Web-ContextPath': '/context-path',
+                            'Webapp-Context': '/context-path',
+                            'Bundle-ClassPath': '.;/WEB-INF/classes'
+                        )
                     }
                 }
             }

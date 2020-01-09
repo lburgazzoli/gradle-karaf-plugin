@@ -61,7 +61,7 @@ class KarafFeaturesTask extends DefaultTask implements KarafTaskTrait {
         def resolver = karaf.resolver
 
         builder.mkp.xmlDeclaration(version: "1.0", encoding: "UTF-8", standalone: "yes")
-        builder.features(xmlns:FEATURES_XMLNS_PREFIX + karaf.xsdVersion, name: karaf.name) {
+        builder.features(xmlns:FEATURES_XMLNS_PREFIX + karaf.xsdVersion, name: karaf.name + '-' + karaf.version) {
             karaf.repositories.each {
                 builder.repository( it )
             }

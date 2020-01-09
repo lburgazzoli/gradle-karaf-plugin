@@ -54,7 +54,7 @@ class KarafFeaturesExtension {
 
         this.outputFile = new File(
             "${project.buildDir}/karaf/features",
-            "${name}-${version}.xml"
+            "${name}-${version}-features.xml"
         )
     }
 
