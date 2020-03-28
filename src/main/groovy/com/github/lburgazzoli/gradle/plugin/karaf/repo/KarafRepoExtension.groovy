@@ -14,28 +14,27 @@
  * limitations under the License.
  */
 
-package com.github.lburgazzoli.gradle.plugin.karaf.kar
+package com.github.lburgazzoli.gradle.plugin.karaf.repo
 
 import java.nio.file.Path
 import org.gradle.api.Project
 import org.gradle.api.tasks.OutputDirectory
+import org.gradle.api.tasks.OutputFile
 
 /**
- * @author lburgazzoli
+ * @author realPyR3X
  */
-class KarafKarExtension {
+class KarafRepoExtension {
     private final Project project
     boolean enabled;
-    String archiveName
 
     @OutputDirectory
     File outputDir
 
-    KarafKarExtension(Project project) {
+    KarafRepoExtension(Project project) {
         this.project = project
         this.enabled = false
-        this.outputDir = new File("${project.buildDir}/karaf/kar")
-        this.archiveName = null
+        this.outputDir = new File("${project.buildDir}/karaf/repo")
     }
 
     Path getOutputPath() {

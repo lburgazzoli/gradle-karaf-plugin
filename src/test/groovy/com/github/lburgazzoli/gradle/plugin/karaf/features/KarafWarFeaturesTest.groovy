@@ -15,19 +15,33 @@
  */
 package com.github.lburgazzoli.gradle.plugin.karaf.features
 
-import groovy.util.logging.Slf4j
-
 import com.github.lburgazzoli.gradle.plugin.karaf.KarafTestSupport
+import org.gradle.api.Project
 
 /**
  * @author lburgazzoli
  */
-@Slf4j
 class KarafWarFeaturesTest extends KarafTestSupport {
 
-    def 'Simple War Dependencies'() {
+    Project project
+
+    def setup() {
+        project = setUpProject('com.lburgazzoli.github', 'gradle-karaf', '1.2.3')
+    }
+
+    def cleanup() {
+        project?.buildDir?.deleteDir()
+    }
+
+    // *************************
+    //
+    // Test
+    //
+    // *************************
+
+    def 'War Dependencies'() {
         given:
-            def project = setupProject('com.lburgazzoli.github', 'gradle-karaf', '1.2.3') {
+            configureProject(project) {
                 dependencies {
                     compile("org.apache.activemq:activemq-web-console:5.13.2@war") {
                         transitive = false
@@ -35,10 +49,10 @@ class KarafWarFeaturesTest extends KarafTestSupport {
                 }
             }
 
+            def karaf = getKarafExtension(project)
             def task = getKarafFeaturesTasks(project)
         when:
-            def extension = getKarafExtension(project)
-            extension.features {
+           karaf.features {
                 xsdVersion = "1.3.0"
 
                 feature {
@@ -53,60 +67,59 @@ class KarafWarFeaturesTest extends KarafTestSupport {
                 }
             }
 
-            def featuresStr = task.generateFeatures(extension.features)
-            def featuresXml = new XmlSlurper().parseText(featuresStr)
+            task.run()
         then:
-            featuresStr != null
-            featuresXml != null
+            assert karaf.hasFeatures()
 
-            println featuresStr
+            def featuresFile = karaf.features.getOutputFile()
+            featuresFile != null
+
+            def featuresXml = new XmlSlurper().parse(featuresFile)
+            featuresXml != null
 
             featuresXml.feature.@name == 'karaf-features-simple-project'
             featuresXml.feature.@description == 'feature-description'
             featuresXml.feature.@version == '1.2.3'
 
-            featuresXml.feature.bundle.'**'.findAll {
-                it.text().contains('war:mvn:org.apache.activemq/activemq-web-console/5.13.2/war?Webapp-Context=activemq-web-console')
-            }.size() == 1
+            findAllBundles(featuresXml, 'war:mvn:org.apache.activemq/activemq-web-console/5.13.2/war\\?Webapp-Context=activemq-web-console').size() == 1
     }
 
-    def 'Project War Dependencies'() {
+    def 'War Dependencies (Project)'() {
         given:
-            def project = setupProject('com.lburgazzoli.github', 'gradle-karaf', '1.2.3') {
+            configureProject(project) {
                 apply plugin: 'war'
-                apply plugin: 'osgi'
 
                 war {
-                    manifest = osgiManifest {
-                        instruction 'Web-ContextPath', '/context-path'
-                        instruction 'Webapp-Context', '/context-path'
-                        instruction 'Bundle-ClassPath', '.;/WEB-INF/classes'
+                    manifest {
+                        attributes(
+                            'Web-ContextPath': '/context-path',
+                            'Webapp-Context': '/context-path',
+                            'Bundle-ClassPath': '.;/WEB-INF/classes'
+                        )
                     }
                 }
             }
 
+            def karaf = getKarafExtension(project)
             def task = getKarafFeaturesTasks(project)
         when:
-            def extension = getKarafExtension(project)
-            extension.features {
+            karaf.features {
                 feature {
                     includeProject = true
                 }
             }
 
-            def featuresStr = task.generateFeatures(extension.features)
-            def featuresXml = new XmlSlurper().parseText(featuresStr)
+            task.run()
         then:
-            featuresStr != null
+            assert karaf.hasFeatures()
+
+            def featuresFile = karaf.features.getOutputFile()
+            featuresFile != null
+
+            def featuresXml = new XmlSlurper().parse(featuresFile)
             featuresXml != null
 
-            println featuresStr
-
-            featuresXml.feature.bundle.'**'.findAll {
-                it.text().equals('war:mvn:com.lburgazzoli.github/gradle-karaf/1.2.3/war')
-            }.size() == 1
-            featuresXml.feature.bundle.'**'.findAll {
-                it.text().equals('mvn:com.lburgazzoli.github/gradle-karaf/1.2.3')
-            }.size() == 0
+            findAllBundles(featuresXml, '^war:mvn:com.lburgazzoli.github/gradle-karaf/1.2.3/war$').size() == 1
+            findAllBundles(featuresXml, '^mvn:com.lburgazzoli.github/gradle-karaf/1.2.3$').size() == 0
     }
 }

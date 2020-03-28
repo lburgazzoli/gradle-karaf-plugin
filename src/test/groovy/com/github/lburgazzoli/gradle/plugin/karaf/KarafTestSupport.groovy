@@ -16,21 +16,19 @@
 
 package com.github.lburgazzoli.gradle.plugin.karaf
 
+import com.github.lburgazzoli.gradle.plugin.karaf.features.KarafFeaturesTask
+import com.github.lburgazzoli.gradle.plugin.karaf.repo.KarafRepoTask
+import com.github.lburgazzoli.gradle.plugin.karaf.kar.KarafKarTask
+import groovy.util.slurpersupport.GPathResult
 import org.gradle.api.Project
 import org.gradle.testfixtures.ProjectBuilder
 import org.gradle.util.ConfigureUtil
-
-import com.github.lburgazzoli.gradle.plugin.karaf.features.KarafFeaturesTask
 import spock.lang.Specification
 
 /**
  * @author lburgazzoli
  */
 class KarafTestSupport extends Specification {
-
-    // *************************************************************************
-    //
-    // *************************************************************************
 
     KarafPluginExtension getKarafExtension(Project project) {
         KarafPluginExtension.lookup(project)
@@ -39,42 +37,35 @@ class KarafTestSupport extends Specification {
     KarafFeaturesTask  getKarafFeaturesTasks(Project project) {
         project.tasks.getByName(KarafFeaturesTask.NAME)
     }
-
-    // *************************************************************************
-    //
-    // *************************************************************************
-
-    def setupProject(String name) {
-        setupProject(ProjectBuilder.builder().withName(name).build())
+    
+    KarafRepoTask  getKarafRepoTasks(Project project) {
+        project.tasks.getByName(KarafRepoTask.NAME)
     }
 
-    def setupProject(String name, Closure closure) {
-        ConfigureUtil.configure(
-            closure,
-            setupProject(ProjectBuilder.builder().withName(name).build())
-        )
+    KarafKarTask getKarafKarTasks(Project project) {
+        project.tasks.getByName(KarafKarTask.NAME)
     }
 
-    def setupProject(String group, String name, String version) {
+    def setUpProject(String group, String name, String version) {
         Project project = ProjectBuilder.builder().withName(name).build()
         project.group = group
         project.version = version
 
-        setupProject(project)
+        setUpProject(project)
     }
 
-    def setupProject(String group, String name, String version, Closure closure) {
+    def setUpProject(String group, String name, String version, Closure closure) {
         Project project = ProjectBuilder.builder().withName(name).build()
         project.group = group
         project.version = version
 
         ConfigureUtil.configure(
             closure,
-            setupProject(project)
+            setUpProject(project)
         )
     }
 
-    def setupProject(Project project) {
+    def setUpProject(Project project) {
         project.apply plugin: 'java'
         project.apply plugin: 'maven'
 
@@ -86,5 +77,19 @@ class KarafTestSupport extends Specification {
         new KarafPlugin().apply(project)
 
         return project
+    }
+
+    def configureProject(Project project, Closure closure) {
+        ConfigureUtil.configure(closure, project)
+
+        return project
+    }
+
+    def findAllBundles(GPathResult features, Closure closure) {
+        return features.feature.bundle.'**'.findAll(closure)
+    }
+
+    def findAllBundles(GPathResult features, String id) {
+        return findAllBundles(features) { it.text() =~ id }
     }
 }

@@ -39,9 +39,8 @@ class KarafFeaturesExtension {
     String group
     String version
     String xsdVersion
-    boolean includeProject
-
-    private File outputFile
+    Boolean includeProject
+    File outputFile
 
     KarafFeaturesExtension(Project project) {
         this.project = project
@@ -50,13 +49,12 @@ class KarafFeaturesExtension {
         this.version = project.version
         this.resolver = new MvnDependencyResolver()
         this.xsdVersion = DEFAULT_XSD_VERSION
-        this.includeProject = false
         this.repositories = []
         this.featureDescriptors = []
 
         this.outputFile = new File(
             "${project.buildDir}/karaf/features",
-            "${name}-${version}.xml"
+            "${name}-${version}-features.xml"
         )
     }
 

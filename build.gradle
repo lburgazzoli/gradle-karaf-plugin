@@ -8,10 +8,11 @@ plugins {
     id 'groovy'
     id 'maven'
     id 'signing'
-    id 'com.gradle.plugin-publish' version '0.9.7'
-    id 'net.researchgate.release' version '2.6.0'
-    id 'com.github.ben-manes.versions' version '0.15.0'
-    id "io.codearte.nexus-staging" version "0.9.0"
+    id 'com.gradle.plugin-publish' version '0.10.0'
+    id 'net.researchgate.release' version '2.8.0'
+    id 'com.github.ben-manes.versions' version '0.20.0'
+    id 'io.codearte.nexus-staging' version '0.20.0'
+    id 'com.adarshr.test-logger' version '1.6.0'
 }
 
 // *****************************************************************************
@@ -32,7 +33,6 @@ ext {
     gitProject        = "https://github.com/lburgazzoli/gradle-karaf-plugin"
     gitURL            = "git@github.com:lburgazzoli/gradle-karaf-plugin"
     groovyVersion     = GroovySystem.version.replaceAll(/\.\d+$/,'')
-    gradleVersion     = '3.0'
     gradleScriptDir   = "${rootProject.projectDir}/gradle"
     gradlePluginId    = "com.github.lburgazzoli.karaf"
     gradlePluginTags  = [ 'karaf' ]
@@ -40,8 +40,8 @@ ext {
 
     versions = [
         slf4j  : '1.7.21',
-        paxUrl : '2.5.2',
-        spock  : "1.1-groovy-${groovyVersion}"
+        paxUrl : '2.5.4',
+        spock  : "1.2-groovy-${groovyVersion}"
     ]
 
     if (isReleaseVersion) {
@@ -84,7 +84,7 @@ project.tasks.withType(org.gradle.api.tasks.compile.GroovyCompile) {
 }
 
 jar {
-    baseName = "${project.name}"
+    archiveBaseName = "${project.name}"
 
     manifest {
         attributes['Implementation-Title'   ] = "${group}.${project.name}-${project.version}"
@@ -93,12 +93,11 @@ jar {
     }
 }
 
-test {
-    testLogging {
-        events "started", "passed", "skipped", "failed", "standardError"
-    }
+testlogger {
+    showStandardStreams false
+    slowThreshold 30000
+    theme 'mocha'
 }
-
 
 // *****************************************************************************
 // ARTIFACTS
