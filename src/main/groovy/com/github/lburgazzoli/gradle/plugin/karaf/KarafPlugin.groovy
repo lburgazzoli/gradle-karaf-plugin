@@ -25,6 +25,7 @@ import org.gradle.api.plugins.JavaPlugin
 import org.gradle.api.plugins.WarPlugin
 
 import com.github.lburgazzoli.gradle.plugin.karaf.features.KarafFeaturesTask
+import com.github.lburgazzoli.gradle.plugin.karaf.repo.KarafRepoTask
 import com.github.lburgazzoli.gradle.plugin.karaf.kar.KarafKarTask
 /**
  * @author lburgazzoli
@@ -46,6 +47,14 @@ class KarafPlugin implements Plugin<Project> {
             group       = KarafFeaturesTask.GROUP
             description = KarafFeaturesTask.DESCRIPTION
         }
+        
+        // Karaf Repo
+        def repo = project.task( KarafRepoTask.NAME , type: KarafRepoTask ) {
+            group       = KarafRepoTask.GROUP
+            description = KarafRepoTask.DESCRIPTION
+        }
+        
+        repo.dependsOn feat
 
         // Karaf KAR
         def kar = project.task( KarafKarTask.NAME , type: KarafKarTask) {
@@ -53,7 +62,7 @@ class KarafPlugin implements Plugin<Project> {
             description = KarafKarTask.DESCRIPTION
         }
 
-        kar.dependsOn feat
+        kar.dependsOn repo
 
         def war = project.tasks.find { it.name == WarPlugin.WAR_TASK_NAME }
         def jar = project.tasks.find { it.name == JavaPlugin.JAR_TASK_NAME }
@@ -96,10 +105,16 @@ class KarafPlugin implements Plugin<Project> {
                     feat.outputs.file(ext.features.outputFile)
                 }
             }
-
-            project.artifacts.add(ARTIFACTS_CONFIGURATION_NAME, ext.features.outputFile) {
-                classifier = 'features'
+            
+            if (ext.hasRepo()) {
+                // if there is an output directory, add that as an output
+                if (ext.repo.outputDir != null) {
+                    repo.outputs.dir(ext.repo.outputDir)
+                }
             }
+
+            project.artifacts.add(ARTIFACTS_CONFIGURATION_NAME, ext.features.outputFile)
+            project.artifacts.add(ARTIFACTS_CONFIGURATION_NAME, ext.repo.outputDir)
             project.artifacts.add(ARTIFACTS_CONFIGURATION_NAME, kar)
         }
     }

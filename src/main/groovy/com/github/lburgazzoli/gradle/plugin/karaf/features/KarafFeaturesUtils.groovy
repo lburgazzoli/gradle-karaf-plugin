@@ -63,7 +63,11 @@ class KarafFeaturesUtils extends KarafUtils {
             ProjectComponentIdentifier pci = root.id as ProjectComponentIdentifier
             Project prj = featureDescriptor.project.findProject(pci.getProjectPath())
 
-            if (prj == featureDescriptor.project && !ext.features.includeProject) {
+            boolean includeProject = false
+            includeProject = ext.features.includeProject ?: false
+            includeProject = featureDescriptor.includeProject ?: includeProject
+            
+            if(prj == featureDescriptor.project && !includeProject) {
                 return
             }
 
