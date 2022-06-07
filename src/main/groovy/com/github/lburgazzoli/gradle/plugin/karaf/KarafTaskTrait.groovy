@@ -15,6 +15,7 @@
  */
 package com.github.lburgazzoli.gradle.plugin.karaf
 
+import org.gradle.api.tasks.Internal
 import org.gradle.util.ConfigureUtil
 
 /**
@@ -34,6 +35,7 @@ trait KarafTaskTrait {
         this.pluginExtension = pluginExtension
     }
 
+    @Internal
     KarafPluginExtension getKaraf() {
         // Don't keep looking it up...
         if (this.pluginExtension == null) {
