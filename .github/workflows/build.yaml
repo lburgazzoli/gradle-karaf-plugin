@@ -14,7 +14,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 #
-name: Build PR
+name: Build
 
 on:
   push:
@@ -27,20 +27,21 @@ jobs:
   build:
     runs-on: ubuntu-latest
     steps:
-    - name: Setup PR env vars
-      if: github.event_name == 'pull_request'
-      run: |
-        echo '::set-env name=PR::true'
-    - name: Setup CI env vars
-      run: |
-        echo '::set-env name=CI::true'
-    - uses: actions/checkout@v2
-    - name: Set up JDK 8
-      uses: AdoptOpenJDK/install-jdk@v1
-      with:
-        version: '8'
-    - name: build
-      run: |
-        echo "is-ci = $CI"
-        echo "is-pr = $PR"
-        ./gradlew ci
+      - name: Setup PR env vars
+        if: github.event_name == 'pull_request'
+        run: |
+          echo 'PR=true' >> $GITHUB_ENV
+      - name: Setup CI env vars
+        run: |
+          echo 'CI=true' >> $GITHUB_ENV
+      - uses: actions/checkout@v2
+      - name: Set up JDK 8
+        uses: actions/setup-java@v3
+        with:
+          distribution: "temurin"
+          java-version: "8"
+      - name: build
+        run: |
+          echo "is-ci = $CI"
+          echo "is-pr = $PR"
+          ./gradlew ci
