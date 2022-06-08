@@ -4,7 +4,7 @@
 // *****************************************************************************
 
 plugins {
-    id 'java'
+    id 'java-library'
     id 'java-gradle-plugin'
     id 'groovy'
     id 'maven'
@@ -63,12 +63,12 @@ repositories {
 }
 
 dependencies {
-    compile gradleApi()
-    compile localGroovy()
+    implementation gradleApi()
+    implementation localGroovy()
 
-    compile "org.ops4j.pax.url:pax-url-aether:$versions.paxUrl"
+    implementation "org.ops4j.pax.url:pax-url-aether:$versions.paxUrl"
 
-    testCompile("org.spockframework:spock-core:$versions.spock") {
+    testImplementation("org.spockframework:spock-core:$versions.spock") {
         exclude(module: 'groovy-all')
     }
 }
