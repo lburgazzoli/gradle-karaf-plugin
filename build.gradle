@@ -21,7 +21,7 @@ plugins {
 // *****************************************************************************
 
 group               = 'com.github.lburgazzoli'
-description         = 'A gradle plugin for Karaf'
+description         = 'A Gradle plugin for Karaf'
 sourceCompatibility = JavaVersion.VERSION_1_7
 targetCompatibility = JavaVersion.VERSION_1_7
 
