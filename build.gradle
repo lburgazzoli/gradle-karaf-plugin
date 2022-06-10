@@ -36,7 +36,7 @@ ext {
     gradleScriptDir   = "${rootProject.projectDir}/gradle"
     gradlePluginId    = "com.github.lburgazzoli.karaf"
     gradlePluginTags  = [ 'karaf' ]
-    gradleCiTasks     = (isReleaseVersion || isPR) ? ['clean', 'test'] : ['clean', 'test', 'uploadArchives']
+    gradleCiTasks     = ['clean', 'test']
 
     versions = [
         slf4j  : '1.7.21',
@@ -139,81 +139,4 @@ pluginBundle {
             displayName = project.description
         }
     }
-}
-
-// *****************************************************************************
-// Publish to Sonatype OSS
-// *****************************************************************************
-
-signing {
-    required {
-        isReleaseVersion
-    }
-
-    sign configurations.archives
-}
-
-uploadArchives {
-    repositories {
-        mavenDeployer {
-            repository(url: project.nexusUrl) {
-                authentication(
-                    userName: project.nexusUsername,
-                    password: project.nexusPassword
-                )
-            }
-
-            beforeDeployment {
-                MavenDeployment deployment -> signing.signPom(deployment)
-            }
-
-            pom.groupId = project.group
-            pom.artifactId = project.name
-            pom.version = project.version
-
-            pom.project {
-                name project.name
-                description project.name
-                url project.gitProject
-
-                scm {
-                    url project.gitProject
-                    connection "scm:${project.gitProject}"
-                    developerConnection "scm:${project.gitURL}"
-                }
-
-                licenses {
-                    license {
-                        name 'The Apache Software License, Version 2.0'
-                        url 'http://www.apache.org/licenses/LICENSE-2.0.txt'
-                        distribution 'repo'
-                    }
-                }
-
-                developers {
-                    developer {
-                        id 'lburgazzoli'
-                        name 'Luca Burgazzoli'
-                    }
-                }
-            }
-        }
-    }
-}
-
-// *****************************************************************************
-//
-// *****************************************************************************
-
-afterReleaseBuild.dependsOn publishPlugins, uploadArchives
-
-task ci(dependsOn: project.gradleCiTasks) {
-    doFirst {
-        println "=============================================================="
-        println "CI Tasks: ${project.gradleCiTasks}"
-        println "=============================================================="
-    }
-}
-
-task close(dependsOn: 'closeAndReleaseRepository') {
 }
