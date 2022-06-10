@@ -46,4 +46,4 @@ jobs:
         run: |
           echo "is-ci = $CI"
           echo "is-pr = $PR"
-          ./gradlew ci
+          ./gradlew clean test
