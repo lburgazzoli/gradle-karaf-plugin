@@ -48,6 +48,12 @@ class DependencyDescriptor extends Dependency {
     static DependencyDescriptor make(
         ResolvedComponentResult componentResult, AbstractArchiveTask task, BundleDescriptor descriptor) {
 
-        return new DependencyDescriptor(componentResult, task.classifier, task.extension, task.archivePath, descriptor)
+        return new DependencyDescriptor(
+                componentResult,
+                task.archiveClassifier.get(),
+                task.archiveExtension.get(),
+                task.archiveFile.get().asFile,
+                descriptor
+        )
     }
 }
