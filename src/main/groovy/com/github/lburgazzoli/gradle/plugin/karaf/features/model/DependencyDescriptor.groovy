@@ -18,7 +18,6 @@ package com.github.lburgazzoli.gradle.plugin.karaf.features.model
 import org.gradle.api.artifacts.ResolvedArtifact
 import org.gradle.api.artifacts.result.ResolvedComponentResult
 import org.gradle.api.tasks.bundling.AbstractArchiveTask
-
 /**
  * @author lburgazzoli
  */
@@ -42,12 +41,22 @@ class DependencyDescriptor extends Dependency {
     static DependencyDescriptor make(
             ResolvedComponentResult componentResult, ResolvedArtifact artifact, BundleDescriptor descriptor) {
 
-        return new DependencyDescriptor(componentResult, artifact.classifier, artifact.type, artifact.file, descriptor)
+        return new DependencyDescriptor(
+                componentResult,
+                artifact.classifier,
+                artifact.type,
+                artifact.file,
+                descriptor)
     }
 
     static DependencyDescriptor make(
         ResolvedComponentResult componentResult, AbstractArchiveTask task, BundleDescriptor descriptor) {
 
-        return new DependencyDescriptor(componentResult, task.classifier, task.extension, task.archivePath, descriptor)
+        return new DependencyDescriptor(
+                componentResult,
+                task.archiveClassifier.get(),
+                task.archiveExtension.get(),
+                task.archiveFile.get().asFile,
+                descriptor)
     }
 }

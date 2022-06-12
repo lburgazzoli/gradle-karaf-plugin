@@ -15,14 +15,14 @@
  */
 package com.github.lburgazzoli.gradle.plugin.karaf.features
 
-import java.nio.file.Path
+import com.github.lburgazzoli.gradle.plugin.karaf.features.model.DependencyResolver
+import com.github.lburgazzoli.gradle.plugin.karaf.features.model.FeatureDescriptor
+import com.github.lburgazzoli.gradle.plugin.karaf.mvn.MvnDependencyResolver
 import org.gradle.api.Project
 import org.gradle.api.tasks.OutputFile
 import org.gradle.util.ConfigureUtil
 
-import com.github.lburgazzoli.gradle.plugin.karaf.features.model.DependencyResolver
-import com.github.lburgazzoli.gradle.plugin.karaf.mvn.MvnDependencyResolver
-import com.github.lburgazzoli.gradle.plugin.karaf.features.model.FeatureDescriptor
+import java.nio.file.Path
 
 /**
  * @author lburgazzoli
@@ -32,7 +32,7 @@ class KarafFeaturesExtension {
 
     private final Project project
     private final DependencyResolver resolver
-    private final def Set<String> repositories
+    private final Set<String> repositories
     private final List<FeatureDescriptor> featureDescriptors;
 
     String name

@@ -16,6 +16,7 @@
 package com.github.lburgazzoli.gradle.plugin.karaf.features
 
 import com.github.lburgazzoli.gradle.plugin.karaf.KarafTestSupport
+import groovy.xml.XmlSlurper
 import org.gradle.api.Project
 
 /**
@@ -43,7 +44,7 @@ class KarafWarFeaturesTest extends KarafTestSupport {
         given:
             configureProject(project) {
                 dependencies {
-                    compile("org.apache.activemq:activemq-web-console:5.13.2@war") {
+                    implementation("org.apache.activemq:activemq-web-console:5.13.2@war") {
                         transitive = false
                     }
                 }

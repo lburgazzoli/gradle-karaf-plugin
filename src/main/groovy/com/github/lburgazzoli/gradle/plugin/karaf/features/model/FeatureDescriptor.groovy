@@ -44,10 +44,14 @@ class FeatureDescriptor extends FeatureDefinition {
         this.configurations = []
         this.conditions = []
 
-        // If "runtime" configuration exists add it as default
-        Configuration runtime = project.configurations.findByName("runtime")
-        if(runtime) {
-            this.configurations << runtime
+        // some known configurationa re added by default
+        Configuration implementation = project.configurations.findByName("implementation")
+        if(implementation) {
+            this.configurations << implementation
+        }
+        Configuration runtimeOnly = project.configurations.findByName("runtimeOnly")
+        if(runtimeOnly) {
+            this.configurations << runtimeOnly
         }
     }
 

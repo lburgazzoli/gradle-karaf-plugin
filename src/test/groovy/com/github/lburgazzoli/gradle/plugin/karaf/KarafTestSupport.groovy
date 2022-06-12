@@ -19,7 +19,7 @@ package com.github.lburgazzoli.gradle.plugin.karaf
 import com.github.lburgazzoli.gradle.plugin.karaf.features.KarafFeaturesTask
 import com.github.lburgazzoli.gradle.plugin.karaf.repo.KarafRepoTask
 import com.github.lburgazzoli.gradle.plugin.karaf.kar.KarafKarTask
-import groovy.util.slurpersupport.GPathResult
+import groovy.xml.slurpersupport.GPathResult
 import org.gradle.api.Project
 import org.gradle.testfixtures.ProjectBuilder
 import org.gradle.util.ConfigureUtil
@@ -34,16 +34,16 @@ class KarafTestSupport extends Specification {
         KarafPluginExtension.lookup(project)
     }
 
-    KarafFeaturesTask  getKarafFeaturesTasks(Project project) {
-        project.tasks.getByName(KarafFeaturesTask.NAME)
+    KarafFeaturesTask getKarafFeaturesTasks(Project project) {
+        return (KarafFeaturesTask)project.tasks.getByName(KarafFeaturesTask.NAME)
     }
-    
-    KarafRepoTask  getKarafRepoTasks(Project project) {
-        project.tasks.getByName(KarafRepoTask.NAME)
+
+    KarafRepoTask getKarafRepoTasks(Project project) {
+        return (KarafRepoTask)project.tasks.getByName(KarafRepoTask.NAME)
     }
 
     KarafKarTask getKarafKarTasks(Project project) {
-        project.tasks.getByName(KarafKarTask.NAME)
+        return (KarafKarTask)project.tasks.getByName(KarafKarTask.NAME)
     }
 
     def setUpProject(String group, String name, String version) {
@@ -67,7 +67,6 @@ class KarafTestSupport extends Specification {
 
     def setUpProject(Project project) {
         project.apply plugin: 'java'
-        project.apply plugin: 'maven'
 
         project.repositories {
             mavenLocal()

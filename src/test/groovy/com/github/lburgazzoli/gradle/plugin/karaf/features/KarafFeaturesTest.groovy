@@ -16,7 +16,9 @@
 package com.github.lburgazzoli.gradle.plugin.karaf.features
 
 import com.github.lburgazzoli.gradle.plugin.karaf.KarafTestSupport
+import groovy.xml.XmlSlurper
 import org.gradle.api.Project
+
 /**
  * @author lburgazzoli
  */
@@ -56,22 +58,24 @@ class KarafFeaturesTest extends KarafTestSupport {
 
             def feature = extension.features.featureDescriptors[0]
             feature.configurations.empty == false
-            feature.configurations.size() == 1
-            feature.configurations[0] == project.configurations.runtime
+            feature.configurations.size() == 2
+
+            assert feature.configurations.any { it == project.configurations.implementation }
+            assert feature.configurations.any { it == project.configurations.runtimeOnly }
     }
 
     def 'Same GAV'() {
         given:
             configureProject(project) {
                 dependencies {
-                    compile group      : 'ca.uhn.hapi.fhir',
-                            name       : 'hapi-fhir-testpage-overlay',
-                            version    : '2.1',
-                            classifier : 'classes'
-                    compile group      : 'ca.uhn.hapi.fhir',
-                            name       : 'hapi-fhir-testpage-overlay',
-                            version    : '2.1',
-                            ext        : 'war'
+                    implementation group      : 'ca.uhn.hapi.fhir',
+                                   name       : 'hapi-fhir-testpage-overlay',
+                                   version    : '2.1',
+                                   classifier : 'classes'
+                    implementation group      : 'ca.uhn.hapi.fhir',
+                                   name       : 'hapi-fhir-testpage-overlay',
+                                   version    : '2.1',
+                                   ext        : 'war'
                 }
             }
 
@@ -105,16 +109,16 @@ class KarafFeaturesTest extends KarafTestSupport {
         given:
             configureProject(project) {
                 dependencies {
-                    compile group  : 'ca.uhn.hapi.fhir',
-                            name       : 'hapi-fhir-testpage-overlay',
-                            version    : '2.1',
-                            classifier : 'classes',
-                            transitive : true
-                    compile group      : 'ca.uhn.hapi.fhir',
-                            name       : 'hapi-fhir-testpage-overlay',
-                            version    : '2.1',
-                            ext        : 'war',
-                            transitive : true
+                    implementation group  : 'ca.uhn.hapi.fhir',
+                                   name       : 'hapi-fhir-testpage-overlay',
+                                   version    : '2.1',
+                                   classifier : 'classes',
+                                   transitive : true
+                    implementation group      : 'ca.uhn.hapi.fhir',
+                                   name       : 'hapi-fhir-testpage-overlay',
+                                   version    : '2.1',
+                                   ext        : 'war',
+                                   transitive : true
                 }
             }
 
@@ -154,8 +158,8 @@ class KarafFeaturesTest extends KarafTestSupport {
         given:
             configureProject(project) {
                 dependencies {
-                    compile 'com.graphql-java:graphql-java-servlet:0.9.0'
-                    compile 'com.google.guava:guava:20.0'
+                    implementation 'com.graphql-java:graphql-java-servlet:0.9.0'
+                    implementation 'com.google.guava:guava:20.0'
                 }
             }
 
@@ -187,16 +191,16 @@ class KarafFeaturesTest extends KarafTestSupport {
         given:
             configureProject(project) {
                 dependencies {
-                    runtime "com.google.guava:guava:19.0"
-                    runtime "com.squareup.retrofit:retrofit:1.9.0"
-                    runtime "com.squareup.retrofit:converter-jackson:1.9.0"
-                    compile "org.apache.activemq:activemq-web:5.13.2"
-                    compile "org.apache.activemq:activemq-web-console:5.13.2@war"
-                    compile "commons-codec:commons-codec:1.10"
-                    compile "commons-collections:commons-collections:3.2.2"
-                    compile "commons-fileupload:commons-fileupload:1.3.2"
-                    compile "commons-io:commons-io:2.5"
-                    compile "commons-lang:commons-lang:2.6"
+                    runtimeOnly "com.google.guava:guava:19.0"
+                    runtimeOnly "com.squareup.retrofit:retrofit:1.9.0"
+                    runtimeOnly "com.squareup.retrofit:converter-jackson:1.9.0"
+                    implementation "org.apache.activemq:activemq-web:5.13.2"
+                    implementation "org.apache.activemq:activemq-web-console:5.13.2@war"
+                    implementation "commons-codec:commons-codec:1.10"
+                    implementation "commons-collections:commons-collections:3.2.2"
+                    implementation "commons-fileupload:commons-fileupload:1.3.2"
+                    implementation "commons-io:commons-io:2.5"
+                    implementation "commons-lang:commons-lang:2.6"
                 }
             }
 
@@ -377,12 +381,12 @@ class KarafFeaturesTest extends KarafTestSupport {
         given:
             configureProject(project) {
                 dependencies {
-                    compile "com.google.guava:guava:19.0"
-                    compile "com.squareup.retrofit:retrofit:1.9.0"
+                    implementation "com.google.guava:guava:19.0"
+                    implementation "com.squareup.retrofit:retrofit:1.9.0"
 
-                    compile 'com.fasterxml.jackson.core:jackson-core:2.7.0'
-                    compile 'com.fasterxml.jackson.core:jackson-databind:2.7.0'
-                    compile 'com.fasterxml.jackson.core:jackson-annotations:2.7.0'
+                    implementation 'com.fasterxml.jackson.core:jackson-core:2.7.0'
+                    implementation 'com.fasterxml.jackson.core:jackson-databind:2.7.0'
+                    implementation 'com.fasterxml.jackson.core:jackson-annotations:2.7.0'
                 }
             }
 
@@ -421,12 +425,12 @@ class KarafFeaturesTest extends KarafTestSupport {
         given:
             configureProject(project) {
                 dependencies {
-                    compile "com.google.guava:guava:19.0"
-                    compile "com.squareup.retrofit:retrofit:1.9.0"
+                    implementation "com.google.guava:guava:19.0"
+                    implementation "com.squareup.retrofit:retrofit:1.9.0"
 
-                    compile 'com.fasterxml.jackson.core:jackson-core:2.7.0'
-                    compile 'com.fasterxml.jackson.core:jackson-databind:2.7.0'
-                    compile 'com.fasterxml.jackson.core:jackson-annotations:2.7.0'
+                    implementation 'com.fasterxml.jackson.core:jackson-core:2.7.0'
+                    implementation 'com.fasterxml.jackson.core:jackson-databind:2.7.0'
+                    implementation 'com.fasterxml.jackson.core:jackson-annotations:2.7.0'
                 }
             }
 
@@ -484,9 +488,9 @@ class KarafFeaturesTest extends KarafTestSupport {
         given:
             configureProject(project) {
                 dependencies {
-                    compile 'org.apache.geronimo.specs:geronimo-jta_1.1_spec:1.1.1'
-                    compile 'com.eclipsesource.minimal-json:minimal-json:0.9.2'
-                    compile 'com.hazelcast:hazelcast-all:3.6.1'
+                    implementation 'org.apache.geronimo.specs:geronimo-jta_1.1_spec:1.1.1'
+                    implementation 'com.eclipsesource.minimal-json:minimal-json:0.9.2'
+                    implementation 'com.hazelcast:hazelcast-all:3.6.1'
                 }
             }
 
@@ -557,7 +561,7 @@ class KarafFeaturesTest extends KarafTestSupport {
                     description    = 'Squareup'
                     includeProject = true
 
-                    configurations 'squareup' 
+                    configurations 'squareup'
                 }
             }
 

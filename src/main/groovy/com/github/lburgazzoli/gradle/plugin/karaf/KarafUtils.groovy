@@ -35,8 +35,16 @@ class KarafUtils {
 
     static void walkDeps(List<Configuration> configurations, Closure closure) {
         configurations.each {
-            Set<ResolvedDependencyResult> alreadyKnownDependencies = new HashSet<>();
-            walkDeps(it, it.incoming.resolutionResult.root, alreadyKnownDependencies, closure)
+            Set<ResolvedDependencyResult> alreadyKnownDependencies = new HashSet<>()
+
+            // hack for now
+            it.setCanBeResolved(true)
+
+            walkDeps(
+                it,
+                it.incoming.resolutionResult.root,
+                alreadyKnownDependencies,
+                closure)
         }
     }
 
