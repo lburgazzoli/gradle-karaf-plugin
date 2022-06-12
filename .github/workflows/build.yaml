@@ -36,21 +36,12 @@ jobs:
   build:
     runs-on: ubuntu-latest
     steps:
-      - name: Setup PR env vars
-        if: github.event_name == 'pull_request'
-        run: |
-          echo 'PR=true' >> $GITHUB_ENV
-      - name: Setup CI env vars
-        run: |
-          echo 'CI=true' >> $GITHUB_ENV
       - uses: actions/checkout@v2
       - name: Set up JDK 8
         uses: actions/setup-java@v3
         with:
           distribution: "temurin"
           java-version: "8"
-      - name: build
+      - name: Test
         run: |
-          echo "is-ci = $CI"
-          echo "is-pr = $PR"
-          ./gradlew clean test
+          ./gradlew check

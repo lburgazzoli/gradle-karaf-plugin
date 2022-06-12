@@ -22,8 +22,6 @@ description = "Automates the process of creating Apache Karaf feature, repo, and
 
 val isReleaseVersion = !version.toString().endsWith("SNAPSHOT")
 val isSnapshotVersion = version.toString().endsWith("SNAPSHOT")
-val isCI = System.getenv()["CI"]?.toBoolean() ?: false
-val isPR = System.getenv()["PR"] != "false"
 val gitRoot = "https://github.com/lburgazzoli"
 val gitProject = "https://github.com/lburgazzoli/gradle-karaf-plugin"
 val gitURL = "git@github.com:lburgazzoli/gradle-karaf-plugin"
