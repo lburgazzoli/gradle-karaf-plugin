@@ -1,0 +1,18 @@
+# Auto detect text files and perform LF normalization
+*        text=auto
+
+*.java   text
+*.groovy text
+*.kt    text
+
+# Reduce merge-conflicts on edits to CHANGES.md file
+CHANGES.md merge=union
+
+# Note: executable is a non-standard attribute, and it is used by the release plugin
+*.sh     text eol=lf executable
+
+*.bat    text eol=crlf
+*.cmd    text eol=crlf
+
+# Blow files don't have extension, so we mention them explicitly
+/gradlew           text eol=lf executable
