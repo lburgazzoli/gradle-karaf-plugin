@@ -3,8 +3,8 @@ import groovy.lang.GroovySystem
 plugins {
     id("java-library")
     id("java-gradle-plugin")
+    `kotlin-dsl`
     id("groovy")
-    id("maven")
     id("signing")
     id("com.gradle.plugin-publish") version "0.21.0"
     id("net.researchgate.release") version "2.8.1"

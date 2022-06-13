@@ -31,13 +31,13 @@ import spock.lang.Specification
 class KarafTestSupport extends Specification {
 
     KarafPluginExtension getKarafExtension(Project project) {
-        KarafPluginExtension.lookup(project)
+        project.extensions.getByName("karaf")
     }
 
     KarafFeaturesTask  getKarafFeaturesTasks(Project project) {
         project.tasks.getByName(KarafFeaturesTask.NAME)
     }
-    
+
     KarafRepoTask  getKarafRepoTasks(Project project) {
         project.tasks.getByName(KarafRepoTask.NAME)
     }
