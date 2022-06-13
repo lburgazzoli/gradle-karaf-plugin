@@ -50,8 +50,8 @@ class DependencyDescriptor extends Dependency {
 
         return new DependencyDescriptor(
                 componentResult,
-                task.archiveClassifier.get(),
-                task.archiveExtension.get(),
+                task.archiveClassifier.getOrNull(),
+                task.archiveExtension.getOrNull(),
                 task.archiveFile.get().asFile,
                 descriptor
         )
