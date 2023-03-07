@@ -71,7 +71,7 @@ class KarafWarFeaturesTest extends KarafTestSupport {
         then:
             assert karaf.hasFeatures()
 
-            def featuresFile = karaf.features.getOutputFile()
+            def featuresFile = karaf.features.getOutputFile().get().asFile
             featuresFile != null
 
             def featuresXml = new XmlSlurper().parse(featuresFile)
@@ -113,8 +113,10 @@ class KarafWarFeaturesTest extends KarafTestSupport {
         then:
             assert karaf.hasFeatures()
 
-            def featuresFile = karaf.features.getOutputFile()
+            def featuresFile = karaf.features.getOutputFile().get().asFile
             featuresFile != null
+
+            println featuresFile.text
 
             def featuresXml = new XmlSlurper().parse(featuresFile)
             featuresXml != null
