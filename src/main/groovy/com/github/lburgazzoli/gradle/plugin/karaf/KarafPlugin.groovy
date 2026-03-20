@@ -43,21 +43,21 @@ class KarafPlugin implements Plugin<Project> {
         project.configurations.create(CONFIGURATION_NAME)
 
         // Karaf Features
-        def feat = project.task( KarafFeaturesTask.NAME , type: KarafFeaturesTask) {
+        def feat = project.tasks.create( KarafFeaturesTask.NAME, KarafFeaturesTask) {
             group       = KarafFeaturesTask.GROUP
             description = KarafFeaturesTask.DESCRIPTION
         }
-        
+
         // Karaf Repo
-        def repo = project.task( KarafRepoTask.NAME , type: KarafRepoTask ) {
+        def repo = project.tasks.create( KarafRepoTask.NAME, KarafRepoTask ) {
             group       = KarafRepoTask.GROUP
             description = KarafRepoTask.DESCRIPTION
         }
-        
+
         repo.dependsOn feat
 
         // Karaf KAR
-        def kar = project.task( KarafKarTask.NAME , type: KarafKarTask) {
+        def kar = project.tasks.create( KarafKarTask.NAME, KarafKarTask) {
             group       = KarafKarTask.GROUP
             description = KarafKarTask.DESCRIPTION
         }

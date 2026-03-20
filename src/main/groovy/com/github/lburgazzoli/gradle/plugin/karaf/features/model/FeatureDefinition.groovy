@@ -19,7 +19,8 @@ import groovy.transform.EqualsAndHashCode
 import groovy.transform.ToString
 import org.gradle.api.artifacts.ModuleVersionIdentifier
 import org.gradle.api.artifacts.ResolvedArtifact
-import org.gradle.util.ConfigureUtil
+import static com.github.lburgazzoli.gradle.plugin.karaf.ClosureUtil.configure
+import static com.github.lburgazzoli.gradle.plugin.karaf.ClosureUtil.configureByMap
 
 /**
  * @author lburgazzoli
@@ -52,14 +53,14 @@ abstract class FeatureDefinition {
     def bundle(String pattern, Closure closure) {
         def descriptor = BundleDescriptor.fromPattern(pattern)
         if(closure) {
-            ConfigureUtil.configure(closure, descriptor)
+            configure(closure, descriptor)
         }
 
         bundleDescriptors << descriptor
     }
 
     def bundle(Closure closure) {
-        bundleDescriptors << ConfigureUtil.configure(
+        bundleDescriptors << configure(
             closure,
             new BundleExtendedDescriptor()
         )
@@ -126,7 +127,7 @@ abstract class FeatureDefinition {
     def feature(String featureName, Closure closure) {
         def featureDependencyDescriptor = new FeatureDependencyDescriptor(featureName)
         if ( closure ) {
-            ConfigureUtil.configure( closure, featureDependencyDescriptor )
+            configure( closure, featureDependencyDescriptor )
         }
 
         this.featureDependencies << featureDependencyDescriptor
@@ -141,13 +142,13 @@ abstract class FeatureDefinition {
     // *************************************************************************
 
     def config(String name, Closure closure) {
-        configs << ConfigureUtil.configure(closure, new Config(name))
+        configs << configure(closure, new Config(name))
     }
 
     def configFile(String uri, String fileName, Closure closure) {
         def configFile = new ConfigFile(uri, fileName)
         if(closure) {
-            ConfigureUtil.configure(closure, configFile)
+            configure(closure, configFile)
         }
 
         configFiles << configFile
@@ -156,7 +157,7 @@ abstract class FeatureDefinition {
     def configFile(String uri, String fileName, boolean override, Closure closure) {
         def configFile = new ConfigFile(uri, fileName, override)
         if(closure) {
-            ConfigureUtil.configure(closure, configFile)
+            configure(closure, configFile)
         }
 
         configFiles << configFile
@@ -165,7 +166,7 @@ abstract class FeatureDefinition {
     def configFile(Closure closure) {
         def configFile = new ConfigFile()
         if(closure) {
-            ConfigureUtil.configure(closure, configFile)
+            configure(closure, configFile)
         }
 
         configFiles << configFile
@@ -176,7 +177,7 @@ abstract class FeatureDefinition {
     // *************************************************************************
 
     def capability(String ns, Closure closure) {
-        capabilities << ConfigureUtil.configure(closure, new Capability(ns))
+        capabilities << configure(closure, new Capability(ns))
     }
 
     // *************************************************************************
@@ -268,11 +269,11 @@ abstract class FeatureDefinition {
         }
 
         def match(Closure closure) {
-            ConfigureUtil.configure( closure, matcher )
+            configure( closure, matcher )
         }
 
         def match(Map properties) {
-            ConfigureUtil.configureByMap( properties, matcher )
+            configureByMap( properties, matcher )
         }
     }
 }

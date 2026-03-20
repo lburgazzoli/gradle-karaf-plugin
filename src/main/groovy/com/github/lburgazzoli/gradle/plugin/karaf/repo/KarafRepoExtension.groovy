@@ -34,7 +34,7 @@ class KarafRepoExtension {
     KarafRepoExtension(Project project) {
         this.project = project
         this.enabled = false
-        this.outputDir = new File("${project.buildDir}/karaf/repo")
+        this.outputDir = new File("${project.layout.buildDirectory.get().asFile}/karaf/repo")
     }
 
     Path getOutputPath() {

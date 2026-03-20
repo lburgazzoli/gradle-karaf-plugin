@@ -18,7 +18,7 @@ package com.github.lburgazzoli.gradle.plugin.karaf.features.model
 import groovy.transform.ToString
 import org.gradle.api.Project
 import org.gradle.api.artifacts.Configuration
-import org.gradle.util.ConfigureUtil
+import static com.github.lburgazzoli.gradle.plugin.karaf.ClosureUtil.configure
 
 /**
  * @author lburgazzoli
@@ -58,7 +58,7 @@ class FeatureDescriptor extends FeatureDefinition {
     void configurations(Closure closure) {
         this.configurations.clear()
 
-        ConfigureUtil.configure(
+        configure(
             closure,
             new ConfigurationsHelper()
         );
@@ -94,14 +94,14 @@ class FeatureDescriptor extends FeatureDefinition {
     // *************************************************************************
 
     void conditional(Closure closure) {
-        this.conditions << ConfigureUtil.configure(
+        this.conditions << configure(
             closure,
             new FeatureCondition()
         )
     }
 
     void conditional(String condition, Closure closure) {
-        this.conditions << ConfigureUtil.configure(
+        this.conditions << configure(
             closure,
             new FeatureCondition(condition)
         )

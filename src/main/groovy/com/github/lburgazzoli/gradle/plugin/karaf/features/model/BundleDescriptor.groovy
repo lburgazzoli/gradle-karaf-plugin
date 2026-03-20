@@ -15,7 +15,8 @@
  */
 package com.github.lburgazzoli.gradle.plugin.karaf.features.model
 
-import org.gradle.util.ConfigureUtil
+import static com.github.lburgazzoli.gradle.plugin.karaf.ClosureUtil.configure
+import static com.github.lburgazzoli.gradle.plugin.karaf.ClosureUtil.configureByMap
 
 /**
  * DSL extension allowing instruction on how to produce a {@code <bundle/>} entry
@@ -75,13 +76,13 @@ class BundleDescriptor {
 
 	def remap(final Closure closure) {
 		remap = {
-            dependency -> ConfigureUtil.configure(closure, dependency)
+            dependency -> configure(closure, dependency)
         }
 	}
 
     def remap(final Map properties) {
 		remap = {
-            dependency -> ConfigureUtil.configureByMap(properties, dependency)
+            dependency -> configureByMap(properties, dependency)
         }
 	}
 
@@ -100,7 +101,7 @@ class BundleDescriptor {
 	def wrap(Closure closure) {
         this.wrap = true
 
-		ConfigureUtil.configure(
+		configure(
             closure,
             new WrapInstructionsHelper()
         )
