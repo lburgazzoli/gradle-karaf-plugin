@@ -45,3 +45,11 @@ jobs:
       - name: Test
         run: |
           ./gradlew check
+      - name: Set up JDK 21
+        uses: actions/setup-java@v3
+        with:
+          distribution: "temurin"
+          java-version: "21"
+      - name: Integration test (Gradle 9)
+        run: |
+          cd integrationTest && ./gradlew generateFeatures
