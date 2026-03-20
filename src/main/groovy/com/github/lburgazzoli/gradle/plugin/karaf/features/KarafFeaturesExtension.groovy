@@ -18,7 +18,7 @@ package com.github.lburgazzoli.gradle.plugin.karaf.features
 import java.nio.file.Path
 import org.gradle.api.Project
 import org.gradle.api.tasks.OutputFile
-import org.gradle.util.ConfigureUtil
+import static com.github.lburgazzoli.gradle.plugin.karaf.ClosureUtil.configure
 
 import com.github.lburgazzoli.gradle.plugin.karaf.features.model.DependencyResolver
 import com.github.lburgazzoli.gradle.plugin.karaf.mvn.MvnDependencyResolver
@@ -53,13 +53,13 @@ class KarafFeaturesExtension {
         this.featureDescriptors = []
 
         this.outputFile = new File(
-            "${project.buildDir}/karaf/features",
+            "${project.layout.buildDirectory.get().asFile}/karaf/features",
             "${name}-${version}-features.xml"
         )
     }
 
     def feature(Closure closure) {
-        featureDescriptors << ConfigureUtil.configure(
+        featureDescriptors << configure(
             closure,
             new FeatureDescriptor(project)
         )

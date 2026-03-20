@@ -17,8 +17,6 @@ package com.github.lburgazzoli.gradle.plugin.karaf.features
 
 import org.gradle.api.DefaultTask
 import org.gradle.api.tasks.TaskAction
-import org.gradle.util.VersionNumber
-
 import com.github.lburgazzoli.gradle.plugin.karaf.KarafTaskTrait
 
 /**
@@ -30,7 +28,7 @@ class KarafFeaturesTask extends DefaultTask implements KarafTaskTrait {
     public static final String DESCRIPTION = "Generates Karaf features file"
 
     public static final String FEATURES_XMLNS_PREFIX = 'http://karaf.apache.org/xmlns/features/v'
-    public static final VersionNumber XMLNS_V13 = new  VersionNumber(1, 3, 0, null)
+    public static final String XMLNS_V13 = '1.3.0'
 
     KarafFeaturesTask() {
         // TODO: to be improved
@@ -57,7 +55,7 @@ class KarafFeaturesTask extends DefaultTask implements KarafTaskTrait {
 
     String generateFeatures(KarafFeaturesExtension karaf) {
         def builder = new KarafFeaturesBuilder()
-        def xsdVer13 = VersionNumber.parse(karaf.xsdVersion) == XMLNS_V13
+        def xsdVer13 = karaf.xsdVersion == XMLNS_V13
         def resolver = karaf.resolver
 
         builder.mkp.xmlDeclaration(version: "1.0", encoding: "UTF-8", standalone: "yes")

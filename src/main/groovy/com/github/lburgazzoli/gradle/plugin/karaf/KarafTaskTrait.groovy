@@ -16,7 +16,7 @@
 package com.github.lburgazzoli.gradle.plugin.karaf
 
 import org.gradle.api.tasks.Internal
-import org.gradle.util.ConfigureUtil
+import static com.github.lburgazzoli.gradle.plugin.karaf.ClosureUtil.configure
 
 /**
  * @author lburgazzoli
@@ -25,7 +25,7 @@ trait KarafTaskTrait {
     private KarafPluginExtension pluginExtension
 
     void karaf(Closure closure) {
-        this.pluginExtension = ConfigureUtil.configure(
+        this.pluginExtension = configure(
             closure,
             new KarafPluginExtension()
         )

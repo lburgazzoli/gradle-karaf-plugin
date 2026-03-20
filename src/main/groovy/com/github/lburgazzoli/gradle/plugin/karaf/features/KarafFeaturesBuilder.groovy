@@ -32,8 +32,8 @@ class KarafFeaturesBuilder extends MarkupBuilder {
 
         this.writer = writer
 
-        super.setOmitNullAttributes(true)
-        super.setDoubleQuotes(true)
+        this.setOmitNullAttributes((boolean) true)
+        this.setDoubleQuotes((boolean) true)
     }
 
     Writer getWriter() {

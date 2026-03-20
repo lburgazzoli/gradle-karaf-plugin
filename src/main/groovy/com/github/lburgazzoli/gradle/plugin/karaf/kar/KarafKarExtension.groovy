@@ -34,7 +34,7 @@ class KarafKarExtension {
     KarafKarExtension(Project project) {
         this.project = project
         this.enabled = false
-        this.outputDir = new File("${project.buildDir}/karaf/kar")
+        this.outputDir = new File("${project.layout.buildDirectory.get().asFile}/karaf/kar")
         this.archiveName = null
     }
 
