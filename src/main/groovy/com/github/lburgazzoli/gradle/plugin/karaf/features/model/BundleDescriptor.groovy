@@ -15,6 +15,8 @@
  */
 package com.github.lburgazzoli.gradle.plugin.karaf.features.model
 
+import org.gradle.api.Action
+
 import static com.github.lburgazzoli.gradle.plugin.karaf.ClosureUtil.configure
 import static com.github.lburgazzoli.gradle.plugin.karaf.ClosureUtil.configureByMap
 
@@ -80,6 +82,10 @@ class BundleDescriptor {
         }
 	}
 
+    def remap(final Action<? super DependencyDescriptor> action) {
+        remap = { dependency -> action.execute(dependency) }
+    }
+
     def remap(final Map properties) {
 		remap = {
             dependency -> configureByMap(properties, dependency)
@@ -106,6 +112,11 @@ class BundleDescriptor {
             new WrapInstructionsHelper()
         )
 	}
+
+    def wrap(Action<? super BundleDescriptor> action) {
+        this.wrap = true
+        action.execute(this)
+    }
 
     private class WrapInstructionsHelper {
         void attribute(String key, String value) {

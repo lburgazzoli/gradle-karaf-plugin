@@ -16,6 +16,7 @@
 package com.github.lburgazzoli.gradle.plugin.karaf.features
 
 import java.nio.file.Path
+import org.gradle.api.Action
 import org.gradle.api.Project
 import org.gradle.api.tasks.OutputFile
 import static com.github.lburgazzoli.gradle.plugin.karaf.ClosureUtil.configure
@@ -63,6 +64,10 @@ class KarafFeaturesExtension {
             closure,
             new FeatureDescriptor(project)
         )
+    }
+
+    def feature(Action<? super FeatureDescriptor> action) {
+        featureDescriptors << configure(action, new FeatureDescriptor(project))
     }
 
     def repository(String repository) {

@@ -15,6 +15,7 @@
  */
 package com.github.lburgazzoli.gradle.plugin.karaf
 
+import org.gradle.api.Action
 import org.gradle.api.Project
 import static com.github.lburgazzoli.gradle.plugin.karaf.ClosureUtil.configure
 
@@ -48,6 +49,10 @@ class KarafPluginExtension {
         configure(closure, getFeatures())
     }
 
+    def features(Action<? super KarafFeaturesExtension> action) {
+        configure(action, getFeatures())
+    }
+
     KarafFeaturesExtension getFeatures() {
         if (!this.features) {
             this.features = new KarafFeaturesExtension(project)
@@ -69,6 +74,12 @@ class KarafPluginExtension {
       
         repo.enabled = true
         repo = configure(closure, repo)
+    }
+
+    def repo(Action<? super KarafRepoExtension> action) {
+        getRepo()
+        repo.enabled = true
+        repo = configure(action, repo)
     }
     
     KarafRepoExtension getRepo() {
@@ -92,6 +103,12 @@ class KarafPluginExtension {
 
         kar.enabled = true
         kar = configure(closure, kar)
+    }
+
+    def kar(Action<? super KarafKarExtension> action) {
+        getKar()
+        kar.enabled = true
+        kar = configure(action, kar)
     }
 
     KarafKarExtension getKar() {

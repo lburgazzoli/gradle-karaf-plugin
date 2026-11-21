@@ -17,6 +17,7 @@ package com.github.lburgazzoli.gradle.plugin.karaf.features.model
 
 import groovy.transform.EqualsAndHashCode
 import groovy.transform.ToString
+import org.gradle.api.Action
 import org.gradle.api.artifacts.ModuleVersionIdentifier
 import org.gradle.api.artifacts.ResolvedArtifact
 import static com.github.lburgazzoli.gradle.plugin.karaf.ClosureUtil.configure
@@ -59,11 +60,23 @@ abstract class FeatureDefinition {
         bundleDescriptors << descriptor
     }
 
+    def bundle(String pattern, Action<? super BundleDescriptor> action) {
+        def descriptor = BundleDescriptor.fromPattern(pattern)
+        if (action) {
+            configure(action, descriptor)
+        }
+        bundleDescriptors << descriptor
+    }
+
     def bundle(Closure closure) {
         bundleDescriptors << configure(
             closure,
             new BundleExtendedDescriptor()
         )
+    }
+
+    def bundle(Action<? super BundleExtendedDescriptor> action) {
+        bundleDescriptors << configure(action, new BundleExtendedDescriptor())
     }
 
     List<BundleDescriptor> getBundleDescriptors() {
@@ -108,20 +121,24 @@ abstract class FeatureDefinition {
         this.featureDependencies.clear()
 
         featureNames.each {
-            this.feature(it, null)
+            this.feature(it, (Closure) null)
         }
     }
 
     def feature(FeatureDescriptor feature) {
-        this.feature(feature.name, null)
+        this.feature(feature.name, (Closure) null)
     }
 
     def feature(FeatureDescriptor feature, Closure closure) {
         this.feature(feature.name, closure)
     }
 
+    def feature(FeatureDescriptor feature, Action<? super FeatureDependencyDescriptor> action) {
+        this.feature(feature.name, action)
+    }
+
     def feature(String featureName) {
-        this.feature(featureName, null)
+        this.feature(featureName, (Closure) null)
     }
 
     def feature(String featureName, Closure closure) {
@@ -131,6 +148,14 @@ abstract class FeatureDefinition {
         }
 
         this.featureDependencies << featureDependencyDescriptor
+    }
+
+    def feature(String featureName, Action<? super FeatureDependencyDescriptor> action) {
+        def descriptor = new FeatureDependencyDescriptor(featureName)
+        if (action) {
+            configure(action, descriptor)
+        }
+        this.featureDependencies << descriptor
     }
 
     List<FeatureDependencyDescriptor> getFeatureDependencies() {
@@ -145,12 +170,24 @@ abstract class FeatureDefinition {
         configs << configure(closure, new Config(name))
     }
 
+    def config(String name, Action<? super Config> action) {
+        configs << configure(action, new Config(name))
+    }
+
     def configFile(String uri, String fileName, Closure closure) {
         def configFile = new ConfigFile(uri, fileName)
         if(closure) {
             configure(closure, configFile)
         }
 
+        configFiles << configFile
+    }
+
+    def configFile(String uri, String fileName, Action<? super ConfigFile> action) {
+        def configFile = new ConfigFile(uri, fileName)
+        if (action) {
+            configure(action, configFile)
+        }
         configFiles << configFile
     }
     
@@ -163,6 +200,14 @@ abstract class FeatureDefinition {
         configFiles << configFile
     }
 
+    def configFile(String uri, String fileName, boolean override, Action<? super ConfigFile> action) {
+        def configFile = new ConfigFile(uri, fileName, override)
+        if (action) {
+            configure(action, configFile)
+        }
+        configFiles << configFile
+    }
+
     def configFile(Closure closure) {
         def configFile = new ConfigFile()
         if(closure) {
@@ -172,12 +217,24 @@ abstract class FeatureDefinition {
         configFiles << configFile
     }
 
+    def configFile(Action<? super ConfigFile> action) {
+        def configFile = new ConfigFile()
+        if (action) {
+            configure(action, configFile)
+        }
+        configFiles << configFile
+    }
+
     // *************************************************************************
     // Capabilities
     // *************************************************************************
 
     def capability(String ns, Closure closure) {
         capabilities << configure(closure, new Capability(ns))
+    }
+
+    def capability(String ns, Action<? super Capability> action) {
+        capabilities << configure(action, new Capability(ns))
     }
 
     // *************************************************************************
@@ -270,6 +327,10 @@ abstract class FeatureDefinition {
 
         def match(Closure closure) {
             configure( closure, matcher )
+        }
+
+        def match(Action<? super DependencyMatcher> action) {
+            configure(action, matcher)
         }
 
         def match(Map properties) {
