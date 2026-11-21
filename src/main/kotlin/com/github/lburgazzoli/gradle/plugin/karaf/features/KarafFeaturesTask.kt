@@ -15,18 +15,20 @@
  */
 package com.github.lburgazzoli.gradle.plugin.karaf.features
 
-import org.gradle.api.tasks.Internal
-import org.gradle.api.Action
 import com.github.lburgazzoli.gradle.plugin.karaf.KarafPluginExtension
 import com.github.lburgazzoli.gradle.plugin.karaf.KarafTaskExtension
-import org.gradle.api.DefaultTask
-import org.gradle.api.tasks.TaskAction
 import com.github.lburgazzoli.gradle.plugin.karaf.features.model.DependencyDescriptor
 import com.github.lburgazzoli.gradle.plugin.karaf.features.model.FeatureDependencyDescriptor
+import org.gradle.api.Action
+import org.gradle.api.DefaultTask
+import org.gradle.api.tasks.Internal
+import org.gradle.api.tasks.TaskAction
+import org.gradle.work.DisableCachingByDefault
 
 /**
  * @author lburgazzoli
  */
+@DisableCachingByDefault(because = "Not worth caching")
 open class KarafFeaturesTask : DefaultTask() {
     companion object {
         const val GROUP = "karaf"

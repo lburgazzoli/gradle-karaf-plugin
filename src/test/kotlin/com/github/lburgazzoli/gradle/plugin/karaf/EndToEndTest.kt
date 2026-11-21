@@ -21,7 +21,7 @@ class EndToEndTest {
     private fun build(
         buildScript: String,
         vararg tasks: String,
-        gradleVersion: String = "7.4.2",
+        gradleVersion: String = "8.14.4",
         buildFileName: String = "build.gradle",
         expectFailure: Boolean = false,
         settings: String = "rootProject.name = 'sample'\n"
@@ -61,7 +61,7 @@ class EndToEndTest {
     private fun featuresXml() = projectDir.resolve("build/karaf/features/sample-1.2.3-features.xml").readText()
 
     @ParameterizedTest
-    @ValueSource(strings = ["5.6.4", "6.9.2", "7.4.2", "8.14.4"])
+    @ValueSource(strings = ["8.0.2", "8.10.2", "8.14.4", "9.9.2"])
     fun `groovy dsl writes nested blocks into the features file`(gradleVersion: String) {
         build(
             groovyBuild(
@@ -271,7 +271,7 @@ class EndToEndTest {
     }
 
     @ParameterizedTest
-    @ValueSource(strings = ["5.6.4", "7.4.2", "8.14.4"])
+    @ValueSource(strings = ["8.0.2", "8.10.2", "8.14.4", "9.9.2"])
     fun `kotlin dsl configures a feature`(gradleVersion: String) {
         build(
             """
@@ -333,6 +333,89 @@ class EndToEndTest {
                   <condition>webconsole</condition>
                   <config name="cond.pid">x=y</config>
                 </conditional>
+              </feature>
+            </features>
+            """.trimIndent()
+        )
+    }
+
+    /**
+     * A build script is compiled without the Kotlin metadata version check, so only a compiled
+     * class such as this buildSrc plugin shows whether the Kotlin compiler of that Gradle version
+     * reads the plugin's classes.
+     */
+    @ParameterizedTest
+    @ValueSource(strings = ["8.0.2", "9.9.2"])
+    fun `a kotlin buildSrc plugin configures the features through the plugin's classes`(gradleVersion: String) {
+        val pluginClasspath = javaClass.classLoader.getResourceAsStream("plugin-under-test-metadata.properties")!!
+            .use { java.util.Properties().apply { load(it) } }
+            .getProperty("implementation-classpath")
+            .split(File.pathSeparator)
+        projectDir.resolve("buildSrc/src/main/kotlin").mkdirs()
+        projectDir.resolve("buildSrc/plugin-classpath.txt").writeText(pluginClasspath.joinToString("\n"))
+        projectDir.resolve("buildSrc/build.gradle.kts").writeText(
+            """
+            plugins {
+                `kotlin-dsl`
+            }
+
+            repositories {
+                gradlePluginPortal()
+            }
+
+            dependencies {
+                implementation(files(file("plugin-classpath.txt").readLines()))
+            }
+            """.trimIndent()
+        )
+        projectDir.resolve("buildSrc/src/main/kotlin/KarafConvention.kt").writeText(
+            """
+            import com.github.lburgazzoli.gradle.plugin.karaf.KarafPluginExtension
+            import org.gradle.api.Plugin
+            import org.gradle.api.Project
+
+            class KarafConvention : Plugin<Project> {
+                override fun apply(project: Project) {
+                    project.pluginManager.apply("com.github.lburgazzoli.karaf")
+                    project.extensions.getByType(KarafPluginExtension::class.java).features {
+                        feature {
+                            name = "f1"
+                        }
+                    }
+                }
+            }
+            """.trimIndent()
+        )
+
+        build(
+            """
+            plugins {
+                id 'java'
+            }
+
+            group = 'com.example'
+            version = '1.2.3'
+
+            apply plugin: KarafConvention
+
+            repositories {
+                mavenCentral()
+            }
+
+            dependencies {
+                implementation 'commons-lang:commons-lang:2.6'
+            }
+            """.trimIndent(),
+            "generateFeatures",
+            gradleVersion = gradleVersion
+        )
+
+        assertThat(featuresXml()).isEqualTo(
+            """
+            <?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+            <features xmlns="http://karaf.apache.org/xmlns/features/v1.2.0" name="sample-1.2.3">
+              <feature name="f1" version="1.2.3">
+                <bundle>mvn:commons-lang/commons-lang/2.6</bundle>
               </feature>
             </features>
             """.trimIndent()
@@ -493,7 +576,7 @@ class EndToEndTest {
     }
 
     @ParameterizedTest
-    @ValueSource(strings = ["5.6.4", "8.14.4"])
+    @ValueSource(strings = ["8.0.2", "9.9.2"])
     fun `outputs follow a version and build directory changed after the plugin's afterEvaluate`(gradleVersion: String) {
         val result = build(
             groovyBuild(
@@ -738,7 +821,7 @@ class EndToEndTest {
     }
 
     @ParameterizedTest
-    @ValueSource(strings = ["5.6.4", "7.4.2"])
+    @ValueSource(strings = ["8.0.2", "8.14.4"])
     fun `configuring the build resolves no configuration and realizes no unrelated task`(gradleVersion: String) {
         build(
             groovyBuild(
@@ -799,7 +882,7 @@ class EndToEndTest {
     }
 
     @ParameterizedTest
-    @ValueSource(strings = ["5.6.4", "7.4.2", "8.14.4"])
+    @ValueSource(strings = ["8.0.2", "8.14.4", "9.9.2"])
     fun `a registered features task builds the war of a project it depends on`(gradleVersion: String) {
         projectDir.resolve("lib").mkdirs()
         projectDir.resolve("lib/build.gradle").writeText(

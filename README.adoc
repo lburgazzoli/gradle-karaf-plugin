@@ -63,7 +63,7 @@ As OSGi can only install bundles, standard jars must be wrapped to add necessary
  - This plugin is an extension of the previous https://github.com/lburgazzoli/gradle-karaf-features-plugin[gradle-karaf-feature-plugin^]
 
 == Requirements
- - Gradle 5.6+
+ - Gradle 8.0+
 
 == Usage
 [source,groovy]
@@ -76,16 +76,19 @@ repositories {
     mavenCentral()
 }
 ----
-Or for compatibility with old versions of Gradle:
+Or with a `buildscript` block:
 [source,groovy]
 ----
-apply plugin: 'com.github.lburgazzoli.karaf'
-
 buildscript {
+    repositories {
+        gradlePluginPortal()
+    }
     dependencies {
-        classpath "gradle.plugin.com.github.lburgazzoli:gradle-karaf-plugin:0.5.8"
+        classpath "com.github.lburgazzoli:gradle-karaf-plugin:0.5.8"
     }
 }
+
+apply plugin: 'com.github.lburgazzoli.karaf'
 
 repositories {
     mavenCentral()

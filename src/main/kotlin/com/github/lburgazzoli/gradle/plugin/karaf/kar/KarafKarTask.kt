@@ -1,15 +1,17 @@
 package com.github.lburgazzoli.gradle.plugin.karaf.kar
 
-import com.github.lburgazzoli.gradle.plugin.karaf.KarafTaskExtension
-import org.gradle.api.tasks.Internal
-import org.gradle.api.Action
 import com.github.lburgazzoli.gradle.plugin.karaf.KarafPluginExtension
-import org.gradle.jvm.tasks.Jar
+import com.github.lburgazzoli.gradle.plugin.karaf.KarafTaskExtension
 import java.nio.file.Files
+import org.gradle.api.Action
+import org.gradle.api.tasks.Internal
+import org.gradle.jvm.tasks.Jar
+import org.gradle.work.DisableCachingByDefault
 
 /**
  * @author lburgazzoli
  */
+@DisableCachingByDefault(because = "Not worth caching")
 abstract class KarafKarTask : Jar() {
     companion object {
         const val GROUP = "karaf"
