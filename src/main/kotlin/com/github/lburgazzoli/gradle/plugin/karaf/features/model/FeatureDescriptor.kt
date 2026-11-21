@@ -33,7 +33,22 @@ abstract class FeatureDescriptor @Inject constructor(
     val owner: KarafFeaturesExtension
 ) : FeatureDefinition() {
     var name: String? = null
-    var version: String? = project.version.toString()
+
+    private var versionSet = false
+    private var explicitVersion: String? = null
+
+    /**
+     * Version of this feature, or `null` to write the feature without one. Until it is set, it falls back to the
+     * project's version when it is read, so a build script that sets `project.version` after declaring the feature
+     * still gets that version.
+     */
+    var version: String?
+        get() = if (versionSet) explicitVersion else project.version.toString()
+        set(value) {
+            explicitVersion = value
+            versionSet = true
+        }
+
     var description: String? = null
     var details: String? = null
 

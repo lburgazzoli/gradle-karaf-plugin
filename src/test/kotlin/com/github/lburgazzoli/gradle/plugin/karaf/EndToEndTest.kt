@@ -783,6 +783,39 @@ class EndToEndTest {
     }
 
     @Test
+    fun `a feature takes the project version set after it unless it sets its own`() {
+        build(
+            groovyBuild(
+                """
+                karaf {
+                    features {
+                        feature { name = 'f1' }
+                        feature {
+                            name = 'f2'
+                            version = '5'
+                        }
+                        feature {
+                            name = 'f3'
+                            version = null
+                        }
+                    }
+                }
+
+                version = '2.0'
+                """.trimIndent()
+            ),
+            "generateFeatures"
+        )
+
+        assertThat(projectDir.resolve("build/karaf/features/sample-2.0-features.xml")).content()
+            .contains(
+                "<feature name=\"f1\" version=\"2.0\">",
+                "<feature name=\"f2\" version=\"5\">",
+                "<feature name=\"f3\">"
+            )
+    }
+
+    @Test
     fun `repo and kar tasks given another extension stage and pack its features`() {
         build(
             groovyBuild(
