@@ -5,14 +5,14 @@ import com.github.lburgazzoli.gradle.plugin.karaf.kar.KarafKarTask
 import com.github.lburgazzoli.gradle.plugin.karaf.repo.KarafRepoTask
 import org.gradle.api.Plugin
 import org.gradle.api.Project
+import org.gradle.api.Task
 import org.gradle.api.artifacts.Configuration
 import org.gradle.api.artifacts.component.ProjectComponentIdentifier
 import org.gradle.api.artifacts.result.ResolvedComponentResult
 import org.gradle.api.plugins.BasePlugin
 import org.gradle.api.plugins.JavaPlugin
 import org.gradle.api.plugins.WarPlugin
-import org.gradle.kotlin.dsl.create
-import org.gradle.kotlin.dsl.register
+import java.util.concurrent.Callable
 
 /**
  * @author lburgazzoli
@@ -30,8 +30,24 @@ class KarafPlugin : Plugin<Project> {
     }
 
     override fun apply(project: Project) {
-        val ext = project.extensions.create<KarafPluginExtension>(KarafPluginExtension.NAME, project)
+        project.extensions.create(KarafPluginExtension.NAME, KarafPluginExtension::class.java, project)
         project.configurations.create(CONFIGURATION_NAME)
+
+        // Inputs, outputs, and dependencies are computed when Gradle asks for them, from each task's own karaf
+        // settings, so nothing is resolved or realized while the build is configured. configureEach reaches the
+        // tasks a build script registers as well.
+        project.tasks.withType(KarafFeaturesTask::class.java).configureEach {
+            val task = this
+            dependsOn(Callable { archiveTasks(task.project, task.karaf) })
+            inputs.files(Callable { task.karaf.features.featureDescriptors.flatMap { it.configurations } })
+            outputs.files(Callable { if (task.karaf.hasFeatures()) listOf(task.karaf.features.outputFile) else emptyList() })
+        }
+        project.tasks.withType(KarafRepoTask::class.java).configureEach {
+            val task = this
+            outputs.dirs(Callable {
+                if (task.karaf.hasRepo() || task.karaf.hasKar()) listOf(task.karaf.repo.outputDir) else emptyList()
+            })
+        }
 
         val feat = project.tasks.register(KarafFeaturesTask.NAME, KarafFeaturesTask::class.java) {
             group = KarafFeaturesTask.GROUP
@@ -39,83 +55,48 @@ class KarafPlugin : Plugin<Project> {
         }
 
         // Karaf Repo
-        val repo = project.tasks.register<KarafRepoTask>(KarafRepoTask.NAME) {
+        val repo = project.tasks.register(KarafRepoTask.NAME, KarafRepoTask::class.java) {
             group = KarafRepoTask.GROUP
             description = KarafRepoTask.DESCRIPTION
             dependsOn(feat)
         }
 
         // Karaf KAR
-        val kar = project.tasks.register<KarafKarTask>(KarafKarTask.NAME) {
+        val kar = project.tasks.register(KarafKarTask.NAME, KarafKarTask::class.java) {
             group = KarafKarTask.GROUP
             description = KarafKarTask.DESCRIPTION
             dependsOn(repo)
         }
 
+        // The archives configuration exists only once a base plugin is applied, which may happen after this one.
         project.afterEvaluate {
-            val war = project.tasks.find { it.name == WarPlugin.WAR_TASK_NAME }
-            val jar = project.tasks.find { it.name == JavaPlugin.JAR_TASK_NAME }
-            if (war != null) {
-                feat.configure {
-                    dependsOn(war)
-                }
-            } else if (jar != null) {
-                feat.configure {
-                    dependsOn(jar)
-                }
-            }
-
-            if (ext.hasFeatures()) {
-                ext.features.featureDescriptors.forEach {
-                    it.configurations.get().forEach { configuration ->
-                        feat.configure {
-                            inputs.files(configuration)
-                            dependsOn(configuration)
-                        }
-                    }
-
-                    KarafUtils.walkDeps(it.configurations.get()) { configuration: Configuration, root: ResolvedComponentResult ->
-
-                        if (root.id is ProjectComponentIdentifier) {
-                            val pci = root.id as ProjectComponentIdentifier
-                            val prj = project.findProject(pci.projectPath)!!
-
-                            val war = prj.tasks.find { it.name == WarPlugin.WAR_TASK_NAME }
-                            val jar = prj.tasks.find { it.name == JavaPlugin.JAR_TASK_NAME }
-
-                            if (war != null) {
-                                feat.configure {
-                                    dependsOn(war)
-                                }
-                            } else if (jar != null) {
-                                feat.configure {
-                                    dependsOn(jar)
-                                }
-                            }
-                        }
-                    }
-                }
-
-                // if there is an output file, add that as an output
-                if (ext.features.outputFile.isPresent) {
-                    feat.configure {
-                        outputs.file(ext.features.outputFile)
-                    }
-                }
-            }
-
-            if (ext.hasRepo()) {
-                // if there is an output directory, add that as an output
-                if (ext.repo.outputDir.isPresent) {
-                    repo.configure {
-                        outputs.dir(ext.repo.outputDir)
-                    }
-                }
-            }
-
-            project.artifacts.add(ARTIFACTS_CONFIGURATION_NAME, ext.features.outputFile)
-            project.artifacts.add(ARTIFACTS_CONFIGURATION_NAME, ext.repo.outputDir)
+            project.artifacts.add(ARTIFACTS_CONFIGURATION_NAME, feat.map { it.karaf.features.outputFile })
+            project.artifacts.add(ARTIFACTS_CONFIGURATION_NAME, repo.map { it.karaf.repo.outputDir })
             project.artifacts.add(ARTIFACTS_CONFIGURATION_NAME, kar)
         }
     }
+
+    /**
+     * Returns the archive tasks a features task depends on: the `war` task, or else the `jar` task, of [project], and
+     * of every project that the configurations of [karaf]'s features depend on.
+     */
+    private fun archiveTasks(project: Project, karaf: KarafPluginExtension): List<Task> {
+        val tasks = mutableListOf<Task>()
+        archiveTask(project)?.let { tasks += it }
+        if (karaf.hasFeatures()) {
+            karaf.features.featureDescriptors.forEach {
+                KarafUtils.walkDeps(it.configurations) { _: Configuration, root: ResolvedComponentResult ->
+                    val id = root.id
+                    if (id is ProjectComponentIdentifier) {
+                        // findProject returns null for a path this build does not have, instead of failing the build.
+                        project.findProject(id.projectPath)?.let(::archiveTask)?.let { task -> tasks += task }
+                    }
+                }
+            }
+        }
+        return tasks
+    }
+
+    private fun archiveTask(project: Project): Task? =
+        project.tasks.findByName(WarPlugin.WAR_TASK_NAME) ?: project.tasks.findByName(JavaPlugin.JAR_TASK_NAME)
 }

@@ -19,20 +19,21 @@ import com.github.lburgazzoli.gradle.plugin.karaf.features.model.DependencyResol
 import com.github.lburgazzoli.gradle.plugin.karaf.features.model.FeatureDescriptor
 import com.github.lburgazzoli.gradle.plugin.karaf.mvn.MvnDependencyResolver
 import org.gradle.api.Action
-import org.gradle.api.NamedDomainObjectContainer
 import org.gradle.api.Project
-import org.gradle.api.file.RegularFileProperty
 import org.gradle.api.model.ObjectFactory
-import org.gradle.api.provider.Property
-import org.gradle.api.provider.SetProperty
-import org.gradle.kotlin.dsl.get
-import org.gradle.kotlin.dsl.newInstance
+import java.io.File
+import java.nio.file.Path
 import javax.inject.Inject
 
 /**
+ * Settings of the features file.
+ *
+ * [name], [group], [version], and [outputFile] fall back to the project's values when they are read, so a build
+ * script that sets `version` after applying the plugin still gets that version.
+ *
  * @author lburgazzoli
  */
-abstract class KarafFeaturesExtension(private val project: Project) {
+abstract class KarafFeaturesExtension @Inject constructor(private val project: Project) {
     companion object {
         const val DEFAULT_XSD_VERSION = "1.2.0"
         const val NAME = "features"
@@ -43,48 +44,67 @@ abstract class KarafFeaturesExtension(private val project: Project) {
     @get:Inject
     protected abstract val objects: ObjectFactory
 
-    abstract val repositories: SetProperty<String>
-    abstract val outputFile: RegularFileProperty
+    val repositories: MutableSet<String> = linkedSetOf()
 
-    //    val featureDescriptors = mutableListOf<FeatureDescriptor>()
-    abstract val featureDescriptors: NamedDomainObjectContainer<FeatureDescriptor>
+    val featureDescriptors: List<FeatureDescriptor>
+        get() = _featureDescriptors
 
-    abstract val name: Property<String>
-    abstract val group: Property<Any>
-    abstract val version: Property<Any>
-    abstract val xsdVersion: Property<String>
-    abstract val includeProject: Property<Boolean>
+    private val _featureDescriptors = mutableListOf<FeatureDescriptor>()
 
-    init {
-        xsdVersion.convention(DEFAULT_XSD_VERSION)
-        name.convention(project.name)
-        group.convention(project.group)
-        version.convention(project.version)
-        val layout = project.layout
-        outputFile.convention(
-            name.flatMap { layout.buildDirectory.file("karaf/features/${it}-${version.get()}-features.xml") }
-        )
-        val prj = project
-        featureDescriptors.configureEach {
-            if (!projectIsInitialized) {
-                this._project = prj
-                version = prj.version
-                _project.configurations.findByName("runtimeClasspath")?.let { configurations.add(it) }
-            }
+    private var explicitName: String? = null
+    private var explicitGroup: String? = null
+    private var explicitVersion: String? = null
+    private var explicitOutputFile: File? = null
+
+    var name: String
+        get() = explicitName ?: project.name
+        set(value) {
+            explicitName = value
         }
+
+    var group: String
+        get() = explicitGroup ?: project.group.toString()
+        set(value) {
+            explicitGroup = value
+        }
+
+    var version: String
+        get() = explicitVersion ?: project.version.toString()
+        set(value) {
+            explicitVersion = value
+        }
+
+    var xsdVersion: String = DEFAULT_XSD_VERSION
+
+    var includeProject: Boolean? = null
+
+    /**
+     * The features file to write; `build/karaf/features/<name>-<version>-features.xml` unless set.
+     */
+    var outputFile: File
+        get() = explicitOutputFile
+            ?: project.layout.buildDirectory.file("karaf/features/$name-$version-features.xml").get().asFile
+        set(value) {
+            explicitOutputFile = value
+        }
+
+    /**
+     * Sets [outputFile] to [path], resolved against the project directory.
+     */
+    fun setOutputFile(path: String) {
+        outputFile = project.file(path)
     }
+
+    val outputPath: Path
+        get() = outputFile.toPath()
 
     fun repository(name: String) {
         repositories.add(name)
     }
 
     fun feature(action: Action<in FeatureDescriptor>) {
-        val feature = objects.newInstance(FeatureDescriptor::class, "").apply {
-            _project = project
-            version = project.version
-            _project.configurations.findByName("runtimeClasspath")?.let { configurations.add(it) }
-        }
+        val feature = objects.newInstance(FeatureDescriptor::class.java, project, this)
         action.execute(feature)
-        featureDescriptors.add(feature)
+        _featureDescriptors += feature
     }
 }

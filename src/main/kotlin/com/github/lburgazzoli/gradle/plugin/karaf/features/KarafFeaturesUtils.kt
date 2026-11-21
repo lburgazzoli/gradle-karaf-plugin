@@ -15,7 +15,6 @@
  */
 package com.github.lburgazzoli.gradle.plugin.karaf.features
 
-import com.github.lburgazzoli.gradle.plugin.karaf.KarafPluginExtension
 import com.github.lburgazzoli.gradle.plugin.karaf.KarafUtils
 import com.github.lburgazzoli.gradle.plugin.karaf.features.model.DependencyDescriptor
 import com.github.lburgazzoli.gradle.plugin.karaf.features.model.FeatureDescriptor
@@ -28,8 +27,6 @@ import org.gradle.api.plugins.JavaPlugin
 import org.gradle.api.plugins.WarPlugin
 import org.gradle.api.tasks.bundling.War
 import org.gradle.jvm.tasks.Jar
-import org.gradle.kotlin.dsl.the
-import org.gradle.kotlin.dsl.withType
 import java.io.File
 import java.util.jar.JarFile
 import java.util.jar.Manifest
@@ -42,7 +39,7 @@ object KarafFeaturesUtils {
     fun collectDependencies(
         featureDescriptor: FeatureDescriptor, container: MutableSet<DependencyDescriptor>
     ): Set<DependencyDescriptor> {
-        KarafUtils.walkDeps(featureDescriptor.configurations.get()) { configuration: Configuration, root: ResolvedComponentResult ->
+        KarafUtils.walkDeps(featureDescriptor.configurations) { configuration: Configuration, root: ResolvedComponentResult ->
             collectDependencies(featureDescriptor, configuration, root, container)
         }
 
@@ -55,22 +52,23 @@ object KarafFeaturesUtils {
         root: ResolvedComponentResult,
         container: MutableSet<DependencyDescriptor>
     ) {
-        val ext = featureDescriptor._project.the<KarafPluginExtension>()
 
         if (root.id is ProjectComponentIdentifier) {
             val pci = root.id as ProjectComponentIdentifier
-            val prj = featureDescriptor._project.findProject(pci.getProjectPath())!!
+            val prj = featureDescriptor.project.findProject(pci.getProjectPath())!!
 
-            val includeProject = ext.features.includeProject.getOrElse(featureDescriptor.includeProject)
+            // A feature-level true wins; otherwise the extension-level setting applies.
+            val includeProject = featureDescriptor.includeProject == true ||
+                featureDescriptor.owner.includeProject == true
 
-            if (prj == featureDescriptor._project && !includeProject) {
+            if (prj == featureDescriptor.project && !includeProject) {
                 return
             }
 
             val instruction = featureDescriptor.findBundleDescriptors(root.moduleVersion!!)
             if (instruction == null || instruction.include) {
-                val war = prj.tasks.withType<War>().matching { it.name == WarPlugin.WAR_TASK_NAME }.firstOrNull()
-                val jar = prj.tasks.withType<Jar>().matching { it.name == JavaPlugin.JAR_TASK_NAME }.firstOrNull()
+                val war = prj.tasks.withType(War::class.java).matching { it.name == WarPlugin.WAR_TASK_NAME }.firstOrNull()
+                val jar = prj.tasks.withType(Jar::class.java).matching { it.name == JavaPlugin.JAR_TASK_NAME }.firstOrNull()
 
                 if (war != null) {
                     container += DependencyDescriptor.make(root, war, instruction)

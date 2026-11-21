@@ -1,10 +1,7 @@
-import groovy.lang.GroovySystem
-
 plugins {
     id("java-library")
     id("java-gradle-plugin")
     `kotlin-dsl`
-    id("groovy")
     id("signing")
     id("com.gradle.plugin-publish") version "0.21.0"
     id("net.researchgate.release") version "2.8.1"
@@ -34,25 +31,23 @@ repositories {
 }
 
 object versions {
-    val groovy = GroovySystem.getShortVersion();
+    val assertj = "3.26.3"
+    val junit = "5.10.3"
     val paxUrl = "2.5.4"
-    val spock = "1.2-groovy-${groovy}"
 }
 
 dependencies {
     implementation(gradleApi())
-    implementation(localGroovy())
 
     implementation("org.ops4j.pax.url:pax-url-aether:${versions.paxUrl}")
 
-    testImplementation("org.spockframework:spock-core:${versions.spock}") {
-        exclude("groovy-all")
-    }
+    testImplementation("org.junit.jupiter:junit-jupiter:${versions.junit}")
+    testImplementation("org.assertj:assertj-core:${versions.assertj}")
 }
 
 java {
-    sourceCompatibility = JavaVersion.VERSION_1_7
-    targetCompatibility = JavaVersion.VERSION_1_7
+    sourceCompatibility = JavaVersion.VERSION_1_8
+    targetCompatibility = JavaVersion.VERSION_1_8
     withSourcesJar()
     withJavadocJar()
 }
@@ -67,6 +62,10 @@ tasks.jar {
     }
 }
 
+tasks.test {
+    useJUnitPlatform()
+}
+
 testlogger {
     showStandardStreams = false
     slowThreshold = 30000
@@ -76,16 +75,6 @@ testlogger {
 // *****************************************************************************
 // ARTIFACTS
 // *****************************************************************************
-
-val groovydocJar by tasks.registering(Jar::class) {
-    dependsOn(tasks.groovydoc)
-    archiveClassifier.set("groovydoc")
-    from(tasks.groovydoc.map { it.destinationDir })
-}
-
-artifacts {
-    archives(groovydocJar)
-}
 
 pluginBundle {
     website = gitProject

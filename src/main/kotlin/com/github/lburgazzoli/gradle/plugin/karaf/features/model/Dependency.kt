@@ -16,19 +16,19 @@
 package com.github.lburgazzoli.gradle.plugin.karaf.features.model
 
 import com.github.lburgazzoli.gradle.plugin.karaf.features.KarafFeaturesUtils
-import groovy.transform.EqualsAndHashCode
-import groovy.transform.ToString
 import org.gradle.api.artifacts.component.ModuleComponentIdentifier
 import org.gradle.api.artifacts.component.ProjectComponentIdentifier
 import org.gradle.api.artifacts.result.ResolvedComponentResult
 import java.io.File
+import java.util.Objects
 
 /**
+ * A dependency to write as a bundle. Two dependencies are equal when their [group], [name], [version], [type], and
+ * [classifier] are.
+ *
  * @author lburgazzoli
  */
-@ToString(includeNames = true)
-@EqualsAndHashCode(includes = ["group", "name", "version", "type", "classifier"])
-data class Dependency(
+class Dependency(
     var group: String?,
     var name: String?,
     var version: String?,
@@ -38,7 +38,6 @@ data class Dependency(
     var kind: Kind,
     var url: String?
 ) {
-    @ToString(includeNames = true)
     enum class Kind {
         UNKNOWN,
         MODULE,
@@ -87,4 +86,12 @@ data class Dependency(
     val isResolved: Boolean get() = url != null
 
     val hasClassifier: Boolean get() = !classifier.isNullOrEmpty()
+
+    override fun equals(other: Any?): Boolean =
+        other is Dependency && group == other.group && name == other.name && version == other.version &&
+            type == other.type && classifier == other.classifier
+
+    override fun hashCode(): Int = Objects.hash(group, name, version, type, classifier)
+
+    override fun toString(): String = "Dependency($group:$name:$version:$classifier@$type)"
 }

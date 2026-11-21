@@ -1,10 +1,17 @@
 buildscript {
     repositories {
-        flatDir { dirs "../build/libs" }
         mavenCentral()
     }
     dependencies {
-        classpath ":gradle-karaf-plugin:${project.property("pluginVersion")}"
+        // The plugin jar of the version the root build's gradle.properties names, so a jar left by an earlier version is not used
+        def rootProperties = new Properties()
+        file('../gradle.properties').withInputStream { rootProperties.load(it) }
+        def pluginJar = file("../build/libs/gradle-karaf-plugin-${rootProperties.getProperty('version')}.jar")
+        if (!pluginJar.isFile()) {
+            throw new GradleException("${pluginJar} does not exist; run ./gradlew jar in the root project first")
+        }
+        classpath files(pluginJar)
+        classpath 'org.ops4j.pax.url:pax-url-aether:2.5.4'
     }
 }
 
@@ -28,6 +35,49 @@ karaf {
         feature {
             name = "karaf-features-example"
             description = "feature-description"
+            config('my.pid') { content = 'a=b' }
+            conditional('webconsole') {
+                bundle 'com.google.guava'
+            }
+        }
+    }
+    kar {}
+}
+
+def expectedFeatures = '''<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<features xmlns="http://karaf.apache.org/xmlns/features/v1.3.0" name="gradle-karaf-plugin-integrationTest-1.2.3">
+  <feature name="karaf-features-example" version="1.2.3" description="feature-description">
+    <config name="my.pid">a=b</config>
+    <conditional>
+      <condition>webconsole</condition>
+      <bundle>mvn:com.google.guava/guava/19.0</bundle>
+    </conditional>
+  </feature>
+</features>'''
+
+tasks.register('verifyKaraf') {
+    dependsOn 'generateKar'
+    doLast {
+        def actual = file('build/karaf/features/gradle-karaf-plugin-integrationTest-1.2.3-features.xml').text
+        if (actual != expectedFeatures) {
+            throw new GradleException("Unexpected features file content:\n${actual}\nexpected:\n${expectedFeatures}")
+        }
+        def expectedRepo = [
+            'com/google/guava/guava/19.0/guava-19.0.jar',
+            'com/lburgazzoli/github/gradle-karaf-plugin-integrationTest/1.2.3/gradle-karaf-plugin-integrationTest-1.2.3-features.xml',
+        ]
+        def repoDir = file('build/karaf/repo')
+        def repoFiles = fileTree(repoDir).files.collect { repoDir.toPath().relativize(it.toPath()).toString().replace(File.separator, '/') }.sort()
+        if (repoFiles != expectedRepo.sort()) {
+            throw new GradleException("Unexpected repository files ${repoFiles}, expected ${expectedRepo}")
+        }
+        def kar = file('build/karaf/kar/gradle-karaf-plugin-integrationTest-1.2.3.kar')
+        def karFiles = new java.util.zip.ZipFile(kar).withCloseable { zip ->
+            zip.entries().toList().findAll { !it.directory }*.name.sort()
+        }
+        def expectedKar = expectedRepo.collect { "repository/${it}".toString() }.sort()
+        if (!karFiles.containsAll(expectedKar)) {
+            throw new GradleException("Entries ${expectedKar - karFiles} are missing from ${kar}, which holds ${karFiles}")
         }
     }
 }

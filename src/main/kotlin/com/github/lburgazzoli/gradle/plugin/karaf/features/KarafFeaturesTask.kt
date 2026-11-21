@@ -15,11 +15,14 @@
  */
 package com.github.lburgazzoli.gradle.plugin.karaf.features
 
+import org.gradle.api.tasks.Internal
+import org.gradle.api.Action
 import com.github.lburgazzoli.gradle.plugin.karaf.KarafPluginExtension
+import com.github.lburgazzoli.gradle.plugin.karaf.KarafTaskExtension
 import org.gradle.api.DefaultTask
 import org.gradle.api.tasks.TaskAction
-import org.gradle.kotlin.dsl.the
-import org.gradle.kotlin.dsl.withGroovyBuilder
+import com.github.lburgazzoli.gradle.plugin.karaf.features.model.DependencyDescriptor
+import com.github.lburgazzoli.gradle.plugin.karaf.features.model.FeatureDependencyDescriptor
 
 /**
  * @author lburgazzoli
@@ -33,6 +36,15 @@ open class KarafFeaturesTask : DefaultTask() {
         const val FEATURES_XMLNS_PREFIX = "http://karaf.apache.org/xmlns/features/v"
         const val XMLNS_V13 = "1.3.0"
 
+        /**
+         * Returns `true` when [version] is 1.3, with any number of trailing zero components,
+         * so `1.3` and `1.3.0` both match.
+         */
+        @JvmStatic
+        fun isXsdVersion13(version: String): Boolean {
+            val parts = version.split('.').map { it.toIntOrNull() ?: return false }
+            return parts.size >= 2 && parts[0] == 1 && parts[1] == 3 && parts.drop(2).all { it == 0 }
+        }
     }
 
     init {
@@ -42,12 +54,33 @@ open class KarafFeaturesTask : DefaultTask() {
         }
     }
 
-    private val karaf = project.the<KarafPluginExtension>()
+    private val karafExtension = KarafTaskExtension(this)
+
+    /**
+     * The settings this task reads: the extension set with [karaf], or else the project's `karaf` extension.
+     */
+    @get:Internal
+    val karaf: KarafPluginExtension
+        get() = karafExtension.extension
+
+    /**
+     * Makes this task read [extension] instead of the project's `karaf` extension.
+     */
+    fun karaf(extension: KarafPluginExtension) {
+        karafExtension.set(extension)
+    }
+
+    /**
+     * Makes this task read a new extension, configured by [action], instead of the project's `karaf` extension.
+     */
+    fun karaf(action: Action<in KarafPluginExtension>) {
+        karafExtension.set(action)
+    }
 
     @TaskAction
     fun run() {
         if (karaf.hasFeatures()) {
-            val outputFile = karaf.features.outputFile.get().asFile
+            val outputFile = karaf.features.outputFile
 
             // write out a features repository xml.
             if (!outputFile.parentFile.exists()) {
@@ -60,97 +93,91 @@ open class KarafFeaturesTask : DefaultTask() {
 
     fun generateFeatures(karaf: KarafFeaturesExtension): String {
         val builder = KarafFeaturesBuilder()
-        val xsdVer13 = karaf.xsdVersion.get() == XMLNS_V13
+        val xsdVer13 = isXsdVersion13(karaf.xsdVersion)
         val resolver = karaf.resolver
 
-        builder.mkp.xmlDeclaration(mapOf("version" to "1.0", "encoding" to "UTF-8", "standalone" to "yes"))
-        builder.withGroovyBuilder {
-            "features"(
-                "xmlns" to FEATURES_XMLNS_PREFIX + karaf.xsdVersion.get(),
-                "name" to karaf.name.get() + "-" + karaf.version.get()
-            ) {
-                karaf.repositories.get().forEach {
-                    "repository"(it)
-                }
-                karaf.featureDescriptors.forEach { feature ->
-                    "feature"(
+        builder.element(
+            "features",
+            mapOf(
+                "xmlns" to FEATURES_XMLNS_PREFIX + karaf.xsdVersion,
+                "name" to karaf.name + "-" + karaf.version
+            )
+        ) {
+            karaf.repositories.forEach {
+                builder.element("repository", text = it)
+            }
+            karaf.featureDescriptors.forEach { feature ->
+                builder.element(
+                    "feature",
+                    mapOf(
                         "name" to feature.name,
                         "version" to feature.version,
                         "description" to feature.description
-                    ) {
-                        feature.details?.let { "details"(feature.details) }
-                        feature.configs.forEach {
-                            "config"("name" to it.name, it.content)
+                    )
+                ) {
+                    feature.details?.takeIf { it.isNotEmpty() }?.let { builder.element("details", text = it) }
+                    feature.configs.forEach {
+                        builder.element("config", mapOf("name" to it.name), it.content)
+                    }
+                    feature.configFiles.forEach {
+                        if (!it.filename.isNullOrEmpty() && !it.uri.isNullOrEmpty()) {
+                            builder.element("configfile", mapOf("finalname" to it.filename, "override" to it.override), it.uri)
                         }
-
-                        feature.configFiles.forEach {
-                            if (it.filename != null && it.uri != null) {
-                                "configfile"(mapOf("finalname" to it.filename, "override" to it.override), it.uri)
-                            }
+                    }
+                    feature.featureDependencies.forEach {
+                        builder.featureDependency(it, xsdVer13)
+                    }
+                    val dependencies = resolver.resolve(feature)
+                    dependencies.forEach {
+                        if (!feature.isConditional(it)) {
+                            builder.bundle(it)
                         }
-                        feature.featureDependencies.forEach {
-                            "feature"(
-                                mapOf(
-                                    "version" to it.version,
-                                    "dependency" to (it.dependency != null && xsdVer13).takeIf { it },
-                                    "prerequisite" to it.prerequisite
-                                ),
-                                it.name
-                            )
-                        }
-                        val dependencies = resolver.resolve(feature)
-                        dependencies.forEach {
-                            if (!feature.isConditional(it)) {
-                                if (it.bundle != null) {
-                                    "bundle"(it.bundle.attributes, it.dependency.url)
-                                } else {
-                                    "bundle"(it.dependency.url)
-                                }
-                            }
-                        }
-                        feature.conditions.get().forEach { condition ->
-                            "conditional" {
-                                condition.condition?.let {
-                                    "condition"(it)
-                                }
+                    }
+                    feature.conditions.forEach { condition ->
+                        builder.element("conditional") {
+                            condition.condition?.takeIf { it.isNotEmpty() }?.let {
+                                builder.element("condition", text = it)
                             }
                             condition.configs.forEach {
-                                "config"("name" to it.name, it.content)
+                                builder.element("config", mapOf("name" to it.name), it.content)
                             }
                             feature.configFiles.forEach {
-                                if (it.filename != null && it.uri != null) {
-                                    "configfile"(mapOf("finalname" to it.filename, "override" to it.override), it.uri)
+                                if (!it.filename.isNullOrEmpty() && !it.uri.isNullOrEmpty()) {
+                                    builder.element("configfile", mapOf("finalname" to it.filename), it.uri)
                                 }
                             }
                             condition.featureDependencies.forEach {
-                                "feature"(
-                                    mapOf(
-                                        "version" to it.version,
-                                        "dependency" to (it.dependency != null && xsdVer13).takeIf { it },
-                                        "prerequisite" to it.prerequisite
-                                    ),
-                                    it.name
-                                )
+                                builder.featureDependency(it, xsdVer13)
                             }
                             dependencies.forEach { dependency ->
                                 condition.bundleDescriptors.forEach {
                                     if (it.matcher.matches(dependency.dependency)) {
-                                        if (dependency.bundle != null) {
-                                            "bundle"(dependency.bundle.attributes, dependency.dependency.url)
-                                        } else {
-                                            "bundle"(dependency.dependency.url)
-                                        }
+                                        builder.bundle(dependency)
                                     }
                                 }
                             }
                         }
-                        feature.capabilities.forEach {
-                            "capability"(it.format())
-                        }
+                    }
+                    feature.capabilities.forEach {
+                        builder.element("capability", text = it.format())
                     }
                 }
             }
         }
         return builder.toString()
     }
+
+    private fun KarafFeaturesBuilder.featureDependency(dependency: FeatureDependencyDescriptor, xsdVer13: Boolean) =
+        element(
+            "feature",
+            mapOf(
+                "version" to dependency.version,
+                "dependency" to (if (dependency.dependency == true && xsdVer13) true else null),
+                "prerequisite" to dependency.prerequisite
+            ),
+            dependency.name
+        )
+
+    private fun KarafFeaturesBuilder.bundle(dependency: DependencyDescriptor) =
+        element("bundle", dependency.bundle?.attributes ?: emptyMap<String, String>(), dependency.dependency.url)
 }

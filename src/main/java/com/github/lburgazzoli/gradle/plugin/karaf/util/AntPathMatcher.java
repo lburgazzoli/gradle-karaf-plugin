@@ -20,10 +20,10 @@ import java.util.LinkedHashMap;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
+import java.util.StringTokenizer;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-import org.codehaus.groovy.runtime.StringGroovyMethods;
 
 /**
  * PathMatcher implementation for Ant-style path patterns. Examples are provided below.
@@ -209,8 +209,12 @@ public class AntPathMatcher {
     }
 
     private String[] tokenize(String pattern) {
-        List<String> list = StringGroovyMethods.tokenize((CharSequence)pattern, (CharSequence)pathSeparator);
-        return list.toArray(new String[list.size()]);
+        StringTokenizer tokenizer = new StringTokenizer(pattern, pathSeparator);
+        String[] tokens = new String[tokenizer.countTokens()];
+        for (int i = 0; i < tokens.length; i++) {
+            tokens[i] = tokenizer.nextToken();
+        }
+        return tokens;
     }
 
     /**
@@ -227,14 +231,14 @@ public class AntPathMatcher {
 
     /**
      * Given a pattern and a full path, determine the pattern-mapped part. <p>For example: <ul>
-     * <li>'<code>/docs/cvs/commit.html</code>' and '<code>/docs/cvs/commit.html</code> -> ''</li>
-     * <li>'<code>/docs/*</code>' and '<code>/docs/cvs/commit</code> -> '<code>cvs/commit</code>'</li>
-     * <li>'<code>/docs/cvs/*.html</code>' and '<code>/docs/cvs/commit.html</code> -> '<code>commit.html</code>'</li>
-     * <li>'<code>/docs/**</code>' and '<code>/docs/cvs/commit</code> -> '<code>cvs/commit</code>'</li>
-     * <li>'<code>/docs/**\/*.html</code>' and '<code>/docs/cvs/commit.html</code> -> '<code>cvs/commit.html</code>'</li>
-     * <li>'<code>/*.html</code>' and '<code>/docs/cvs/commit.html</code> -> '<code>docs/cvs/commit.html</code>'</li>
-     * <li>'<code>*.html</code>' and '<code>/docs/cvs/commit.html</code> -> '<code>/docs/cvs/commit.html</code>'</li>
-     * <li>'<code>*</code>' and '<code>/docs/cvs/commit.html</code> -> '<code>/docs/cvs/commit.html</code>'</li> </ul>
+     * <li>'<code>/docs/cvs/commit.html</code>' and '<code>/docs/cvs/commit.html</code> -&gt; ''</li>
+     * <li>'<code>/docs/*</code>' and '<code>/docs/cvs/commit</code> -&gt; '<code>cvs/commit</code>'</li>
+     * <li>'<code>/docs/cvs/*.html</code>' and '<code>/docs/cvs/commit.html</code> -&gt; '<code>commit.html</code>'</li>
+     * <li>'<code>/docs/**</code>' and '<code>/docs/cvs/commit</code> -&gt; '<code>cvs/commit</code>'</li>
+     * <li>'<code>/docs/**\/*.html</code>' and '<code>/docs/cvs/commit.html</code> -&gt; '<code>cvs/commit.html</code>'</li>
+     * <li>'<code>/*.html</code>' and '<code>/docs/cvs/commit.html</code> -&gt; '<code>docs/cvs/commit.html</code>'</li>
+     * <li>'<code>*.html</code>' and '<code>/docs/cvs/commit.html</code> -&gt; '<code>/docs/cvs/commit.html</code>'</li>
+     * <li>'<code>*</code>' and '<code>/docs/cvs/commit.html</code> -&gt; '<code>/docs/cvs/commit.html</code>'</li> </ul>
      * <p>Assumes that {@link #match} returns <code>true</code> for '<code>pattern</code>' and '<code>path</code>', but
      * does <strong>not</strong> enforce this.
      */
@@ -279,7 +283,7 @@ public class AntPathMatcher {
      * <p>This implementation simply concatenates the two patterns, unless the first pattern
      * contains a file extension match (such as {@code *.html}. In that case, the second pattern
      * should be included in the first, or an {@code IllegalArgumentException} is thrown.
-     * <p>For example: <table>
+     * <p>For example: <table><caption>Combined patterns</caption>
      * <tr><th>Pattern 1</th><th>Pattern 2</th><th>Result</th></tr> <tr><td>/hotels</td><td>{@code
      * null}</td><td>/hotels</td></tr> <tr><td>{@code null}</td><td>/hotels</td><td>/hotels</td></tr>
      * <tr><td>/hotels</td><td>/bookings</td><td>/hotels/bookings</td></tr> <tr><td>/hotels</td><td>bookings</td><td>/hotels/bookings</td></tr>
@@ -456,7 +460,7 @@ public class AntPathMatcher {
      * via a {@link Pattern}.
      *
      * <p>The pattern may contain special characters: '*' means zero or more characters; '?' means one and only one
-     * character; '{' and '}' indicate a URI template pattern. For example <tt>/users/{user}</tt>.
+     * character; '{' and '}' indicate a URI template pattern. For example <code>/users/{user}</code>.
      *
      * @author Arjen Poutsma
      * @author Rossen Stoyanchev

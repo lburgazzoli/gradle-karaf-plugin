@@ -20,11 +20,11 @@ class DependencyMatcher(
             var s = notation
             var type: String? = null
             if (s.contains("@")) {
-                val fields = s.split("@".toRegex()).dropLastWhile { it.isEmpty() }.toTypedArray()
+                val fields = javaSplit(s, '@')
                 s = fields[0]
                 type = fields[1]
             }
-            val notationParts = s.split(":".toRegex()).dropLastWhile { it.isEmpty() }.toTypedArray()
+            val notationParts = javaSplit(s, ':')
             if (notationParts.size < 1 || notationParts.size > 4) {
                 throw IllegalDependencyNotation("Supplied String module notation \'$s\' is invalid.")
             }
@@ -49,26 +49,26 @@ class DependencyMatcher(
     }
 
     fun matches(group: String?, name: String?, version: String?, type: String?, classifier: String?): Boolean {
-        if (this.group != null && this.group != group && !patternMatch(this.group, group)) {
+        if (!this.group.isNullOrEmpty() && this.group != group && !patternMatch(this.group, group)) {
             return false
         }
-        if (this.name != null && this.name != name && !patternMatch(this.name, name)) {
+        if (!this.name.isNullOrEmpty() && this.name != name && !patternMatch(this.name, name)) {
             return false
         }
-        if (this.version != null && this.version != version && !patternMatch(this.version, version)) {
+        if (!this.version.isNullOrEmpty() && this.version != version && !patternMatch(this.version, version)) {
             return false
         }
-        if (this.type != null && this.type != type && !patternMatch(this.type, type)) {
+        if (!this.type.isNullOrEmpty() && this.type != type && !patternMatch(this.type, type)) {
             return false
         }
-        if (this.classifier != null && this.classifier != classifier && !patternMatch(this.classifier, classifier)) {
+        if (!this.classifier.isNullOrEmpty() && this.classifier != classifier && !patternMatch(this.classifier, classifier)) {
             return false
         }
         return true
     }
 
     protected fun patternMatch(pattern: String?, target: String?): Boolean {
-        return if (pattern != null && target != null) {
+        return if (!pattern.isNullOrEmpty() && !target.isNullOrEmpty()) {
             var rex = false
             var ant = false
             try {
@@ -85,3 +85,10 @@ class DependencyMatcher(
         }
     }
 }
+
+/**
+ * Splits [text] around [separator] as [java.lang.String.split] does: trailing empty strings are dropped, and an empty
+ * [text] gives one empty string.
+ */
+private fun javaSplit(text: String, separator: Char): Array<String> =
+    Pattern.compile(Pattern.quote(separator.toString())).split(text)

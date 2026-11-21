@@ -1,8 +1,10 @@
 package com.github.lburgazzoli.gradle.plugin.karaf.kar
 
+import com.github.lburgazzoli.gradle.plugin.karaf.KarafTaskExtension
+import org.gradle.api.tasks.Internal
+import org.gradle.api.Action
 import com.github.lburgazzoli.gradle.plugin.karaf.KarafPluginExtension
 import org.gradle.jvm.tasks.Jar
-import org.gradle.kotlin.dsl.the
 import java.nio.file.Files
 
 /**
@@ -22,9 +24,30 @@ abstract class KarafKarTask : Jar() {
         }
     }
 
-    override fun copy() {
-        val karaf = project.the<KarafPluginExtension>()
+    private val karafExtension = KarafTaskExtension(this)
 
+    /**
+     * The settings this task reads: the extension set with [karaf], or else the project's `karaf` extension.
+     */
+    @get:Internal
+    val karaf: KarafPluginExtension
+        get() = karafExtension.extension
+
+    /**
+     * Makes this task read [extension] instead of the project's `karaf` extension.
+     */
+    fun karaf(extension: KarafPluginExtension) {
+        karafExtension.set(extension)
+    }
+
+    /**
+     * Makes this task read a new extension, configured by [action], instead of the project's `karaf` extension.
+     */
+    fun karaf(action: Action<in KarafPluginExtension>) {
+        karafExtension.set(action)
+    }
+
+    override fun copy() {
         if (!karaf.hasKar()) {
             return
         }
@@ -35,10 +58,10 @@ abstract class KarafKarTask : Jar() {
         archiveAppendix.set(null as String?)
         archiveClassifier.set(null as String?)
         archiveBaseName.set(features.name)
-        archiveVersion.set(features.version.map { it.toString() })
+        archiveVersion.set(features.version)
         archiveExtension.set(EXTENSION)
         destinationDirectory.set(kar.outputDir)
-        if (kar.archiveName.isPresent) {
+        if (!kar.archiveName.isNullOrEmpty()) {
             archiveVersion.set(null as String?)
             archiveBaseName.set(kar.archiveName)
         }

@@ -15,24 +15,31 @@
  */
 package com.github.lburgazzoli.gradle.plugin.karaf.features.model
 
-import groovy.transform.EqualsAndHashCode
-import groovy.transform.ToString
 import org.gradle.api.Action
 import org.gradle.api.artifacts.ModuleVersionIdentifier
 import org.gradle.api.artifacts.ResolvedArtifact
+import org.gradle.api.model.ObjectFactory
 import java.io.File
+import javax.inject.Inject
 
 /**
  * @author lburgazzoli
  */
 abstract class FeatureDefinition {
+    /**
+     * Creates the nested DSL objects, so Gradle decorates them and a Groovy closure passed
+     * to one of their methods gets the object as its delegate.
+     */
+    @get:Inject
+    protected abstract val objects: ObjectFactory
+
     val bundleDescriptors: MutableList<BundleDescriptor> = mutableListOf()
     val featureDependencies: MutableList<FeatureDependencyDescriptor> = mutableListOf()
     val configs: MutableSet<Config> = mutableSetOf()
     val configFiles: MutableSet<ConfigFile> = mutableSetOf()
     val capabilities: MutableList<Capability> = mutableListOf()
 
-    var includeProject: Boolean = false
+    var includeProject: Boolean? = null
 
     // *************************************************************************
     // Bundles
@@ -40,14 +47,14 @@ abstract class FeatureDefinition {
 
     @JvmOverloads
     fun bundle(pattern: String, action: Action<in BundleDescriptor>? = null) {
-        val descriptor = BundleDescriptor.fromPattern(pattern)
+        val descriptor = objects.newInstance(BundleDescriptor::class.java, DependencyMatcher.from(pattern))
         action?.execute(descriptor)
 
         bundleDescriptors += descriptor
     }
 
-    fun bundle(action: Action<in BundleDescriptor>) {
-        bundleDescriptors += BundleExtendedDescriptor().also { action.execute(it) }
+    fun bundle(action: Action<in BundleExtendedDescriptor>) {
+        bundleDescriptors += objects.newInstance(BundleExtendedDescriptor::class.java).also { action.execute(it) }
     }
 
     fun findBundleDescriptors(artifact: ResolvedArtifact): BundleDescriptor? {
@@ -94,7 +101,13 @@ abstract class FeatureDefinition {
 
     @JvmOverloads
     fun feature(feature: FeatureDescriptor, action: Action<in FeatureDependencyDescriptor>? = null) {
-        feature(feature.name, action)
+        val featureDependencyDescriptor = FeatureDependencyDescriptor(feature.name)
+        action?.execute(featureDependencyDescriptor)
+        requireNotNull(featureDependencyDescriptor.name) {
+            "feature $feature has no name, so it cannot be referenced as a dependency; set name in the dependency block"
+        }
+
+        featureDependencies += featureDependencyDescriptor
     }
 
     @JvmOverloads
@@ -140,22 +153,13 @@ abstract class FeatureDefinition {
     // *************************************************************************
     //
     // *************************************************************************
-
-    @ToString(includeNames = true)
-    @EqualsAndHashCode(includes = ["name"])
     data class Config(val name: String) {
         var append: Boolean = false
         var content: String? = null
     }
-
-    @ToString(includeNames = true)
-    @EqualsAndHashCode(includes = ["uri", "filename", "override"])
     data class ConfigFile(var uri: String? = null, var filename: String? = null, var override: Boolean? = null) {
         var file: File? = null
     }
-
-    @ToString(includeNames = true)
-    @EqualsAndHashCode(includes = ["ns"])
     data class Capability(val ns: String) {
         var effective: String? = "resolve"
         var filter: String? = null
@@ -164,16 +168,16 @@ abstract class FeatureDefinition {
 
         fun format(): String {
             val text = StringBuilder(ns)
-            if (filter != null) {
+            if (!filter.isNullOrEmpty()) {
                 text.append(";filter:='").append(filter).append("'")
             }
-            if (effective != null) {
+            if (!effective.isNullOrEmpty()) {
                 text.append(";effective:='").append(effective).append("'")
             }
-            if (resolution != null) {
+            if (!resolution.isNullOrEmpty()) {
                 text.append(";resolution:='").append(resolution).append("'")
             }
-            if (extra != null) {
+            if (!extra.isNullOrEmpty()) {
                 text.append(";").append(extra)
             }
 
@@ -181,9 +185,33 @@ abstract class FeatureDefinition {
         }
     }
 
-    class BundleExtendedDescriptor : BundleDescriptor(DependencyMatcher()) {
+    open class BundleExtendedDescriptor @Inject constructor() : BundleDescriptor(DependencyMatcher()) {
         fun match(action: Action<in DependencyMatcher>) {
             action.execute(matcher)
+        }
+
+        /**
+         * Sets the properties of [matcher] from [properties], for example `match group: 'org.foo', name: 'bar'`.
+         * The keys are `group`, `name`, `version`, `type`, and `classifier`.
+         *
+         * @throws IllegalArgumentException if [properties] has any other key
+         */
+        fun match(properties: Map<String, Any?>) {
+            val properties = textKeys(properties)
+            val unknown = properties.keys - setOf("group", "name", "version", "type", "classifier")
+            require(unknown.isEmpty()) {
+                "match supports group, name, version, type, and classifier; got $unknown"
+            }
+            properties.forEach { (key, value) ->
+                val text = value?.toString()
+                when (key) {
+                    "group" -> matcher.group = text
+                    "name" -> matcher.name = text
+                    "version" -> matcher.version = text
+                    "type" -> matcher.type = text
+                    "classifier" -> matcher.classifier = text
+                }
+            }
         }
     }
 }

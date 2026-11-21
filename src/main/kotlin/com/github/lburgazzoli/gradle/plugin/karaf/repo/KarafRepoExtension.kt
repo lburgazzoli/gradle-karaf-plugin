@@ -1,10 +1,6 @@
 package com.github.lburgazzoli.gradle.plugin.karaf.repo
 
 import org.gradle.api.Project
-import org.gradle.api.file.DirectoryProperty
-import org.gradle.api.file.ProjectLayout
-import org.gradle.api.provider.Property
-import org.gradle.api.tasks.OutputDirectory
 import java.io.File
 import java.nio.file.Path
 import javax.inject.Inject
@@ -12,23 +8,29 @@ import javax.inject.Inject
 /**
  * @author realPyR3X
  */
-abstract class KarafRepoExtension {
+open class KarafRepoExtension @Inject constructor(private val project: Project) {
     companion object {
         const val NAME = "repo"
     }
 
-    abstract val enabled: Property<Boolean>
+    var enabled: Boolean = false
 
-    @get:Inject
-    protected abstract val layout: ProjectLayout
+    /**
+     * Returns [enabled]; Groovy build scripts call it as `isEnabled()`.
+     */
+    fun isEnabled(): Boolean = enabled
 
-    abstract val outputDir: DirectoryProperty
+    private var explicitOutputDir: File? = null
+
+    /**
+     * The directory the repository is written to; `build/karaf/repo` unless set.
+     */
+    var outputDir: File
+        get() = explicitOutputDir ?: project.layout.buildDirectory.dir("karaf/repo").get().asFile
+        set(value) {
+            explicitOutputDir = value
+        }
 
     val outputPath: Path
-        get() = outputDir.get().asFile.toPath()
-
-    init {
-        enabled.convention(false)
-        outputDir.convention(layout.buildDirectory.dir("karaf/repo"))
-    }
+        get() = outputDir.toPath()
 }

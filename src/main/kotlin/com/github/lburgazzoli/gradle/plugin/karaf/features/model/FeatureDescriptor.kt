@@ -15,49 +15,60 @@
  */
 package com.github.lburgazzoli.gradle.plugin.karaf.features.model
 
-import groovy.transform.ToString
 import org.gradle.api.Action
-import org.gradle.api.Named
+import com.github.lburgazzoli.gradle.plugin.karaf.features.KarafFeaturesExtension
 import org.gradle.api.Project
 import org.gradle.api.artifacts.Configuration
-import org.gradle.api.provider.ListProperty
 import javax.inject.Inject
 
 /**
  * @author lburgazzoli
  */
-@ToString(includeNames = true)
 abstract class FeatureDescriptor @Inject constructor(
-    private var name: String
-) : FeatureDefinition(), Named {
-    var version: Any? = null
+    val project: Project,
+    /**
+     * The features settings this feature belongs to. The project bundle is included when either their
+     * `includeProject` or the feature's own is `true`.
+     */
+    val owner: KarafFeaturesExtension
+) : FeatureDefinition() {
+    var name: String? = null
+    var version: String? = project.version.toString()
     var description: String? = null
     var details: String? = null
-    internal lateinit var _project: Project
-    internal val projectIsInitialized: Boolean get() = this::_project.isInitialized
 
-    abstract val configurations: ListProperty<Configuration>
-    abstract val conditions: ListProperty<FeatureCondition>
+    val configurations: MutableList<Configuration> = mutableListOf()
+    val conditions: MutableList<FeatureCondition> = mutableListOf()
 
-    class ConfigurationsScope(
-        private val feature: FeatureDescriptor
-    ) {
+    init {
+        project.configurations.findByName("runtimeClasspath")?.let { configurations.add(it) }
+    }
+
+    inner class ConfigurationsScope {
         fun add(configurationName: String) {
-            feature.configuration(configurationName)
+            configuration(configurationName)
         }
 
         fun add(configuration: Configuration) {
-            feature.configuration(configuration)
+            configuration(configuration)
+        }
+
+        fun del(configurationName: String) {
+            del(project.configurations.getByName(configurationName))
+        }
+
+        fun del(configuration: Configuration) {
+            configurations.remove(configuration)
         }
     }
 
     fun configurations(action: Action<in ConfigurationsScope>) {
-        configurations.empty()
-        action.execute(ConfigurationsScope(this))
+        configurations.clear()
+        action.execute(ConfigurationsScope())
     }
 
     fun configuration(configurationName: String) {
-        configuration(_project.configurations.getByName(configurationName))
+        configuration(project.configurations.getByName(configurationName))
     }
 
     fun configuration(configuration: Configuration) {
@@ -65,7 +76,7 @@ abstract class FeatureDescriptor @Inject constructor(
     }
 
     fun configurations(vararg configurationNames: String) {
-        configurations(configurationNames.map { _project.configurations.getByName(it) })
+        configurations(configurationNames.map { project.configurations.getByName(it) })
     }
 
     fun configurations(vararg configurations: Configuration) {
@@ -73,7 +84,7 @@ abstract class FeatureDescriptor @Inject constructor(
     }
 
     fun configurations(configurations: Collection<Configuration>) {
-        this.configurations.empty()
+        this.configurations.clear()
         this.configurations.addAll(configurations)
     }
 
@@ -82,25 +93,22 @@ abstract class FeatureDescriptor @Inject constructor(
     // *************************************************************************
 
     fun conditional(action: Action<in FeatureCondition>) {
-        conditions.add(FeatureCondition().also { action.execute(it) })
+        conditions.add(objects.newInstance(FeatureCondition::class.java).also { action.execute(it) })
     }
 
     fun conditional(condition: String, action: Action<in FeatureCondition>) {
-        conditions.add(FeatureCondition(condition).also { action.execute(it) })
-    }
-
-    override fun getName(): String {
-        return name
-    }
-
-    fun setName(name: String) {
-        this.name = name
+        conditions.add(objects.newInstance(FeatureCondition::class.java).also {
+            it.condition = condition
+            action.execute(it)
+        })
     }
 
     fun isConditional(dependency: DependencyDescriptor): Boolean =
-        this.conditions.get().any { condition ->
+        this.conditions.any { condition ->
             condition.bundleDescriptors.any { instruction ->
                 instruction.matcher.matches(dependency.dependency)
             }
         }
+
+    override fun toString(): String = "FeatureDescriptor(name=$name, version=$version)"
 }
