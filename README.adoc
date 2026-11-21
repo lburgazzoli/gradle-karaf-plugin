@@ -43,6 +43,8 @@ tasks.register('otherFeatures', com.github.lburgazzoli.gradle.plugin.karaf.featu
 }
 ----
 
+A task's own settings start from the defaults and inherit nothing from the project's `karaf` block. The default features `outputFile` is built from the features `name` and `version`, so two features tasks that use that default and the same `name` and `version` write the same file; give one of them a different `name` or an explicit `outputFile`.
+
 To share one set of settings between tasks, create it with `objects.newInstance(com.github.lburgazzoli.gradle.plugin.karaf.KarafPluginExtension, project)` and pass it to each task with `karaf(settings)`.
 
 == Description
