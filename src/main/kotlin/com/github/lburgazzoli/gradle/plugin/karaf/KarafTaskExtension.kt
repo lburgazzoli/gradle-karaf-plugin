@@ -9,8 +9,11 @@ import org.gradle.api.Task
 internal class KarafTaskExtension(private val task: Task) {
     private var override: KarafPluginExtension? = null
 
+    // Task.project is deprecated at execution time, and the task action reads extension.
+    private val projectExtensions = task.project.extensions
+
     val extension: KarafPluginExtension
-        get() = override ?: task.project.extensions.getByType(KarafPluginExtension::class.java)
+        get() = override ?: projectExtensions.getByType(KarafPluginExtension::class.java)
 
     fun set(extension: KarafPluginExtension) {
         override = extension
