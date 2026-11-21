@@ -41,9 +41,20 @@ open class KarafFeaturesTask : DefaultTask() {
          * so `1.3` and `1.3.0` both match.
          */
         @JvmStatic
-        fun isXsdVersion13(version: String): Boolean {
-            val parts = version.split('.').map { it.toIntOrNull() ?: return false }
-            return parts.size >= 2 && parts[0] == 1 && parts[1] == 3 && parts.drop(2).all { it == 0 }
+        fun isXsdVersion13(version: String): Boolean = normalizeXsdVersion(version) == XMLNS_V13
+
+        /**
+         * Returns [version] in the `major.minor.micro` form of Karaf's features namespaces: `1` becomes `1.0.0`, and
+         * `1.3` and `1.3.0.0` become `1.3.0`. A version with a non-numeric component, or with a non-zero component
+         * past the third, is returned unchanged.
+         */
+        @JvmStatic
+        fun normalizeXsdVersion(version: String): String {
+            val parts = version.split('.').map { it.toIntOrNull() ?: return version }
+            if (parts.drop(3).any { it != 0 }) {
+                return version
+            }
+            return (parts.take(3) + List(3 - minOf(parts.size, 3)) { 0 }).joinToString(".")
         }
     }
 
@@ -99,7 +110,7 @@ open class KarafFeaturesTask : DefaultTask() {
         builder.element(
             "features",
             mapOf(
-                "xmlns" to FEATURES_XMLNS_PREFIX + karaf.xsdVersion,
+                "xmlns" to FEATURES_XMLNS_PREFIX + normalizeXsdVersion(karaf.xsdVersion),
                 "name" to karaf.name + "-" + karaf.version
             )
         ) {

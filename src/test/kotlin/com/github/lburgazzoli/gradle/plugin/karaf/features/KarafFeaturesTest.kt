@@ -9,6 +9,8 @@ import org.assertj.core.api.Assertions.assertThat
 import org.assertj.core.api.SoftAssertions.assertSoftly
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.io.TempDir
+import org.junit.jupiter.params.ParameterizedTest
+import org.junit.jupiter.params.provider.CsvSource
 import java.io.File
 
 class KarafFeaturesTest {
@@ -17,6 +19,24 @@ class KarafFeaturesTest {
 
     private fun FeaturesXml.bundlesMatching(regex: String): List<String> =
         bundles().filter { Regex(regex).containsMatchIn(it) }
+
+    @ParameterizedTest(name = "{0} is written as {1}")
+    @CsvSource(
+        "1.3, 1.3.0",
+        "1.2, 1.2.0",
+        "1.3.0, 1.3.0",
+        "1.3.0.0, 1.3.0",
+        "01.3, 1.3.0",
+        "1.3.0.1, 1.3.0.1",
+        "1, 1.0.0",
+        "1.3-SNAPSHOT, 1.3-SNAPSHOT",
+        "'', ''"
+    )
+    fun `xsdVersion is written in the major-minor-micro form of Karaf's namespaces`(xsdVersion: String, expected: String) {
+        assertThat(KarafFeaturesTask.normalizeXsdVersion(xsdVersion))
+            .`as`("normalizeXsdVersion(%s)", xsdVersion)
+            .isEqualTo(expected)
+    }
 
     @Test
     fun `a feature reads runtimeClasspath by default`() {

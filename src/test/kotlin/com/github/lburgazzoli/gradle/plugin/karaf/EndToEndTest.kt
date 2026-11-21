@@ -103,7 +103,7 @@ class EndToEndTest {
         assertThat(featuresXml()).isEqualTo(
             """
             <?xml version="1.0" encoding="UTF-8" standalone="yes"?>
-            <features xmlns="http://karaf.apache.org/xmlns/features/v1.3" name="sample-1.2.3">
+            <features xmlns="http://karaf.apache.org/xmlns/features/v1.3.0" name="sample-1.2.3">
               <repository>mvn:org.foo/bar/1.0/xml/features</repository>
               <feature name="f1" version="1.2.3" description="d">
                 <config name="my.pid">a=b</config>
