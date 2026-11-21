@@ -44,6 +44,7 @@ class Dependency(
         PROJECT
     }
 
+    @JvmOverloads
     constructor(kind: Kind = Kind.UNKNOWN) : this(
         group = null,
         name = null,
@@ -86,6 +87,13 @@ class Dependency(
     val isResolved: Boolean get() = url != null
 
     val hasClassifier: Boolean get() = !classifier.isNullOrEmpty()
+
+    /**
+     * Returns `true` when [classifier] is not `null`, an empty classifier included. The project's jar, built with no
+     * classifier, has an empty one. Groovy build scripts call this as `hasClassifier()`; the [hasClassifier] property counts an empty
+     * classifier as none.
+     */
+    fun hasClassifier(): Boolean = classifier != null
 
     override fun equals(other: Any?): Boolean =
         other is Dependency && group == other.group && name == other.name && version == other.version &&

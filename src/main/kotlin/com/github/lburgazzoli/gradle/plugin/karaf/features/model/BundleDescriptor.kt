@@ -13,6 +13,7 @@ import javax.inject.Inject
  */
 open class BundleDescriptor @Inject constructor(val matcher: DependencyMatcher) {
     companion object {
+        @JvmStatic
         fun fromPattern(pattern: String): BundleDescriptor =
             BundleDescriptor(DependencyMatcher.from(pattern))
     }

@@ -927,4 +927,113 @@ class EndToEndTest {
         assertThat(featuresXml())
             .contains("<bundle>wrap:mvn:commons-lang/commons-lang/2.6${'$'}Bundle-Version=2.6</bundle>")
     }
+
+    @Test
+    fun `hasClassifier() in a groovy remap block is true for an empty classifier and false for none`() {
+        build(
+            groovyBuild(
+                """
+                karaf {
+                    features {
+                        includeProject = true
+                        feature {
+                            name = 'f1'
+                            bundle('com.example:sample') {
+                                remap { name = hasClassifier() ? 'with-classifier' : 'without-classifier' }
+                            }
+                            bundle('commons-lang') {
+                                remap { name = hasClassifier() ? 'with-classifier' : 'without-classifier' }
+                            }
+                        }
+                    }
+                }
+                """.trimIndent()
+            ),
+            "generateFeatures"
+        )
+
+        assertThat(featuresXml())
+            .`as`("the project jar has an empty classifier, and 0.5.7 counted it as a classifier")
+            .contains(
+                "<bundle>mvn:com.example/with-classifier/1.2.3</bundle>",
+                "<bundle>mvn:commons-lang/without-classifier/2.6</bundle>"
+            )
+    }
+
+    @Test
+    fun `configuration given a missing configuration keeps the feature's default configuration`() {
+        build(
+            groovyBuild(
+                """
+                karaf {
+                    features {
+                        feature {
+                            name = 'f1'
+                            configuration project.configurations.findByName('absent')
+                        }
+                    }
+                }
+                """.trimIndent()
+            ),
+            "generateFeatures"
+        )
+
+        assertThat(featuresXml()).contains("<bundle>mvn:commons-lang/commons-lang/2.6</bundle>")
+    }
+
+    @Test
+    fun `configurations add and del given a missing configuration change nothing`() {
+        build(
+            groovyBuild(
+                """
+                karaf {
+                    features {
+                        feature {
+                            name = 'f1'
+                            configurations {
+                                add project.configurations.findByName('absent')
+                                add 'runtimeClasspath'
+                                del project.configurations.findByName('absent')
+                            }
+                        }
+                    }
+                }
+                """.trimIndent()
+            ),
+            "generateFeatures"
+        )
+
+        assertThat(featuresXml()).contains("<bundle>mvn:commons-lang/commons-lang/2.6</bundle>")
+    }
+
+    @Test
+    fun `a groovy script builds dependency matchers through the model's static factories`() {
+        val result = build(
+            groovyBuild(
+                """
+                import com.github.lburgazzoli.gradle.plugin.karaf.features.model.BundleDescriptor
+                import com.github.lburgazzoli.gradle.plugin.karaf.features.model.Dependency
+                import com.github.lburgazzoli.gradle.plugin.karaf.features.model.DependencyMatcher
+
+                tasks.register('printMatches') {
+                    doLast {
+                        def lang = new Dependency()
+                        lang.group = 'commons-lang'
+                        lang.name = 'commons-lang'
+                        def guava = new Dependency()
+                        guava.group = 'com.google.guava'
+                        guava.name = 'guava'
+                        def matcher = DependencyMatcher.from('commons-lang:commons-lang')
+                        def bundle = BundleDescriptor.fromPattern('commons-lang:commons-lang')
+                        println "from: " + [matcher.matches(lang), matcher.matches(guava)]
+                        println "fromPattern: " + [bundle.matcher.matches(lang), bundle.matcher.matches(guava)]
+                    }
+                }
+                """.trimIndent()
+            ),
+            "printMatches"
+        )
+
+        assertThat(result.output).contains("from: [true, false]", "fromPattern: [true, false]")
+    }
 }

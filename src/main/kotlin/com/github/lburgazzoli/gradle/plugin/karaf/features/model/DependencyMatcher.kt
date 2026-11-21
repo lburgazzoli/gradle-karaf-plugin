@@ -16,6 +16,7 @@ class DependencyMatcher(
     var classifier: String? = null
 ) {
     companion object {
+        @JvmStatic
         fun from(notation: String): DependencyMatcher {
             var s = notation
             var type: String? = null

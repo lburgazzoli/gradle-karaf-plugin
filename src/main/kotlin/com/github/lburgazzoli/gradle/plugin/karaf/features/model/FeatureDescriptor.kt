@@ -49,7 +49,7 @@ abstract class FeatureDescriptor @Inject constructor(
             configuration(configurationName)
         }
 
-        fun add(configuration: Configuration) {
+        fun add(configuration: Configuration?) {
             configuration(configuration)
         }
 
@@ -57,8 +57,8 @@ abstract class FeatureDescriptor @Inject constructor(
             del(project.configurations.getByName(configurationName))
         }
 
-        fun del(configuration: Configuration) {
-            configurations.remove(configuration)
+        fun del(configuration: Configuration?) {
+            configuration?.let { configurations.remove(it) }
         }
     }
 
@@ -71,8 +71,12 @@ abstract class FeatureDescriptor @Inject constructor(
         configuration(project.configurations.getByName(configurationName))
     }
 
-    fun configuration(configuration: Configuration) {
-        configurations.add(configuration)
+    /**
+     * Adds [configuration] to the configurations this feature reads; a `null` adds nothing, so
+     * `configuration project.configurations.findByName('optional')` works whether or not the configuration exists.
+     */
+    fun configuration(configuration: Configuration?) {
+        configuration?.let { configurations.add(it) }
     }
 
     fun configurations(vararg configurationNames: String) {
